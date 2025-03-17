@@ -1,40 +1,44 @@
 import React from "react";
-import { View, Text, Button, StyleSheet } from "react-native";
+import { View, Text, Image, TouchableOpacity } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-// import { auth } from "../firebase/Config";
-// import { signOut } from "firebase/auth";
+import Navbar from "../components/Navbar";
+import styles from "../styles/Home";
 
 export default function HomeScreen() {
   const navigation = useNavigation();
-//   const user = auth.currentUser;
-
-//   const handleLogout = async () => {
-//     await signOut(auth);
-//     navigation.replace("Login");
-//   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.welcomeText}>Tervetuloa</Text>
-      <Button title="Kirjaa työaika" onPress={() => navigation.navigate("WorkEntry")} />
-      <Button title="Ryhmät" onPress={() => navigation.navigate("Groups")} />
-      <Button title="Asetukset" onPress={() => navigation.navigate("Settings")} />
-      {/* <Button title="Kirjaudu ulos" onPress={handleLogout} color="red" /> */}
-      <Button title="Kirjaudu ulos"color="red" />
+      <Navbar />
+
+      {/* Circular Profile Image */}
+      <View style={styles.profileContainer}>
+        <View style={styles.progressCircle}>
+          <Image
+            source={{ uri: "https://via.placeholder.com/100" }} // Replace with actual user image
+            style={styles.profileImage}
+          />
+        </View>
+      </View>
+
+      {/* Work Hours Section */}
+      <View style={styles.workHoursContainer}>
+        <View style={styles.workHoursItem}>
+          <View style={[styles.colorIndicator, { backgroundColor: "#4B3F72" }]} />
+          <Text style={styles.workHoursText}>Koulutyöt 18h</Text>
+        </View>
+        <View style={styles.workHoursItem}>
+          <View style={[styles.colorIndicator, { backgroundColor: "#CDB4DB" }]} />
+          <Text style={styles.workHoursText}>Työpaikka 20h</Text>
+        </View>
+        <Text style={styles.totalHoursText}>Yht. 38h</Text>
+      </View>
+
+      {/* Floating Edit Button */}
+      <TouchableOpacity style={styles.floatingButton}>
+        <MaterialIcons name="edit" size={24} color="#4B3F72" />
+      </TouchableOpacity>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
-  },
-  welcomeText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
-});
