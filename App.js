@@ -5,7 +5,7 @@ import HomeScreen from './src/screens/HomeScreen';
 import GroupScreen from './src/screens/GroupScreen';
 import WelcomeScreen from './src/screens/WelcomeScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
-import AddShiftScreen from './src/screens/ShiftScreen';
+import AddShiftScreen from './src/screens/AddShiftScreen';
 import ShiftScreen from './src/screens/ShiftScreen';
 import AllShiftsScreen from './src/screens/AllShiftsScreen';
 
