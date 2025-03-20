@@ -37,6 +37,7 @@ export default function WelcomeScreen() {
         <TextInput
           style={styles.credentialsInput}
           placeholder='Email'
+          keyboardType='email-address'
           numberOfLines={1}
         />
         <TouchableOpacity style={styles.clearCredentialsIcon}>
