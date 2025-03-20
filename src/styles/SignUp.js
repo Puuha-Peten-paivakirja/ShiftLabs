@@ -47,4 +47,8 @@ export default StyleSheet.create({
     position: 'absolute',
     right: Platform.OS === 'ios' ? 59 : 69.5
   },
+  buttonContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+  }
 })
