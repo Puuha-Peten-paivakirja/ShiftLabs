@@ -16,11 +16,9 @@ export default StyleSheet.create({
     alignItems: 'center',
   },
   nameInput: {
-    width: 120,
-    height: 40,
+    width: 144,
     backgroundColor: '#FAF5FF',
-    paddingRight: 36,
-    paddingLeft: 4,
+    paddingRight: 32,
     borderBottomColor: 'black',
     borderBottomWidth: 0.8,
   },
@@ -35,17 +33,15 @@ export default StyleSheet.create({
     justifyContent: 'center'
   },
   credentialsInput: {
-    width: 280,
-    height: 40,
+    width: 328,
     backgroundColor: '#FAF5FF',
-    paddingRight: 36,
-    paddingLeft: 4,
+    paddingRight: 32,
     borderBottomColor: 'black',
     borderBottomWidth: 0.8,
   },
   clearCredentialsIcon: {
     position: 'absolute',
-    right: Platform.OS === 'ios' ? 59 : 69.5
+    right: Platform.OS === 'ios' ? 35 : 45
   },
   buttonContainer: {
     marginTop: 20,

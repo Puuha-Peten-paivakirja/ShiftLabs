@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { View, TextInput, TouchableOpacity } from 'react-native'
+import { View, TouchableOpacity } from 'react-native'
+import { TextInput } from 'react-native-paper'
 import Navbar from '../components/Navbar'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import styles from '../styles/SignUp'
@@ -22,7 +23,7 @@ export default function WelcomeScreen() {
         <View style={styles.nameInputHalf}>
           <TextInput
             style={styles.nameInput}
-            placeholder='First name'
+            label='First name'
             value={user.firstName}
             onChangeText={text => setUser({...user, firstName: text})}
             numberOfLines={1}
@@ -35,7 +36,7 @@ export default function WelcomeScreen() {
         <View style={styles.nameInputHalf}>
           <TextInput
             style={styles.nameInput}
-            placeholder='Last name'
+            label='Last name'
             value={user.lastName}
             onChangeText={text => setUser({...user, lastName: text})}
             numberOfLines={1}
@@ -49,7 +50,7 @@ export default function WelcomeScreen() {
       <View style={styles.credentialsInputRow}>
         <TextInput
           style={styles.credentialsInput}
-          placeholder='Email'
+          label='Email'
           value={user.email}
           onChangeText={text => setUser({...user, email: text})}
           keyboardType='email-address'
@@ -63,7 +64,7 @@ export default function WelcomeScreen() {
       <View style={styles.credentialsInputRow}>
         <TextInput
           style={styles.credentialsInput}
-          placeholder='Password'
+          label='Password'
           value={user.password}
           onChangeText={text => setUser({...user, password: text})}
           secureTextEntry={true}
@@ -77,7 +78,7 @@ export default function WelcomeScreen() {
       <View style={styles.credentialsInputRow}>
         <TextInput
           style={styles.credentialsInput}
-          placeholder='Confirm password'
+          label='Confirm password'
           value={user.confirmedPassword}
           onChangeText={text => setUser({...user, confirmedPassword: text})}
           secureTextEntry={true}
