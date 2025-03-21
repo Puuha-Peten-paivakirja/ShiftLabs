@@ -5,8 +5,12 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import styles from '../styles/SignUp.js'
 import { CustomButton } from '../components/CustomButton'
 import { Topbar } from '../components/Topbar.js'
+import { useNavigation } from '@react-navigation/native'
+import { getAuth, createUserWithEmailAndPassword, firestore, USERS, addDoc, collection } from '../firebase/config.js' 
 
 export default function WelcomeScreen() {
+  const navigation = useNavigation()
+
   const [user, setUser] = useState({
     firstName: '',
     lastName: '',
@@ -14,6 +18,37 @@ export default function WelcomeScreen() {
     password: '',
     confirmedPassword: ''
   })
+
+  const signUp = () => {
+    const auth = getAuth()
+
+    createUserWithEmailAndPassword(auth, user.email, user.password)
+      .then((result) => {
+        console.log(result.user)
+        setUser({
+          ...user, 
+          firstName: '',
+          lastName: '',
+          email: '',
+          password: '',
+          confirmedPassword: ''
+        })
+        addDoc(collection(firestore, USERS), {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email
+        })
+          .then(() => {
+            navigation.navigate('SignIn')
+          })
+          .catch((error) => {
+            console.log(error)
+          })
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+  }
 
   return (
     <View style={styles.container}>
@@ -93,11 +128,11 @@ export default function WelcomeScreen() {
         </View>
 
         <View style={styles.bottomContainer}>
-          <CustomButton title={'Sign up'} />
+          <CustomButton title={'Sign up'} onPress={() => signUp()}/>
           <View style={styles.bottomText}>
             <Text style={styles.signInText}>Already have an account? </Text>
             <TouchableOpacity activeOpacity={0.75}>
-              <Text style={styles.signInTextLink}>Sign in</Text>
+              <Text style={styles.signInTextLink} onPress={() => navigation.navigate('SignIn')}>Sign in</Text>
             </TouchableOpacity>
           </View>
         </View>

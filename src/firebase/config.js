@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app'
-import { getFirestore } from 'firebase/firestore'
+import { getFirestore, addDoc, collection } from 'firebase/firestore'
+import { getAuth, createUserWithEmailAndPassword  } from 'firebase/auth'
 
 const firebaseConfig = {
     apiKey: process.env.EXPO_PUBLIC_API_KEY,
@@ -14,6 +15,6 @@ initializeApp(firebaseConfig)
 
 const firestore = getFirestore()
 
-export {
-    firestore
-}
+const USERS = 'users'
+
+export { firestore, getAuth, createUserWithEmailAndPassword, USERS, addDoc, collection }

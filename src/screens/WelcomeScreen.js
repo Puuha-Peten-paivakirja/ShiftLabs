@@ -15,8 +15,12 @@ export default function WelcomeScreen() {
         <Text>Welcome</Text>
         <View style={styles.buttonsContainer}>
           <CustomButton title={'Sign up'} onPress={() => navigation.navigate('SignUp')} />
-          <CustomButton title={'Sign in'} onPress={() => navigation.navigate('SignIn')} />
-          <CustomButton title={'Guest'} />
+          <CustomButton
+            title={'Sign in'}
+            onPress={() => navigation.navigate('SignIn')} 
+            style={{backgroundColor: '#d8bcfc'}}
+          />
+          <CustomButton title={'Guest'} style={{backgroundColor: '#d8bcfc'}} />
         </View>
       </View>
     </View>
