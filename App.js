@@ -9,19 +9,19 @@ import AddShiftScreen from './src/screens/ShiftScreen';
 import ShiftScreen from './src/screens/ShiftScreen';
 import AllShiftsScreen from './src/screens/AllShiftsScreen';
 import SignUpScreen from './src/screens/SignUpScreen.js';
+import SignInScreen from './src/screens/SignInScreen.js';
 
 const Stack = createStackNavigator();
-
-// Added SignUpScreen just for testing
 
 export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Welcome" component={WelcomeScreen} />
         <Stack.Screen name="SignUp" component={SignUpScreen} />
+        <Stack.Screen name="SignIn" component={SignInScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Group" component={GroupScreen} />
-        <Stack.Screen name="Welcome" component={WelcomeScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
         <Stack.Screen name="AddShift" component={AddShiftScreen} />
         <Stack.Screen name="Shift" component={ShiftScreen} />

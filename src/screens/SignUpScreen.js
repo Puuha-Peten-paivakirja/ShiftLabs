@@ -1,9 +1,8 @@
 import React, { useState } from 'react'
 import { View, TouchableOpacity, Text } from 'react-native'
 import { TextInput } from 'react-native-paper'
-import Navbar from '../components/Navbar'
 import Ionicons from '@expo/vector-icons/Ionicons'
-import styles from '../styles/SignUp'
+import styles from '../styles/SignUp.js'
 import { CustomButton } from '../components/CustomButton'
 import { Topbar } from '../components/Topbar.js'
 
