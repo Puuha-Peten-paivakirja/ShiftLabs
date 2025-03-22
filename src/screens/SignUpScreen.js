@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { View, TouchableOpacity, Text } from 'react-native'
+import { View, TouchableOpacity, Text, Alert } from 'react-native'
 import { TextInput } from 'react-native-paper'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import styles from '../styles/SignUp.js'
@@ -7,6 +7,8 @@ import { CustomButton } from '../components/CustomButton'
 import { Topbar } from '../components/Topbar.js'
 import { useNavigation } from '@react-navigation/native'
 import { getAuth, createUserWithEmailAndPassword, firestore, USERS, addDoc, collection } from '../firebase/config.js' 
+import isEmail from 'validator/lib/isEmail'
+import isStrongPassword from 'validator/lib/isStrongPassword'
 
 export default function WelcomeScreen() {
   const navigation = useNavigation()
@@ -19,26 +21,60 @@ export default function WelcomeScreen() {
     confirmedPassword: ''
   })
 
+  const validateUserInputs = () => {
+    if (user.firstName.trim().length === 0) {
+      Alert.alert('Error', 'Firstname is required')
+      return false
+    }
+    else if (user.lastName.trim().length === 0) {
+      Alert.alert('Error', 'Lastname is required')
+      return false
+    }
+    else if (user.email.trim().length === 0) {
+      Alert.alert('Error', 'Email is required')
+      return false
+    }
+    else if (!isEmail(user.email)) {
+      Alert.alert('Error', 'Email is not valid')
+      return false
+    }
+    else if (!isStrongPassword(user.password, {minLength: 8, minLowercase:1 , minUppercase: 1, minNumbers: 1, minSymbols: 0})) {
+      Alert.alert('Error', 'Password must contain at least 8 characters, 1 number, 1 uppercase letter and 1 lowercase letter')
+      return false
+    }
+    else if (user.confirmedPassword.trim().length === 0 || user.confirmedPassword !== user.password) {
+      Alert.alert('Error', 'Passwords do not match')
+      return false
+    }
+    else {
+      return true
+    }
+  }
+
   const signUp = () => {
     const auth = getAuth()
+
+    if (!validateUserInputs()) {
+      return
+    }
 
     createUserWithEmailAndPassword(auth, user.email, user.password)
       .then((result) => {
         console.log(result.user)
-        setUser({
-          ...user, 
-          firstName: '',
-          lastName: '',
-          email: '',
-          password: '',
-          confirmedPassword: ''
-        })
         addDoc(collection(firestore, USERS), {
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email
         })
           .then(() => {
+            setUser({
+              ...user, 
+              firstName: '',
+              lastName: '',
+              email: '',
+              password: '',
+              confirmedPassword: ''
+            })
             navigation.navigate('SignIn')
           })
           .catch((error) => {
