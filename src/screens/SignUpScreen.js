@@ -6,7 +6,7 @@ import styles from '../styles/SignUp.js'
 import { CustomButton } from '../components/CustomButton'
 import { Topbar } from '../components/Topbar.js'
 import { CommonActions, useNavigation } from '@react-navigation/native'
-import { getAuth, createUserWithEmailAndPassword, firestore, USERS, setDoc, doc } from '../firebase/config.js' 
+import { auth, createUserWithEmailAndPassword, firestore, USERS, setDoc, doc } from '../firebase/config.js' 
 import isEmail from 'validator/lib/isEmail'
 import isStrongPassword from 'validator/lib/isStrongPassword'
 
@@ -52,8 +52,6 @@ export default function WelcomeScreen() {
   }
 
   const signUp = () => {
-    const auth = getAuth()
-
     if (!validateUserInputs()) { // Check if the information given by the user is valid
       return
     }

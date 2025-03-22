@@ -45,10 +45,6 @@ export default function BurgerMenu({ isOpen, closeMenu }) {
           <Text style={styles.menuText}>Ryhmät</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate("Welcome")} style={styles.menuItem}>
-          <Text style={styles.menuText}>Tervetuloa</Text>
-        </TouchableOpacity>
-
         <TouchableOpacity onPress={() => navigation.navigate("Shift")} style={styles.menuItem}>
             <Text style={styles.menuText}>Kalenteri</Text>
         </TouchableOpacity>
