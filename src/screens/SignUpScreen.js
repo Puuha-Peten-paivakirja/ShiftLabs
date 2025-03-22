@@ -6,7 +6,7 @@ import styles from '../styles/SignUp.js'
 import { CustomButton } from '../components/CustomButton'
 import { Topbar } from '../components/Topbar.js'
 import { CommonActions, useNavigation } from '@react-navigation/native'
-import { getAuth, createUserWithEmailAndPassword, firestore, USERS, addDoc, collection } from '../firebase/config.js' 
+import { getAuth, createUserWithEmailAndPassword, firestore, USERS, setDoc, doc } from '../firebase/config.js' 
 import isEmail from 'validator/lib/isEmail'
 import isStrongPassword from 'validator/lib/isStrongPassword'
 
@@ -59,15 +59,14 @@ export default function WelcomeScreen() {
     }
 
     createUserWithEmailAndPassword(auth, userInfo.email, userInfo.password)
-      .then(() => {
-        addDoc(collection(firestore, USERS), { // Adding a document into 'users' collection. 
+      .then((userCredential) => {
+        setDoc(doc(firestore, USERS, userCredential.user.uid), { // Adding a document into 'users' collection
           firstName: userInfo.firstName,
           lastName: userInfo.lastName,
           email: userInfo.email
         })
           .then(() => {
-            setUserInfo({ // Clear userInfo after a successful registration
-              ...userInfo, 
+            setUserInfo({ // Clear userInfo after a successful registration 
               firstName: '',
               lastName: '',
               email: '',
