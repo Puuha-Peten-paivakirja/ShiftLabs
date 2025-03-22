@@ -15,6 +15,6 @@ initializeApp(firebaseConfig)
 
 const firestore = getFirestore()
 
-const USERS = 'users'
+const USERS = 'users' // This is a collection in Firestore
 
 export { firestore, getAuth, createUserWithEmailAndPassword, USERS, addDoc, collection }

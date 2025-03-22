@@ -5,7 +5,7 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import styles from '../styles/SignUp.js'
 import { CustomButton } from '../components/CustomButton'
 import { Topbar } from '../components/Topbar.js'
-import { useNavigation } from '@react-navigation/native'
+import { CommonActions, useNavigation } from '@react-navigation/native'
 import { getAuth, createUserWithEmailAndPassword, firestore, USERS, addDoc, collection } from '../firebase/config.js' 
 import isEmail from 'validator/lib/isEmail'
 import isStrongPassword from 'validator/lib/isStrongPassword'
@@ -13,7 +13,7 @@ import isStrongPassword from 'validator/lib/isStrongPassword'
 export default function WelcomeScreen() {
   const navigation = useNavigation()
 
-  const [user, setUser] = useState({
+  const [userInfo, setUserInfo] = useState({
     firstName: '',
     lastName: '',
     email: '',
@@ -22,27 +22,27 @@ export default function WelcomeScreen() {
   })
 
   const validateUserInputs = () => {
-    if (user.firstName.trim().length === 0) {
+    if (userInfo.firstName.trim().length === 0) {
       Alert.alert('Error', 'Firstname is required')
       return false
     }
-    else if (user.lastName.trim().length === 0) {
+    else if (userInfo.lastName.trim().length === 0) {
       Alert.alert('Error', 'Lastname is required')
       return false
     }
-    else if (user.email.trim().length === 0) {
+    else if (userInfo.email.trim().length === 0) {
       Alert.alert('Error', 'Email is required')
       return false
     }
-    else if (!isEmail(user.email)) {
+    else if (!isEmail(userInfo.email)) {
       Alert.alert('Error', 'Email is not valid')
       return false
     }
-    else if (!isStrongPassword(user.password, {minLength: 8, minLowercase:1 , minUppercase: 1, minNumbers: 1, minSymbols: 0})) {
+    else if (!isStrongPassword(userInfo.password, {minLength: 8, minLowercase:1 , minUppercase: 1, minNumbers: 1, minSymbols: 0})) {
       Alert.alert('Error', 'Password must contain at least 8 characters, 1 number, 1 uppercase letter and 1 lowercase letter')
       return false
     }
-    else if (user.confirmedPassword.trim().length === 0 || user.confirmedPassword !== user.password) {
+    else if (userInfo.confirmedPassword.trim().length === 0 || userInfo.confirmedPassword !== userInfo.password) {
       Alert.alert('Error', 'Passwords do not match')
       return false
     }
@@ -54,35 +54,44 @@ export default function WelcomeScreen() {
   const signUp = () => {
     const auth = getAuth()
 
-    if (!validateUserInputs()) {
+    if (!validateUserInputs()) { // Check if the information given by the user is valid
       return
     }
 
-    createUserWithEmailAndPassword(auth, user.email, user.password)
-      .then((result) => {
-        console.log(result.user)
-        addDoc(collection(firestore, USERS), {
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email
+    createUserWithEmailAndPassword(auth, userInfo.email, userInfo.password)
+      .then(() => {
+        addDoc(collection(firestore, USERS), { // Adding a document into 'users' collection. 
+          firstName: userInfo.firstName,
+          lastName: userInfo.lastName,
+          email: userInfo.email
         })
           .then(() => {
-            setUser({
-              ...user, 
+            setUserInfo({ // Clear userInfo after a successful registration
+              ...userInfo, 
               firstName: '',
               lastName: '',
               email: '',
               password: '',
               confirmedPassword: ''
             })
-            navigation.navigate('SignIn')
+            navigation.dispatch( // Clear the navigation stack and redirect the user to the home page
+              CommonActions.reset({
+                index: 0,
+                routes: [{name: 'Home' }]
+              })
+            )
           })
           .catch((error) => {
             console.log(error)
           })
       })
       .catch((error) => {
-        console.log(error)
+        if (error.code === 'auth/email-already-in-use') {
+          Alert.alert('Error', 'Email already in use')
+        }
+        else {
+          Alert.alert('Error', error.message)
+        }
       })
   }
 
@@ -97,11 +106,11 @@ export default function WelcomeScreen() {
               <TextInput
                 style={styles.nameInput}
                 label='First name'
-                value={user.firstName}
-                onChangeText={text => setUser({...user, firstName: text})}
+                value={userInfo.firstName}
+                onChangeText={text => setUserInfo({...userInfo, firstName: text})}
                 numberOfLines={1}
               />
-              <TouchableOpacity style={styles.clearNameIcon} onPress={() => setUser({...user, firstName: ''})}>
+              <TouchableOpacity style={styles.clearNameIcon} onPress={() => setUserInfo({...userInfo, firstName: ''})}>
                 <Ionicons name='close-circle' size={20} />
               </TouchableOpacity>
             </View>
@@ -110,11 +119,11 @@ export default function WelcomeScreen() {
               <TextInput
                 style={styles.nameInput}
                 label='Last name'
-                value={user.lastName}
-                onChangeText={text => setUser({...user, lastName: text})}
+                value={userInfo.lastName}
+                onChangeText={text => setUserInfo({...userInfo, lastName: text})}
                 numberOfLines={1}
               />
-              <TouchableOpacity style={styles.clearNameIcon} onPress={() => setUser({...user, lastName: ''})}>
+              <TouchableOpacity style={styles.clearNameIcon} onPress={() => setUserInfo({...userInfo, lastName: ''})}>
                 <Ionicons name='close-circle' size={20} />
               </TouchableOpacity>
             </View>
@@ -124,12 +133,12 @@ export default function WelcomeScreen() {
             <TextInput
               style={styles.credentialsInput}
               label='Email'
-              value={user.email}
-              onChangeText={text => setUser({...user, email: text})}
+              value={userInfo.email}
+              onChangeText={text => setUserInfo({...userInfo, email: text})}
               keyboardType='email-address'
               numberOfLines={1}
             />
-            <TouchableOpacity style={styles.clearCredentialsIcon} onPress={() => setUser({...user, email: ''})}>
+            <TouchableOpacity style={styles.clearCredentialsIcon} onPress={() => setUserInfo({...user, email: ''})}>
               <Ionicons name='close-circle' size={20} />
             </TouchableOpacity>
           </View>
@@ -138,12 +147,12 @@ export default function WelcomeScreen() {
             <TextInput
               style={styles.credentialsInput}
               label='Password'
-              value={user.password}
-              onChangeText={text => setUser({...user, password: text})}
+              value={userInfo.password}
+              onChangeText={text => setUserInfo({...userInfo, password: text})}
               secureTextEntry={true}
               numberOfLines={1}
             />
-            <TouchableOpacity style={styles.clearCredentialsIcon} onPress={() => setUser({...user, password: ''})}>
+            <TouchableOpacity style={styles.clearCredentialsIcon} onPress={() => setUserInfo({...userInfo, password: ''})}>
               <Ionicons name='close-circle' size={20} />
             </TouchableOpacity>
           </View>
@@ -152,12 +161,12 @@ export default function WelcomeScreen() {
             <TextInput
               style={styles.credentialsInput}
               label='Confirm password'
-              value={user.confirmedPassword}
-              onChangeText={text => setUser({...user, confirmedPassword: text})}
+              value={userInfo.confirmedPassword}
+              onChangeText={text => setUserInfo({...userInfo, confirmedPassword: text})}
               secureTextEntry={true}
               numberOfLines={1}
             />
-            <TouchableOpacity style={styles.clearCredentialsIcon} onPress={() => setUser({...user, confirmedPassword: ''})}>
+            <TouchableOpacity style={styles.clearCredentialsIcon} onPress={() => setUserInfo({...userInfo, confirmedPassword: ''})}>
               <Ionicons name='close-circle' size={20} />
             </TouchableOpacity>
           </View>
