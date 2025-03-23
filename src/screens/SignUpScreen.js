@@ -135,7 +135,7 @@ export default function WelcomeScreen() {
               keyboardType='email-address'
               numberOfLines={1}
             />
-            <TouchableOpacity style={styles.clearCredentialsIcon} onPress={() => setUserInfo({...user, email: ''})}>
+            <TouchableOpacity style={styles.clearCredentialsIcon} onPress={() => setUserInfo({...userInfo, email: ''})}>
               <Ionicons name='close-circle' size={20} />
             </TouchableOpacity>
           </View>
