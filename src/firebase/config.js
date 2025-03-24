@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app'
 import { getFirestore, setDoc, doc } from 'firebase/firestore'
-import { getAuth, createUserWithEmailAndPassword  } from 'firebase/auth'
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth'
 
 const firebaseConfig = {
     apiKey: process.env.EXPO_PUBLIC_API_KEY,
@@ -18,4 +18,4 @@ const auth = getAuth()
 
 const USERS = 'users' // This is a collection in Firestore
 
-export { firestore, auth, createUserWithEmailAndPassword, USERS, setDoc, doc }
+export { firestore, auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, USERS, setDoc, doc }
