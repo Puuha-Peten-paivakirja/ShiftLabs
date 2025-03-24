@@ -1,11 +1,11 @@
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { View, TouchableOpacity, Text, Alert } from 'react-native'
 import { TextInput } from 'react-native-paper'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import styles from '../styles/SignUp.js'
 import { CustomButton } from '../components/CustomButton'
 import { Topbar } from '../components/Topbar.js'
-import { CommonActions, useNavigation } from '@react-navigation/native'
+import { CommonActions, useNavigation, useFocusEffect } from '@react-navigation/native'
 import { auth, createUserWithEmailAndPassword, firestore, USERS, setDoc, doc } from '../firebase/config.js' 
 import isEmail from 'validator/lib/isEmail'
 import isStrongPassword from 'validator/lib/isStrongPassword'
@@ -13,6 +13,7 @@ import isStrongPassword from 'validator/lib/isStrongPassword'
 export default function WelcomeScreen() {
   const navigation = useNavigation()
 
+  const [isDisabled, setIsDisabled] = useState(false)
   const [userInfo, setUserInfo] = useState({
     firstName: '',
     lastName: '',
@@ -20,6 +21,12 @@ export default function WelcomeScreen() {
     password: '',
     confirmedPassword: ''
   })
+
+  useFocusEffect(
+    useCallback(() => {
+      setIsDisabled(false)
+    }, [])
+  )
 
   const validateUserInputs = () => {
     if (userInfo.firstName.trim().length === 0) {
@@ -52,7 +59,10 @@ export default function WelcomeScreen() {
   }
 
   const signUp = () => {
+    setIsDisabled(true)
+
     if (!validateUserInputs()) { // Check if the information given by the user is valid
+      setIsDisabled(false) 
       return
     }
 
@@ -80,6 +90,7 @@ export default function WelcomeScreen() {
           })
           .catch((error) => {
             console.log(error)
+            setIsDisabled(false)
           })
       })
       .catch((error) => {
@@ -89,6 +100,7 @@ export default function WelcomeScreen() {
         else {
           Alert.alert('Error', error.message)
         }
+        setIsDisabled(false)
       })
   }
 
@@ -170,7 +182,11 @@ export default function WelcomeScreen() {
         </View>
 
         <View style={styles.bottomContainer}>
-          <CustomButton title={'Sign up'} onPress={() => signUp()}/>
+          <CustomButton
+            title={'Sign up'}
+            onPress={() => signUp()}
+            isDisabled={isDisabled}
+          />
           <View style={styles.bottomText}>
             <Text style={styles.signInText}>Already have an account? </Text>
             <TouchableOpacity activeOpacity={0.75}>
