@@ -30,27 +30,51 @@ export default function WelcomeScreen() {
 
   const validateUserInputs = () => {
     if (userInfo.firstName.trim().length === 0) {
-      Alert.alert('Error', 'Firstname is required')
+      Alert.alert('Error', 'Firstname is required', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
       return false
     }
     else if (userInfo.lastName.trim().length === 0) {
-      Alert.alert('Error', 'Lastname is required')
+      Alert.alert('Error', 'Lastname is required', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
       return false
     }
     else if (userInfo.email.trim().length === 0) {
-      Alert.alert('Error', 'Email is required')
+      Alert.alert('Error', 'Email is required', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
       return false
     }
     else if (!isEmail(userInfo.email)) {
-      Alert.alert('Error', 'Email is not valid')
+      Alert.alert('Error', 'Email is not valid', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
       return false
     }
     else if (!isStrongPassword(userInfo.password, {minLength: 8, minLowercase:1 , minUppercase: 1, minNumbers: 1, minSymbols: 0})) {
-      Alert.alert('Error', 'Password must contain at least 8 characters, 1 number, 1 uppercase letter and 1 lowercase letter')
+      Alert.alert('Error', 'Password must contain at least 8 characters, 1 number, 1 uppercase letter and 1 lowercase letter', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
       return false
     }
     else if (userInfo.confirmedPassword.trim().length === 0 || userInfo.confirmedPassword !== userInfo.password) {
-      Alert.alert('Error', 'Passwords do not match')
+      Alert.alert('Error', 'Passwords do not match', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
       return false
     }
     else {
@@ -61,8 +85,7 @@ export default function WelcomeScreen() {
   const signUp = () => {
     setIsDisabled(true)
 
-    if (!validateUserInputs()) { // Check if the information given by the user is valid
-      setIsDisabled(false) 
+    if (!validateUserInputs()) { // Check if the information given by the user is valid 
       return
     }
 
@@ -95,12 +118,19 @@ export default function WelcomeScreen() {
       })
       .catch((error) => {
         if (error.code === 'auth/email-already-in-use') {
-          Alert.alert('Error', 'Email already in use')
+          Alert.alert('Error', 'Email already in use', [
+            {
+              onPress: () => setIsDisabled(false)
+            }
+          ])
         }
         else {
-          Alert.alert('Error', error.message)
+          Alert.alert('Error', error.message, [
+            {
+              onPress: () => setIsDisabled(false)
+            }
+          ])
         }
-        setIsDisabled(false)
       })
   }
 
