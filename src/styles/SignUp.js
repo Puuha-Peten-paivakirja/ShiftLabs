@@ -47,7 +47,6 @@ export default StyleSheet.create({
     right: Platform.OS === 'ios' ? 35 : 45
   },
   bottomContainer: {
-
     alignItems: 'center'
   },
   bottomText: {
