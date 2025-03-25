@@ -5,7 +5,7 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import styles from '../styles/SignUp.js'
 import { CustomButton } from '../components/CustomButton'
 import { Topbar } from '../components/Topbar.js'
-import { CommonActions, useNavigation, useFocusEffect } from '@react-navigation/native'
+import { useNavigation, useFocusEffect } from '@react-navigation/native'
 import { auth, createUserWithEmailAndPassword, firestore, USERS, setDoc, doc } from '../firebase/config.js' 
 import isEmail from 'validator/lib/isEmail'
 import isStrongPassword from 'validator/lib/isStrongPassword'
@@ -104,12 +104,7 @@ export default function WelcomeScreen() {
               password: '',
               confirmedPassword: ''
             })
-            navigation.dispatch( // Clear the navigation stack and redirect the user to the home page
-              CommonActions.reset({
-                index: 0,
-                routes: [{name: 'Home' }]
-              })
-            )
+            navigation.navigate('SignIn')
           })
           .catch((error) => {
             console.log(error)
