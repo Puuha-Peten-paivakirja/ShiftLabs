@@ -10,7 +10,7 @@ import styles from "../styles/AddShift";
 //the timer does not have a set "max" time, since users should be able to record how long they worked
 
 
-const TIMER_DURATION = 0; // Timer in seconds
+const TIMER_DURATION = 10; // Timer in seconds
 const RADIUS = 45;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
@@ -70,13 +70,16 @@ const AddShiftScreen = () => {
 
     //this should save the shift duration and end time and end date locally. If user is signed in, then it saves on the database too
     const saveShift = async () => {
-        if (startTime && endTime) {
-            const shiftData = {
-                startTime,
-                endTime,
-                duration: shiftDuration,
-                date: new Date(),
-            };
+        const currentTime = new Date();
+        const duration = (currentTime - startTime) / 1000;
+        
+        // if (startTime && endTime) {
+        const shiftData = {
+            startTime: startTime ? startTime.toISOString() : currentTime.toISOString(),
+            endTime: currentTime.toISOString(),
+            duration: shiftDuration,
+            date: new Date().toISOString(),
+        };
 
             try {
                 const savedShifts = await AsyncStorage.getItem('shifts');
@@ -96,7 +99,6 @@ const AddShiftScreen = () => {
     
             console.log('Shift saved:', shiftData);
         }
-    };
 
     const formatTime = (seconds) => {
         const hrs = Math.floor(seconds / 3600);

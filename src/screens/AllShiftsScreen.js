@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, StyleSheet } from "react-native";
+import { View, Text, FlatList, StyleSheet, Pressable } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Navbar from "../components/Navbar";
 
@@ -21,6 +21,17 @@ export default function AllShiftsScreen() {
         fetchShifts();
     }, []);
 
+    const deleteShift = async (destroyShift) => {
+        try {
+            const updatedShifts = shifts.filter((shift) => shift !== destroyShift);
+            setSavedShifts(updatedShifts);
+            await AsyncStorage.setItem("shifts", JSON.stringify(updatedShifts));
+        } catch (error) {
+            console.error("Error deleting shift:", error);
+        }
+    };
+
+
     return (
         <View style={styles.container}>
             <Navbar />
@@ -40,6 +51,10 @@ export default function AllShiftsScreen() {
                             <Text>Pvm: {item.date}</Text>
                             <Text>Kesto: {item.duration} min</Text>
                             <Text>Tauot: {item.breakDuration} min</Text>
+
+                            <Pressable onPress={() => deleteShift(item)} style={styles.deleteShiftButton}>
+                                <Text style={styles.deleteShiftButtonText}>Poista</Text>
+                            </Pressable>
                         </View>
                     )}
                 />
