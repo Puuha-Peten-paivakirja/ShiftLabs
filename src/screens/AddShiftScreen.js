@@ -2,16 +2,24 @@ import React, { useState, useEffect, useRef } from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { Animated, Easing } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Navbar from "../components/Navbar";
 import styles from "../styles/AddShift";
+//this screen should have buttons for starting, pausing and stopping the timer
+//the timer should be displayed as a circle, that would have a stopwatch effect
+//the timer does not have a set "max" time, since users should be able to record how long they worked
 
-const TIMER_DURATION = 60; // Timer in seconds
+
+const TIMER_DURATION = 0; // Timer in seconds
 const RADIUS = 45;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 const AddShiftScreen = () => {
     const [timeLeft, setTimeLeft] = useState(TIMER_DURATION);
     const [running, setRunning] = useState(false);
+    const [startTime, setStartTime] = useState(null);
+    const [endTime, setEndTime] = useState(null);
+    const [shiftDuration, setShiftDuration] = useState(0);
     const animatedValue = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
@@ -44,14 +52,59 @@ const AddShiftScreen = () => {
         outputRange: [CIRCUMFERENCE, 0], // Decreases stroke
     });
 
-    const startTimer = () => {
+    const startTimer=()=>{
         setRunning(true);
+        const currentDate = new Date();
+        setStartTime(currentDate);
     };
-
-    const stopTimer = () => {
+    
+    const stopTimer=()=>{
         setRunning(false);
+        const currentDate = new Date();
+        setEndTime(currentDate);
+        if (startTime) {
+            const duration = (currentDate - startTime) / 1000;
+            setShiftDuration(duration);
+        }
     };
 
+    //this should save the shift duration and end time and end date locally. If user is signed in, then it saves on the database too
+    const saveShift = async () => {
+        if (startTime && endTime) {
+            const shiftData = {
+                startTime,
+                endTime,
+                duration: shiftDuration,
+                date: new Date(),
+            };
+
+            try {
+                const savedShifts = await AsyncStorage.getItem('shifts');
+                const shifts = savedShifts ? JSON.parse(savedShifts) : [];
+                shifts.push(shiftData);
+
+                await AsyncStorage.setItem('shifts', JSON.stringify(shifts));
+                
+            } catch (error) {
+                console.error('Failed to save shift:', error);
+            }
+    
+            // // Example of saving to a database (Firebase or another service)
+            // if (isUserLoggedIn) {
+            //     saveToDatabase(shiftData);  // Save to database
+            // }
+    
+            console.log('Shift saved:', shiftData);
+        }
+    };
+
+    const formatTime = (seconds) => {
+        const hrs = Math.floor(seconds / 3600);
+        const mins = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+        return `${hrs}:${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    };
+    
     return (
         <View style={styles.wrapper}>
             <Navbar />
@@ -84,11 +137,14 @@ const AddShiftScreen = () => {
 
                 {/* Buttons */}
                 <View style={styles.buttonContainer}>
-                    <Pressable style={[styles.button, running && styles.disabled]} onPress={startTimer} disabled={running}>
+                    <Pressable style={[styles.button, running && styles.disabled]} onPress={startTimer}>
                         <Text style={styles.buttonText}>{running ? "Lopeta": "Aloita"}</Text>
                     </Pressable>
-                    <Pressable style={[styles.button, !running && styles.disabled]} onPress={stopTimer} disabled={!running}>
+                    <Pressable style={[styles.button, !running && styles.disabled]} onPress={stopTimer}>
                         <Text style={styles.buttonText}>{running ? "Tauko":"Jatka"}</Text>
+                    </Pressable>
+                    <Pressable style={styles.button} onPress={saveShift}>
+                        <Text style={styles.buttonText}>Tallenna</Text>
                     </Pressable>
                 </View>
             </View>

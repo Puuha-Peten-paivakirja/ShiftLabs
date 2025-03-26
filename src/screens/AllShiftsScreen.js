@@ -4,14 +4,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Navbar from "../components/Navbar";
 
 export default function AllShiftsScreen() {
-    const [shifts, setShifts] = useState([]);
+    const [shifts, setSavedShifts] = useState([]);
 
     useEffect(() => {
         const fetchShifts = async () => {
             try {
-                const storedShifts = await AsyncStorage.getItem("shifts");
-                if (storedShifts) {
-                    setShifts(JSON.parse(storedShifts));
+                const savedShifts = await AsyncStorage.getItem("shifts");
+                if (savedShifts) {
+                    setSavedShifts(JSON.parse(savedShifts));
                 }
             } catch (error) {
                 console.error("Error loading shifts:", error);
@@ -37,6 +37,7 @@ export default function AllShiftsScreen() {
                             <Text style={styles.shiftText}>
                                 {item.startDate} - {item.endDate}
                             </Text>
+                            <Text>Date: {item.date}</Text>
                             <Text>Duration: {item.duration} min</Text>
                             <Text>Break Time: {item.breakDuration} min</Text>
                         </View>
