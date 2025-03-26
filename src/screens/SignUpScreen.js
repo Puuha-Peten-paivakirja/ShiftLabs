@@ -1,11 +1,11 @@
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { View, TouchableOpacity, Text, Alert } from 'react-native'
 import { TextInput } from 'react-native-paper'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import styles from '../styles/SignUp.js'
 import { CustomButton } from '../components/CustomButton'
 import { Topbar } from '../components/Topbar.js'
-import { CommonActions, useNavigation } from '@react-navigation/native'
+import { useNavigation, useFocusEffect } from '@react-navigation/native'
 import { auth, createUserWithEmailAndPassword, firestore, USERS, setDoc, doc } from '../firebase/config.js' 
 import isEmail from 'validator/lib/isEmail'
 import isStrongPassword from 'validator/lib/isStrongPassword'
@@ -13,6 +13,7 @@ import isStrongPassword from 'validator/lib/isStrongPassword'
 export default function WelcomeScreen() {
   const navigation = useNavigation()
 
+  const [isDisabled, setIsDisabled] = useState(false)
   const [userInfo, setUserInfo] = useState({
     firstName: '',
     lastName: '',
@@ -21,29 +22,59 @@ export default function WelcomeScreen() {
     confirmedPassword: ''
   })
 
+  useFocusEffect(
+    useCallback(() => {
+      setIsDisabled(false)
+    }, [])
+  )
+
   const validateUserInputs = () => {
     if (userInfo.firstName.trim().length === 0) {
-      Alert.alert('Error', 'Firstname is required')
+      Alert.alert('Error', 'Firstname is required', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
       return false
     }
     else if (userInfo.lastName.trim().length === 0) {
-      Alert.alert('Error', 'Lastname is required')
+      Alert.alert('Error', 'Lastname is required', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
       return false
     }
     else if (userInfo.email.trim().length === 0) {
-      Alert.alert('Error', 'Email is required')
+      Alert.alert('Error', 'Email is required', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
       return false
     }
     else if (!isEmail(userInfo.email)) {
-      Alert.alert('Error', 'Email is not valid')
+      Alert.alert('Error', 'Email is not valid', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
       return false
     }
     else if (!isStrongPassword(userInfo.password, {minLength: 8, minLowercase:1 , minUppercase: 1, minNumbers: 1, minSymbols: 0})) {
-      Alert.alert('Error', 'Password must contain at least 8 characters, 1 number, 1 uppercase letter and 1 lowercase letter')
+      Alert.alert('Error', 'Password must contain at least 8 characters, 1 number, 1 uppercase letter and 1 lowercase letter', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
       return false
     }
     else if (userInfo.confirmedPassword.trim().length === 0 || userInfo.confirmedPassword !== userInfo.password) {
-      Alert.alert('Error', 'Passwords do not match')
+      Alert.alert('Error', 'Passwords do not match', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
       return false
     }
     else {
@@ -52,7 +83,9 @@ export default function WelcomeScreen() {
   }
 
   const signUp = () => {
-    if (!validateUserInputs()) { // Check if the information given by the user is valid
+    setIsDisabled(true)
+
+    if (!validateUserInputs()) { // Check if the information given by the user is valid 
       return
     }
 
@@ -71,23 +104,27 @@ export default function WelcomeScreen() {
               password: '',
               confirmedPassword: ''
             })
-            navigation.dispatch( // Clear the navigation stack and redirect the user to the home page
-              CommonActions.reset({
-                index: 0,
-                routes: [{name: 'Home' }]
-              })
-            )
+            navigation.navigate('SignIn')
           })
           .catch((error) => {
             console.log(error)
+            setIsDisabled(false)
           })
       })
       .catch((error) => {
         if (error.code === 'auth/email-already-in-use') {
-          Alert.alert('Error', 'Email already in use')
+          Alert.alert('Error', 'Email already in use', [
+            {
+              onPress: () => setIsDisabled(false)
+            }
+          ])
         }
         else {
-          Alert.alert('Error', error.message)
+          Alert.alert('Error', error.message, [
+            {
+              onPress: () => setIsDisabled(false)
+            }
+          ])
         }
       })
   }
@@ -170,7 +207,11 @@ export default function WelcomeScreen() {
         </View>
 
         <View style={styles.bottomContainer}>
-          <CustomButton title={'Sign up'} onPress={() => signUp()}/>
+          <CustomButton
+            title={'Sign up'}
+            onPress={() => signUp()}
+            isDisabled={isDisabled}
+          />
           <View style={styles.bottomText}>
             <Text style={styles.signInText}>Already have an account? </Text>
             <TouchableOpacity activeOpacity={0.75}>

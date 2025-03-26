@@ -18,7 +18,7 @@ export function Topbar({title}) {
 
 const styles = StyleSheet.create({
   topBar: {
-    backgroundColor: '#FAF5FF'
+    backgroundColor: '#f8ecf4'
   },
   titleText: {
     fontWeight: 'bold'

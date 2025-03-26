@@ -1,19 +1,28 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import { View, TouchableOpacity, Text, Alert } from 'react-native'
 import { TextInput } from 'react-native-paper'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import styles from '../styles/SignIn.js'
 import { CustomButton } from '../components/CustomButton'
 import { Topbar } from '../components/Topbar.js'
-import { CommonActions, useNavigation } from '@react-navigation/native'
+import { CommonActions, useNavigation, useFocusEffect } from '@react-navigation/native'
 import { auth, signInWithEmailAndPassword } from '../firebase/config.js' 
 
 export default function GroupScreen() {
   const navigation = useNavigation()
 
+  const [isDisabled, setIsDisabled] = useState(false)
   const [userInfo, setUserInfo] = useState({email: '', password: '',})
 
+  useFocusEffect(
+    useCallback(() => {
+      setIsDisabled(false)
+    }, [])
+  )
+
   const signIn = () => {
+    setIsDisabled(true)
+
     signInWithEmailAndPassword(auth, userInfo.email, userInfo.password)
       .then(() => {
         setUserInfo({email: '', password: ''}) // Clear userInfo after a successful login
@@ -26,13 +35,25 @@ export default function GroupScreen() {
       })
       .catch((error) => {
         if (error.code === 'auth/invalid-email') {
-          Alert.alert('Error', 'Email is not valid')
+          Alert.alert('Error', 'Email is not valid', [
+            {
+              onPress: () => setIsDisabled(false)
+            }
+          ])
         }
-        else if (error.code === 'auth/invalid-credential') {
-          Alert.alert('Error', 'Invalid credentials')
+        else if (error.code === 'auth/invalid-credential' || error.code === 'auth/missing-password') {
+          Alert.alert('Error', 'Invalid credentials', [
+            {
+              onPress: () => setIsDisabled(false)
+            }
+          ])
         }
         else {
-          Alert.alert('Error', error.message)
+          Alert.alert('Error', error.message, [
+            {
+              onPress: () => setIsDisabled(false)
+            }
+          ])
         }
       })
   }
@@ -75,7 +96,11 @@ export default function GroupScreen() {
         </View>
 
         <View style={styles.bottomContainer}>
-          <CustomButton title={'Sign in'} onPress={() => signIn()}/>
+          <CustomButton
+            title={'Sign in'}
+            onPress={() => signIn()}
+            isDisabled={isDisabled}
+          />
             <View style={styles.bottomText}>
               <Text style={styles.signInText}>Forgot your password? </Text>
               <TouchableOpacity activeOpacity={0.75}>
