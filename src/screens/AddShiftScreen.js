@@ -85,10 +85,10 @@ const AddShiftScreen = () => {
                 {/* Buttons */}
                 <View style={styles.buttonContainer}>
                     <Pressable style={[styles.button, running && styles.disabled]} onPress={startTimer} disabled={running}>
-                        <Text style={styles.buttonText}>Aloita</Text>
+                        <Text style={styles.buttonText}>{running ? "Lopeta": "Aloita"}</Text>
                     </Pressable>
                     <Pressable style={[styles.button, !running && styles.disabled]} onPress={stopTimer} disabled={!running}>
-                        <Text style={styles.buttonText}>Tauko</Text>
+                        <Text style={styles.buttonText}>{running ? "Tauko":"Jatka"}</Text>
                     </Pressable>
                 </View>
             </View>
