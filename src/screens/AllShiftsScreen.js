@@ -25,9 +25,9 @@ export default function AllShiftsScreen() {
         <View style={styles.container}>
             <Navbar />
             <View style={shifts.container}>
-            <Text style={styles.header}>Past Shifts</Text>
+            <Text style={styles.header}>Aiemmat työvuorot</Text>
             {shifts.length === 0 ? (
-                <Text style={styles.noDataText}>No shifts recorded.</Text>
+                <Text style={styles.noDataText}>Ei nauhotettuja työvuoroja</Text>
             ) : (
                 <FlatList
                     data={shifts}
@@ -37,9 +37,9 @@ export default function AllShiftsScreen() {
                             <Text style={styles.shiftText}>
                                 {item.startDate} - {item.endDate}
                             </Text>
-                            <Text>Date: {item.date}</Text>
-                            <Text>Duration: {item.duration} min</Text>
-                            <Text>Break Time: {item.breakDuration} min</Text>
+                            <Text>Pvm: {item.date}</Text>
+                            <Text>Kesto: {item.duration} min</Text>
+                            <Text>Tauot: {item.breakDuration} min</Text>
                         </View>
                     )}
                 />
