@@ -20,7 +20,7 @@ export default StyleSheet.create({
   },
   nameInput: {
     width: 144,
-    backgroundColor: '#FAF5FF',
+    backgroundColor: '#e6e0e9',
     paddingRight: 32,
     borderBottomColor: 'black',
     borderBottomWidth: 0.8
@@ -37,7 +37,7 @@ export default StyleSheet.create({
   },
   credentialsInput: {
     width: 328,
-    backgroundColor: '#FAF5FF',
+    backgroundColor: '#e6e0e9',
     paddingRight: 32,
     borderBottomColor: 'black',
     borderBottomWidth: 0.8
