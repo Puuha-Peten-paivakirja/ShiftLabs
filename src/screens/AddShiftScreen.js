@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import { View, Text, Pressable, Modal } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { Animated, Easing } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -20,6 +20,7 @@ const AddShiftScreen = () => {
     const [startTime, setStartTime] = useState(null);
     const [endTime, setEndTime] = useState(null);
     const [shiftDuration, setShiftDuration] = useState(0);
+    const [isModalVisible, setIsModalVisible] = useState(false);
     const animatedValue = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
@@ -68,16 +69,31 @@ const AddShiftScreen = () => {
         }
     };
 
+    const endShift=()=>{
+        setIsModalVisible(false);
+        saveShift();
+    };
+
+    const openModal=()=>{
+        setIsModalVisible(true);
+    };
+
+    const closeModal=()=>{
+        setIsModalVisible(false);
+    };
+
+
+
     //this should save the shift duration and end time and end date locally. If user is signed in, then it saves on the database too
     const saveShift = async () => {
+        const formattedDuration = formatTime(shiftDuration);
+        const formattedBreakDuration = formatTime(TIMER_DURATION - timeLeft);
         const currentTime = new Date();
-        const duration = (currentTime - startTime) / 1000;
-        
-        // if (startTime && endTime) {
         const shiftData = {
             startTime: startTime ? startTime.toISOString() : currentTime.toISOString(),
             endTime: currentTime.toISOString(),
-            duration: shiftDuration,
+            duration: formattedDuration,
+            breakDuration: formattedBreakDuration,
             date: new Date().toISOString(),
         };
 
@@ -98,13 +114,15 @@ const AddShiftScreen = () => {
             // }
     
             console.log('Shift saved:', shiftData);
+            setRunning(false);
+            setEndTime(currentTime);
         }
 
     const formatTime = (seconds) => {
         const hrs = Math.floor(seconds / 3600);
         const mins = Math.floor((seconds % 3600) / 60);
         const secs = seconds % 60;
-        return `${hrs}:${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        return `${("0" + hrs).slice(-2)}:${("0" + mins).slice(-2)}:${("0" + secs).slice(-2)}`;;
     };
     
     return (
@@ -139,15 +157,32 @@ const AddShiftScreen = () => {
 
                 {/* Buttons */}
                 <View style={styles.buttonContainer}>
-                    <Pressable style={[styles.button, running && styles.disabled]} onPress={startTimer}>
+                    <Pressable style={[styles.button, running && styles.disabled]} onPress={running ? openModal: startTimer}>
                         <Text style={styles.buttonText}>{running ? "Lopeta": "Aloita"}</Text>
                     </Pressable>
                     <Pressable style={[styles.button, !running && styles.disabled]} onPress={stopTimer}>
                         <Text style={styles.buttonText}>{running ? "Tauko":"Jatka"}</Text>
                     </Pressable>
-                    <Pressable style={styles.button} onPress={saveShift}>
-                        <Text style={styles.buttonText}>Tallenna</Text>
-                    </Pressable>
+                    {/* Modal */}
+                    <Modal
+                        animationType="slide"
+                        transparent={true}
+                        visible={isModalVisible}
+                        onRequestClose={closeModal}
+                    >
+
+                        <View style={styles.modalContainer}>
+                            <View style={styles.modalContent}>
+                                <Text style={styles.modalText}>Haluatko varmasti lopettaa vuoron?</Text>
+                                <Pressable style={styles.modalButton} onPress={endShift}>
+                                    <Text style={styles.modalButtonText}>Kyllä</Text>
+                                </Pressable>
+                                <Pressable style={styles.modalButton} onPress={closeModal}>
+                                    <Text style={styles.modalButtonText}>Ei</Text>
+                                </Pressable>
+                            </View>
+                        </View>
+                    </Modal>
                 </View>
             </View>
         </View>

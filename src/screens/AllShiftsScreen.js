@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, StyleSheet, Pressable } from "react-native";
+import { View, Text, FlatList, Pressable } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Navbar from "../components/Navbar";
+import styles from "../styles/AllShifts";
 
 export default function AllShiftsScreen() {
     const [shifts, setSavedShifts] = useState([]);
@@ -31,6 +32,19 @@ export default function AllShiftsScreen() {
         }
     };
 
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const day = ("0" + date.getDate()).slice(-2);
+        const month = ("0" + (date.getMonth() + 1)).slice(-2);
+        const year = date.getFullYear();
+        return `${day}.${month}.${year}`;
+    };
+
+    const formatDuration = (durationInMinutes) => {
+        const hours = Math.floor(durationInMinutes / 60);
+        const minutes = durationInMinutes % 60;
+        return `${("0" + hours).slice(-2)}:${("0" + minutes).slice(-2)}`;
+    };
 
     return (
         <View style={styles.container}>
@@ -46,14 +60,14 @@ export default function AllShiftsScreen() {
                     renderItem={({ item }) => (
                         <View style={styles.shiftItem}>
                             <Text style={styles.shiftText}>
-                                {item.startDate} - {item.endDate}
+                                {formatDate(item.startDate)} - {formatDate(item.endDate)}
                             </Text>
-                            <Text>Pvm: {item.date}</Text>
-                            <Text>Kesto: {item.duration} min</Text>
-                            <Text>Tauot: {item.breakDuration} min</Text>
+                            <Text>Pvm: {formatDate(item.date)}</Text>
+                            <Text>Kesto: {formatDuration(item.duration)} tuntia</Text>
+                            <Text>Tauot: {formatDuration(item.breakDuration)} tuntia</Text>
 
                             <Pressable onPress={() => deleteShift(item)} style={styles.deleteShiftButton}>
-                                <Text style={styles.deleteShiftButtonText}>Poista</Text>
+                                <Text style={styles.deleteShiftButtonText}>❌</Text>
                             </Pressable>
                         </View>
                     )}
@@ -64,30 +78,3 @@ export default function AllShiftsScreen() {
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#fff",
-    },
-    header: {
-        fontSize: 20,
-        fontWeight: "bold",
-        textAlign: "center",
-        marginVertical: 10,
-    },
-    noDataText: {
-        textAlign: "center",
-        marginTop: 20,
-        fontSize: 16,
-        color: "gray",
-    },
-    shiftItem: {
-        padding: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: "#ddd",
-    },
-    shiftText: {
-        fontSize: 16,
-        fontWeight: "bold",
-    },
-});

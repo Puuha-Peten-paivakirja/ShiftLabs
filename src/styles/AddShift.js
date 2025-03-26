@@ -42,4 +42,33 @@ export default StyleSheet.create({
         fontSize: 16,
         fontWeight: "bold",
     },
+    modalBackground: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+    },
+    modalContent: {
+        backgroundColor: "#fff",
+        padding: 20,
+        borderRadius: 10,
+        width: 300,
+        alignItems: "center",
+    },
+    modalText: {
+        fontSize: 18,
+        marginBottom: 20,
+    },
+    modalButtonContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        width: "100%",
+    },
+    modalButton: {
+        padding: 10,
+        backgroundColor: "#6A4BA6",
+        borderRadius: 5,
+        width: "45%",
+        alignItems: "center",
+    },
 });
