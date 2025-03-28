@@ -10,7 +10,7 @@ import { auth, createUserWithEmailAndPassword, firestore, USERS, setDoc, doc } f
 import isEmail from 'validator/lib/isEmail'
 import isStrongPassword from 'validator/lib/isStrongPassword'
 
-export default function WelcomeScreen() {
+export default function SignUpScreen() {
   const navigation = useNavigation()
 
   const [isDisabled, setIsDisabled] = useState(false)
