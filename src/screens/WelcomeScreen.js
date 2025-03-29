@@ -20,7 +20,7 @@ export default function WelcomeScreen() {
             onPress={() => navigation.navigate('SignIn')} 
             style={{backgroundColor: '#d8bcfc'}}
           />
-          <CustomButton title={'Guest'} onPress={() => navigation.navigate('Home')} style={{backgroundColor: '#d8bcfc'}}  />
+          <CustomButton title={'Guest'} onPress={() => navigation.navigate('Home')} style={{backgroundColor: '#d8bcfc'}}  />        
         </View>
       </View>
     </View>
