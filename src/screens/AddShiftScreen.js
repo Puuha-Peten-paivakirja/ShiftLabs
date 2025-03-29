@@ -3,6 +3,7 @@ import { View, Text, Pressable, Modal } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { Animated, Easing } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import BackgroundFetch from "react-native-background-fetch";
 import Navbar from "../components/Navbar";
 import styles from "../styles/AddShift";
 //this screen should have buttons for starting, pausing and stopping the timer
@@ -93,7 +94,7 @@ const AddShiftScreen = () => {
             startTime: startTime ? startTime.toISOString() : currentTime.toISOString(),
             endTime: currentTime.toISOString(),
             duration: formattedDuration,
-            breakDuration: elapsedTime,
+            breakDuration: 0,
             date: new Date().toISOString(),
         };
 
@@ -116,6 +117,7 @@ const AddShiftScreen = () => {
             console.log('Shift saved:', shiftData);
             setRunning(false);
             setEndTime(currentTime);
+            setElapsedTime(0);
         }
 
     const formatTime = (seconds) => {
@@ -152,7 +154,7 @@ const AddShiftScreen = () => {
                             strokeDashoffset={strokeDashoffset}
                         />
                     </Svg>
-                    <Text style={styles.timerText}>{elapsedTime}s</Text>
+                    <Text style={styles.timerText}>{formatTime(elapsedTime)}</Text>
                 </View>
 
                 {/* Buttons */}
