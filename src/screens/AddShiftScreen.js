@@ -10,12 +10,11 @@ import styles from "../styles/AddShift";
 //the timer does not have a set "max" time, since users should be able to record how long they worked
 
 
-const TIMER_DURATION = 10; // Timer in seconds
 const RADIUS = 45;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 const AddShiftScreen = () => {
-    const [timeLeft, setTimeLeft] = useState(TIMER_DURATION);
+    const [elapsedTime, setElapsedTime] = useState(0);
     const [running, setRunning] = useState(false);
     const [startTime, setStartTime] = useState(null);
     const [endTime, setEndTime] = useState(null);
@@ -27,26 +26,27 @@ const AddShiftScreen = () => {
         let interval;
         if (running) {
             interval = setInterval(() => {
-                setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+                setElapsedTime((prev) => prev + 1);
             }, 1000);
         } else {
             clearInterval(interval);
         }
         return () => clearInterval(interval);
     }, [running]);
+    
 
     useEffect(() => {
         if (running) {
+            animatedValue.setValue(0); // Reset animation progress
             Animated.timing(animatedValue, {
                 toValue: 1,
-                duration: TIMER_DURATION * 1000,
+                duration: 1000,
                 easing: Easing.linear,
                 useNativeDriver: false,
             }).start();
-        } else {
-            animatedValue.stopAnimation();
         }
-    }, [running]);
+    }, [elapsedTime]); // Depend on elapsedTime to restart every second
+    
 
     const strokeDashoffset = animatedValue.interpolate({
         inputRange: [0, 1],
@@ -55,8 +55,7 @@ const AddShiftScreen = () => {
 
     const startTimer=()=>{
         setRunning(true);
-        const currentDate = new Date();
-        setStartTime(currentDate);
+        setStartTime(new Date());
     };
     
     const stopTimer=()=>{
@@ -70,6 +69,7 @@ const AddShiftScreen = () => {
     };
 
     const endShift=()=>{
+        console.log("End shift pressed");
         setIsModalVisible(false);
         saveShift();
     };
@@ -86,14 +86,14 @@ const AddShiftScreen = () => {
 
     //this should save the shift duration and end time and end date locally. If user is signed in, then it saves on the database too
     const saveShift = async () => {
-        const formattedDuration = formatTime(shiftDuration);
-        const formattedBreakDuration = formatTime(TIMER_DURATION - timeLeft);
+        console.log("Saving shift...");
+        const formattedDuration = formatTime(elapsedTime);
         const currentTime = new Date();
         const shiftData = {
             startTime: startTime ? startTime.toISOString() : currentTime.toISOString(),
             endTime: currentTime.toISOString(),
             duration: formattedDuration,
-            breakDuration: formattedBreakDuration,
+            breakDuration: elapsedTime,
             date: new Date().toISOString(),
         };
 
@@ -152,7 +152,7 @@ const AddShiftScreen = () => {
                             strokeDashoffset={strokeDashoffset}
                         />
                     </Svg>
-                    <Text style={styles.timerText}>{timeLeft}s</Text>
+                    <Text style={styles.timerText}>{elapsedTime}s</Text>
                 </View>
 
                 {/* Buttons */}

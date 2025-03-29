@@ -40,11 +40,18 @@ export default function AllShiftsScreen() {
         return `${day}.${month}.${year}`;
     };
 
-    const formatDuration = (durationInMinutes) => {
-        const hours = Math.floor(durationInMinutes / 60);
-        const minutes = durationInMinutes % 60;
-        return `${("0" + hours).slice(-2)}:${("0" + minutes).slice(-2)}`;
+    const formatDuration = (duration) => {
+        if (typeof duration === "string" && duration.includes(":")) {
+            const [hours, minutes, seconds] = duration.split(":").map(Number);
+            return `${("0" + hours).slice(-2)}:${("0" + minutes).slice(-2)}:${("0" + seconds).slice(-2)}`;
+        }
+        return "00:00:00"; // Fallback for invalid values
     };
+    
+    
+    
+    
+    
 
     return (
         <View style={styles.container}>
@@ -63,8 +70,8 @@ export default function AllShiftsScreen() {
                                 {formatDate(item.startDate)} - {formatDate(item.endDate)}
                             </Text>
                             <Text>Pvm: {formatDate(item.date)}</Text>
-                            <Text>Kesto: {formatDuration(item.duration)} tuntia</Text>
-                            <Text>Tauot: {formatDuration(item.breakDuration)} tuntia</Text>
+                            <Text>Kesto: {formatDuration(item.duration)}</Text>
+                            <Text>Tauot: {formatDuration(item.breakDuration)}</Text>
 
                             <Pressable onPress={() => deleteShift(item)} style={styles.deleteShiftButton}>
                                 <Text style={styles.deleteShiftButtonText}>❌</Text>
