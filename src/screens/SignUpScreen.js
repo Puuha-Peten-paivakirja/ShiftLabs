@@ -104,7 +104,7 @@ export default function SignUpScreen() {
               password: '',
               confirmedPassword: ''
             })
-            navigation.navigate('SignIn')
+            navigation.navigate('Home') // Navigate to home screen after a successful registration
           })
           .catch((error) => {
             console.log(error)
