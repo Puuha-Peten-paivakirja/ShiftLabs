@@ -5,7 +5,7 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import styles from '../styles/SignUp.js'
 import { CustomButton } from '../components/CustomButton'
 import { Topbar } from '../components/Topbar.js'
-import { useNavigation, useFocusEffect } from '@react-navigation/native'
+import { useNavigation, useFocusEffect, CommonActions } from '@react-navigation/native'
 import { auth, createUserWithEmailAndPassword, firestore, USERS, setDoc, doc } from '../firebase/config.js' 
 import isEmail from 'validator/lib/isEmail'
 import isStrongPassword from 'validator/lib/isStrongPassword'
@@ -61,8 +61,8 @@ export default function SignUpScreen() {
       ])
       return false
     }
-    else if (!isStrongPassword(userInfo.password, {minLength: 8, minLowercase:1 , minUppercase: 1, minNumbers: 1, minSymbols: 0})) {
-      Alert.alert('Error', 'Password must contain at least 8 characters, 1 number, 1 uppercase letter and 1 lowercase letter', [
+    else if (!isStrongPassword(userInfo.password, {minLength: 8, minLowercase:1 , minUppercase: 1, minNumbers: 1, minSymbols: 0} || userInfo.password.length > 30)) {
+      Alert.alert('Error', 'Password must contain 8-30 characters, 1 number, 1 uppercase letter and 1 lowercase letter', [
         {
           onPress: () => setIsDisabled(false)
         }
@@ -104,7 +104,12 @@ export default function SignUpScreen() {
               password: '',
               confirmedPassword: ''
             })
-            navigation.navigate('Home') // Navigate to home screen after a successful registration
+            navigation.dispatch( // Clear the navigation stack and redirect the user to the home page
+              CommonActions.reset({
+                index: 0,
+                routes: [{name: 'Home' }]
+              })
+            )
           })
           .catch((error) => {
             console.log(error)
