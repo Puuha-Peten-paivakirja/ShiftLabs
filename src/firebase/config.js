@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app'
-import { getFirestore, setDoc, doc, collection, addDoc, serverTimestamp  } from 'firebase/firestore'
+import { getFirestore, setDoc, doc, collection, addDoc, serverTimestamp, query, getDocs, where, onSnapshot  } from 'firebase/firestore'
 import { initializeAuth, getReactNativePersistence, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth'
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage'
 
@@ -23,6 +23,7 @@ const auth = initializeAuth(app, {
 const USERS = 'users' // This is a collection in Firestore
 const GROUPS = 'groups'
 const GROUPUSERS = 'group-users'
+const USERGROUPS = 'user-groups'
 
 export { 
     firestore, 
@@ -38,5 +39,10 @@ export {
     GROUPS,
     GROUPUSERS,
     serverTimestamp,
-    onAuthStateChanged
+    onAuthStateChanged,
+    where,
+    query,
+    getDocs,
+    USERGROUPS,
+    onSnapshot,
  }
