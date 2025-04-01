@@ -5,22 +5,21 @@ import { TextInput } from "react-native-paper";
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { addDoc, collection, firestore, GROUPS, GROUPUSERS, serverTimestamp, USERS, query, where, getDocs, USERGROUPS, onSnapshot } from "../firebase/config.js";
 import { useUser } from "../context/useUser";
-import { ScrollView } from "react-native-gesture-handler";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-
+import { FlatList, ScrollView } from "react-native-gesture-handler";
+import { SafeAreaView } from "react-native-safe-area-context";
+import filter from "lodash.filter";
 
 export default function GroupScreen() {
 
   const { user } = useUser()
-  const [ userFullName, setFullName ] = useState({
-    firstName: '',
-    lastName: ''
-  })
+  const [listOfUsers, setUsersList] = useState([]);
   const [newGroup, setNewGroup] = useState({
     groupName: '',
     groupDesc: '',
   })
   const [ joinedGroups, setJoinedGroups ] = useState([])
+  const [ searchQuery , setSearchQuery ] = useState('')
+  const [filteredUsers, setFilteredUsers] = useState([]);
 
   useEffect(() => {
     if (!user) return;
@@ -32,11 +31,40 @@ export default function GroupScreen() {
           groupName: doc.data().groupName, 
         }))
         setJoinedGroups(tempGroups)
-      })
+    })
+    const usersQuery = query(collection(firestore, USERS))
+    const usersListener = onSnapshot(usersQuery, (querySnapshot) => {
+      const usersList = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        firstName: doc.data().firstName,
+        lastName: doc.data().lastName,
+    })).filter((u) => u.id !== user.uid);
+    setUsersList(usersList);
+    setFilteredUsers(usersList);
+  });
+
       return () => {
         groupsUserIn()
+        usersListener()
       }
   }, [user])
+
+  const handleSearch = (query) => {
+    setSearchQuery(query)
+    const formattedQuery = query.toLowerCase()
+    const filteredData = filter(listOfUsers, (user) => {
+      return contains (user, formattedQuery);
+    })
+    setFilteredUsers(filteredData)
+  }
+
+  const contains = ({firstName, lastName}, query) =>  {
+
+    const firstNameMatch = firstName.toLowerCase().includes(query);
+    const lastNameMatch = lastName.toLowerCase().includes(query);  
+    return firstNameMatch || lastNameMatch;
+
+  }
 
 
   const getUserName = async (userEmail) => {
@@ -48,9 +76,8 @@ export default function GroupScreen() {
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) { 
-          querySnapshot.forEach((doc) => {
-            setFullName({...userFullName, firstName: doc.data().firstName, lastName:doc.data().lastName})
-          })
+        const userData = querySnapshot.docs[0].data();
+        return { firstName: userData.firstName, lastName: userData.lastName }
       } else {
           console.log("Käyttäjää ei löytynyt.");
       }
@@ -61,7 +88,6 @@ export default function GroupScreen() {
 
 
   const save = async () => {
-    console.log("Saving group:", newGroup);
 
     if (user !== null) {
       const email = user.email
@@ -75,11 +101,11 @@ export default function GroupScreen() {
           })
           setNewGroup({ groupDesc:'', groupName:''})
           console.log('New group saved')
-          await getUserName(email)
+          const userName = await getUserName(email);
           
           await addDoc(collection(firestore, GROUPS, docRef.id, GROUPUSERS), {
-            firstName: userFullName.firstName,
-            lastName: userFullName.lastName,
+            firstName: userName.firstName,
+            lastName: userName.lastName,
             email: email,
             joined: serverTimestamp(),
             role: "admin",
@@ -131,6 +157,7 @@ export default function GroupScreen() {
         </ScrollView>
 
         <View style={styles.separator} />
+        {/*------------------------------------*/}
         <Text style={styles.headings}>Luo uusi ryhmä:</Text>
 
 
@@ -139,6 +166,7 @@ export default function GroupScreen() {
             style={styles.nameInput}
             placeholder="Ryhmän nimi..."
             value={newGroup.groupName}
+            maxLength={25}
             onChangeText={text => setNewGroup({...newGroup, groupName:text})}
             numberOfLines={1}
           />
@@ -151,16 +179,51 @@ export default function GroupScreen() {
         <View style={styles.nameInputHalf}>
           <TextInput
             style={styles.nameInput}
+            multiline
+            maxLength={50}
             placeholder="Ryhmän kuvaus..."
             value={newGroup.groupDesc}
             onChangeText={text => setNewGroup({...newGroup, groupDesc:text})}
-            numberOfLines={1}
+            numberOfLines={3}
           />
           <TouchableOpacity style={styles.clearNameIcon} onPress={() => setNewGroup({...newGroup, groupDesc:''})}>
             <Ionicons name='close-circle' size={20} />
           </TouchableOpacity>
         </View> 
 
+
+        <View style={styles.serachContainer}>
+          <TextInput 
+            placeholder="Etsi henkilöitä..." 
+            autoCapitalize="none" 
+            autoCorrect={false}
+            value={searchQuery}
+            onChangeText={(query) => handleSearch(query)}
+            />
+        </View>
+
+ 
+
+          <FlatList
+              data={filteredUsers}
+              keyExtractor={(item) => item.id}
+              style={styles.srollviewUser}
+              renderItem={({ item }) => (
+              <View>
+                <View style={styles.userItem}>
+                  <Text style={styles.userText}>{item.firstName} {item.lastName}</Text>
+                  <TouchableOpacity style={styles.userInfo} onPress={() => alert('Button Pressed!')}>
+                    <Ionicons name="add-outline" size={30} />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.userSeparator} />
+              </View>
+            )}
+          />
+
+
+
+         
 
           <TouchableOpacity style={styles.createGroup} onPress={save}>
             <Text style={styles.createButton}>Luo</Text>
@@ -172,7 +235,7 @@ export default function GroupScreen() {
       <View style={styles.loginContainer}>
         <Text style={styles.loginMessage}>Kirjaudu sisään käyttääksesi ryhmiä!</Text>
         <Image 
-          source={require('C:/tyot/Projekti24Kevat/ShiftLabs/assets/login-image.png')}
+          source={require('../../assets/login-image.png')}
           style={styles.image}
           />
         </View>
@@ -189,7 +252,7 @@ const styles = StyleSheet.create({
   group:{
     flex:1,
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 15,
   },
   headings:{
     fontSize: 20,
@@ -221,7 +284,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   groupItem: {
-    paddingVertical: 15,  
+    paddingVertical: 10,  
     paddingHorizontal: 20,
     marginVertical: 5,    
     borderColor: '#ccc', 
@@ -238,7 +301,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   srollwiew: {
-    maxHeight: 200,
+    maxHeight: 170,
     width: "90%",
   },
   groupInfo: {
@@ -254,11 +317,13 @@ const styles = StyleSheet.create({
     padding: 15,
     paddingRight: 40,
     paddingLeft: 40,
+    marginTop: 20,
 
   },
   createButton:{
     fontSize: 20,
     color: '#FFFFFF',
+    
   },
   loginMessage:{
     textAlign: 'center',
@@ -275,4 +340,37 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 50, 
   },
+  srollviewUser:{
+    maxHeight: 150,
+    width: "73%",
+  },
+  userItem: {
+    paddingVertical: 10,  
+    paddingHorizontal: 20,
+    borderColor: '#ccc', 
+    backgroundColor: '#F3EDF7',
+    width: '100%',         
+    alignSelf: 'center', 
+    flexDirection: 'row',  
+    justifyContent: 'flex-start', 
+    alignItems: 'center', 
+    },
+    userInfo: {
+      justifyContent: 'center',
+      alignItems: 'center', 
+      padding: 4,
+      borderRadius: 5,
+      backgroundColor: '#d8bcfc'
+    },
+    userSeparator: {
+      height: 1,
+      backgroundColor: '#ccc',
+    },
+    serachContainer:{
+      width: '73%',
+      maxHeight: 150,
+
+
+    },
+
 });
