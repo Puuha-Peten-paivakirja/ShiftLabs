@@ -172,7 +172,7 @@ export default function GroupScreen() {
       <View style={styles.loginContainer}>
         <Text style={styles.loginMessage}>Kirjaudu sisään käyttääksesi ryhmiä!</Text>
         <Image 
-          source={require('C:/tyot/Projekti24Kevat/ShiftLabs/assets/login-image.png')}
+          source={require('../../assets/login-image.png')}
           style={styles.image}
           />
         </View>
