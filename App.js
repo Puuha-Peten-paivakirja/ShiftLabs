@@ -12,21 +12,13 @@ import SignUpScreen from './src/screens/SignUpScreen.js';
 import SignInScreen from './src/screens/SignInScreen.js';
 
 const Stack = createStackNavigator();
+import { UserProvider } from './src/context/UserProvider.js';
+import MainNavigator from './src/navigation/MainNavigator.js';
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Welcome" component={WelcomeScreen} />
-        <Stack.Screen name="SignUp" component={SignUpScreen} />
-        <Stack.Screen name="SignIn" component={SignInScreen} />
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Group" component={GroupScreen} />
-        <Stack.Screen name="Settings" component={SettingsScreen} />
-        <Stack.Screen name="AddShift" component={AddShiftScreen} />
-        <Stack.Screen name="Shift" component={ShiftScreen} />
-        <Stack.Screen name="AllShifts" component={AllShiftsScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <UserProvider>
+      <MainNavigator />
+    </UserProvider>
   );
 }

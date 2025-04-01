@@ -8,7 +8,7 @@ import { Topbar } from '../components/Topbar.js'
 import { CommonActions, useNavigation, useFocusEffect } from '@react-navigation/native'
 import { auth, signInWithEmailAndPassword } from '../firebase/config.js' 
 
-export default function GroupScreen() {
+export default function SignInScreen() {
   const navigation = useNavigation()
 
   const [isDisabled, setIsDisabled] = useState(false)
