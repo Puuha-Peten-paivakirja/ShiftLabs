@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, Pressable, Modal } from "react-native";
+import { View, Text, Pressable, Modal, TouchableOpacity } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { Animated, Easing } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -158,12 +158,12 @@ const AddShiftScreen = () => {
 
                 {/* Buttons */}
                 <View style={styles.buttonContainer}>
-                    <Pressable style={[styles.button, running && styles.disabled]} onPress={running ? openModal: startTimer}>
+                    <TouchableOpacity style={[styles.button, running && styles.disabled]} onPress={running ? openModal: startTimer}>
                         <Text style={styles.buttonText}>{running ? "Lopeta": "Aloita"}</Text>
-                    </Pressable>
-                    <Pressable style={[styles.button, !running && styles.disabled]} onPress={stopTimer}>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.button, !running && styles.disabled]} onPress={stopTimer}>
                         <Text style={styles.buttonText}>{running ? "Tauko":"Jatka"}</Text>
-                    </Pressable>
+                    </TouchableOpacity>
                     {/* Modal */}
                     <Modal
                         animationType="slide"
@@ -175,12 +175,12 @@ const AddShiftScreen = () => {
                         <View style={styles.modalContainer}>
                             <View style={styles.modalContent}>
                                 <Text style={styles.modalText}>Haluatko varmasti lopettaa vuoron?</Text>
-                                <Pressable style={styles.modalButton} onPress={endShift}>
+                                <TouchableOpacity style={styles.modalButton} onPress={endShift}>
                                     <Text style={styles.modalButtonText}>Kyllä</Text>
-                                </Pressable>
-                                <Pressable style={styles.modalButton} onPress={closeModal}>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.modalButton} onPress={closeModal}>
                                     <Text style={styles.modalButtonText}>Ei</Text>
-                                </Pressable>
+                                </TouchableOpacity>
                             </View>
                         </View>
                     </Modal>
