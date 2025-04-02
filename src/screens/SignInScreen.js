@@ -107,7 +107,7 @@ export default function SignInScreen() {
           />
             <View style={styles.bottomText}>
               <Text style={styles.signInText}>Forgot your password? </Text>
-              <TouchableOpacity activeOpacity={0.75}>
+              <TouchableOpacity activeOpacity={0.75} onPress={() => navigation.navigate('ResetPassword')}>
                 <Text style={styles.signInTextLink}>Reset password</Text>
               </TouchableOpacity>
             </View>

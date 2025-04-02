@@ -37,9 +37,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'center'
   },
-  textContainer: {
-    flex: 2
-  },
   buttonsContainer: {
     gap: 20
   }

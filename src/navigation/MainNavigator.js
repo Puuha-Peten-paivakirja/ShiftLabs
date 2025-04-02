@@ -9,6 +9,7 @@ import SettingsScreen from '../screens/SettingsScreen.js'
 import AddShiftScreen from '../screens/AddShiftScreen.js'
 import ShiftScreen from '../screens/ShiftScreen.js'
 import AllShiftsScreen from '../screens/AllShiftsScreen.js'
+import ResetPasswordScreen from '../screens/ResetPasswordScreen.js'
 import { useUser } from '../context/useUser.js'
 
 const Stack = createStackNavigator()
@@ -23,6 +24,7 @@ export default function MainNavigator() {
         <Stack.Screen name='Welcome' component={WelcomeScreen} />
         <Stack.Screen name='SignUp' component={SignUpScreen} />
         <Stack.Screen name='SignIn' component={SignInScreen} />
+        <Stack.Screen name='ResetPassword' component={ResetPasswordScreen} />
         <Stack.Screen name='Group' component={GroupScreen} />
         <Stack.Screen name='Settings' component={SettingsScreen} />
         <Stack.Screen name='AddShift' component={AddShiftScreen} />

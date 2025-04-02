@@ -1,8 +1,4 @@
 import React from 'react';
-import { createStackNavigator } from '@react-navigation/stack';
-
-
-const Stack = createStackNavigator();
 import { UserProvider } from './src/context/UserProvider.js';
 import MainNavigator from './src/navigation/MainNavigator.js';
 
