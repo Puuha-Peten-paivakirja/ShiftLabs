@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, Pressable } from "react-native";
+import { View, Text, FlatList, Pressable, TouchableOpacity } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Navbar from "../components/Navbar";
 import styles from "../styles/AllShifts";
@@ -48,11 +48,6 @@ export default function AllShiftsScreen() {
         return "00:00:00"; // Fallback for invalid values
     };
     
-    
-    
-    
-    
-
     return (
         <View style={styles.container}>
             <Navbar />
@@ -73,9 +68,9 @@ export default function AllShiftsScreen() {
                             <Text>Kesto: {formatDuration(item.duration)}</Text>
                             <Text>Tauot: {formatDuration(item.breakDuration)}</Text>
 
-                            <Pressable onPress={() => deleteShift(item)} style={styles.deleteShiftButton}>
+                            <TouchableOpacity onPress={() => deleteShift(item)} style={styles.deleteShiftButton}>
                                 <Text style={styles.deleteShiftButtonText}>❌</Text>
-                            </Pressable>
+                            </TouchableOpacity>
                         </View>
                     )}
                 />

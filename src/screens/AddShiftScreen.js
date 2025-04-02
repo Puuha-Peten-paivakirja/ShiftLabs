@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, Modal, TouchableOpacity, Animated, Easing} from "react-native";
+import { View, Text, Modal, TouchableOpacity, Animated, Easing, TextInput} from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Navbar from "../components/Navbar";
@@ -15,8 +15,12 @@ const AddShiftScreen = () => {
     const [paused, setPaused] = useState(false);
     const [startTime, setStartTime] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [shiftName, setShiftName] = useState("");
+    const [shiftDescription, setShiftDescription] = useState("");
     const animatedValue = useRef(new Animated.Value(0)).current;
     const timerRef = useRef(null);
+
+
 
 
     useEffect(() => {
@@ -84,6 +88,8 @@ const AddShiftScreen = () => {
         const formattedDuration = formatTime(elapsedTime);
         const formattedBreakDuration = formatTime(elapsedBreak);
         const shiftData = {
+            name: shiftName,
+            description: shiftDescription,
             startTime: startTime ? startTime.toISOString() : currentTime.toISOString(),
             endTime: currentTime.toISOString(),
             duration: formattedDuration,
@@ -101,9 +107,12 @@ const AddShiftScreen = () => {
             console.error("Failed to save shift:", error);
         }
 
+        console.log("reset state");
         setStartTime(null);
         setElapsedTime(0);
         setElapsedBreak(0);
+        setShiftName("");
+        setShiftDescription(""); // Update the modal key to force re-render
     };
 
     const formatTime = (seconds) => {
@@ -117,6 +126,17 @@ const AddShiftScreen = () => {
         <View style={styles.wrapper}>
             <Navbar />
             <View style={styles.container}>
+            <TextInput // Use the modal key to force re-render
+            style={styles.input}
+            placeholder="Vuoron nimi"
+           value={shiftName}
+           onChangeText={setShiftName}
+           /><TextInput
+           style={styles.input}
+           placeholder="Kuvaus"
+           value={shiftDescription}
+           onChangeText={setShiftDescription}
+           multiline/>
                 <View style={styles.circleContainer}>
                     <Svg height="150" width="150" viewBox="0 0 100 100">
                         <Circle cx="50" cy="50" r={RADIUS} stroke="#D8C5E5" strokeWidth="4" fill="none" />
