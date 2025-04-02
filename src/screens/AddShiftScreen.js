@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, Pressable, Modal, TouchableOpacity } from "react-native";
+import { View, Text, Modal, TouchableOpacity } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { Animated, Easing } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
