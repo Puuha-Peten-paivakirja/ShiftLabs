@@ -1,142 +1,44 @@
-import React, { useState, useEffect, useRef } from "react";
-import { View, Text, Modal, TouchableOpacity, Animated, Easing, TextInput} from "react-native";
+import React, { useState, useEffect, useRef, useContext } from "react";
+import { View, Text, Modal, TouchableOpacity, Animated, Easing, TextInput, Alert } from "react-native";
 import Svg, { Circle } from "react-native-svg";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import Navbar from "../components/Navbar";
 import styles from "../styles/AddShift";
+import { ShiftTimerContext } from "../context/ShiftTimerContext";
+
 
 const RADIUS = 45;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 const AddShiftScreen = () => {
-    const [elapsedTime, setElapsedTime] = useState(0);
-    const [elapsedBreak, setElapsedBreak] = useState(0);
-    const [running, setRunning] = useState(false);
-    const [paused, setPaused] = useState(false);
-    const [startTime, setStartTime] = useState(null);
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    const [shiftName, setShiftName] = useState("");
-    const [shiftDescription, setShiftDescription] = useState("");
+    const { elapsedTime, running, paused, startShift, pauseShift, resumeShift, stopShift, setIsModalVisible, isModalVisible, openModal, formatTime, setShiftDescription, setShiftName, shiftName, shiftDescription } = useContext(ShiftTimerContext);
+
     const animatedValue = useRef(new Animated.Value(0)).current;
-    const timerRef = useRef(null);
 
 
-
-
-    useEffect(() => {
-      if (running && !paused) {
-          timerRef.current = setInterval(() => {
-              setElapsedTime((prev) => prev + 1);
-          }, 1000);
-      } else if (paused) {
-          timerRef.current = setInterval(() => {
-              setElapsedBreak((prev) => prev + 1);
-          }, 1000);
-      } else {
-          clearInterval(timerRef.current);
+useEffect(() => {
+    if (running && !paused) {
+        animatedValue.setValue(0); // Reset the animation
+        Animated.timing(animatedValue, {
+          toValue: 1, // Full circle (end of timer)
+          duration: 1000, // Duration for a full circle (1 second per unit of time)
+          easing: Easing.linear,
+          useNativeDriver: false, // Make sure to use this if not using native driver
+        }).start();
       }
+    }, [elapsedTime, running, paused]); // Re-trigger when elapsedTime changes
   
-      return () => clearInterval(timerRef.current);
-  }, [running, paused]);
-  
-
-    useEffect(() => {
-        if (running && !paused) {
-            animatedValue.setValue(0);
-            Animated.timing(animatedValue, {
-                toValue: 1,
-                duration: 1000,
-                easing: Easing.linear,
-                useNativeDriver: false,
-            }).start();
-        }
-    }, [elapsedTime]);
-
     const strokeDashoffset = animatedValue.interpolate({
-        inputRange: [0, 1],
-        outputRange: [CIRCUMFERENCE, 0],
+      inputRange: [0, 1],
+      outputRange: [CIRCUMFERENCE, 0],
     });
-
-    const startTimer = () => {
-        setRunning(true);
-        setPaused(false);
-        if (!startTime) {
-            setStartTime(new Date());
-        }
-    };
-
-    const pauseTimer = () => {
-        setPaused(true);
-        setRunning(false);
-    };
-
-    const resumeTimer = () => {
-      setPaused(false);
-      setRunning(true);
-  };
-  
-    const stopTimer = () => {
-        setIsModalVisible(true);
-    };
-
-    const endShift = async () => {
-        setRunning(false);
-        setPaused(false);
-        setIsModalVisible(false);
-
-        const currentTime = new Date();
-        const formattedDuration = formatTime(elapsedTime);
-        const formattedBreakDuration = formatTime(elapsedBreak);
-        const shiftData = {
-            name: shiftName,
-            description: shiftDescription,
-            startTime: startTime ? startTime.toISOString() : currentTime.toISOString(),
-            endTime: currentTime.toISOString(),
-            duration: formattedDuration,
-            breakDuration: formattedBreakDuration,
-            date: currentTime.toISOString(),
-        };
-
-        try {
-            const savedShifts = await AsyncStorage.getItem("shifts");
-            const shifts = savedShifts ? JSON.parse(savedShifts) : [];
-            shifts.push(shiftData);
-            await AsyncStorage.setItem("shifts", JSON.stringify(shifts));
-            console.log("Shift data:", shiftData);
-        } catch (error) {
-            console.error("Failed to save shift:", error);
-        }
-
-        console.log("reset state");
-        setStartTime(null);
-        setElapsedTime(0);
-        setElapsedBreak(0);
-        setShiftName("");
-        setShiftDescription(""); // Update the modal key to force re-render
-    };
-
-    const formatTime = (seconds) => {
-        const hrs = Math.floor(seconds / 3600);
-        const mins = Math.floor((seconds % 3600) / 60);
-        const secs = seconds % 60;
-        return `${("0" + hrs).slice(-2)}:${("0" + mins).slice(-2)}:${("0" + secs).slice(-2)}`;
-    };
 
     return (
         <View style={styles.wrapper}>
             <Navbar />
             <View style={styles.container}>
-            <TextInput // Use the modal key to force re-render
-            style={styles.input}
-            placeholder="Vuoron nimi"
-           value={shiftName}
-           onChangeText={setShiftName}
-           /><TextInput
-           style={styles.input}
-           placeholder="Kuvaus"
-           value={shiftDescription}
-           onChangeText={setShiftDescription}
-           multiline/>
+                <TextInput style={styles.input} placeholder="Vuoron nimi" value={shiftName} onChangeText={setShiftName} />
+                <TextInput style={styles.input} placeholder="Kuvaus" value={shiftDescription} onChangeText={setShiftDescription} multiline />
+                
                 <View style={styles.circleContainer}>
                     <Svg height="150" width="150" viewBox="0 0 100 100">
                         <Circle cx="50" cy="50" r={RADIUS} stroke="#D8C5E5" strokeWidth="4" fill="none" />
@@ -156,22 +58,22 @@ const AddShiftScreen = () => {
 
                 <View style={styles.buttonContainer}>
                     {!running && !paused ? (
-                        <TouchableOpacity style={styles.button} onPress={startTimer}>
+                        <TouchableOpacity style={styles.button} onPress={startShift}>
                             <Text style={styles.buttonText}>Aloita</Text>
                         </TouchableOpacity>
                     ) : (
                         <>
                             {running && (
-                                <TouchableOpacity style={styles.button} onPress={pauseTimer}>
+                                <TouchableOpacity style={styles.button} onPress={pauseShift}>
                                     <Text style={styles.buttonText}>Tauko</Text>
                                 </TouchableOpacity>
                             )}
                             {paused && (
-                                <TouchableOpacity style={styles.button} onPress={resumeTimer}>
+                                <TouchableOpacity style={styles.button} onPress={resumeShift}>
                                     <Text style={styles.buttonText}>Jatka</Text>
                                 </TouchableOpacity>
                             )}
-                            <TouchableOpacity style={styles.button} onPress={stopTimer}>
+                            <TouchableOpacity style={styles.button} onPress={openModal}>
                                 <Text style={styles.buttonText}>Lopeta</Text>
                             </TouchableOpacity>
                         </>
@@ -182,7 +84,7 @@ const AddShiftScreen = () => {
                     <View style={styles.modalContainer}>
                         <View style={styles.modalContent}>
                             <Text style={styles.modalText}>Haluatko varmasti lopettaa vuoron?</Text>
-                            <TouchableOpacity style={styles.modalButton} onPress={endShift}>
+                            <TouchableOpacity style={styles.modalButton} onPress={stopShift}>
                                 <Text style={styles.modalButtonText}>Kyllä</Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.modalButton} onPress={() => setIsModalVisible(false)}>
