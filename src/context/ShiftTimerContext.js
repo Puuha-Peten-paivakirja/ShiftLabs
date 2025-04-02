@@ -1,5 +1,44 @@
 import React, { createContext, useState, useEffect, useRef } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as TaskManager from "expo-task-manager";
+import * as BackgroundFetch from "expo-background-fetch";
+import * as Notifications from "expo-notifications";
+import { Platform } from "react-native";
+
+const BACKGROUND_TIMER_TASK = "BACKGROUND_TIMER_TASK";
+
+// Ensure notification handler is set
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
+
+TaskManager.defineTask(BACKGROUND_TIMER_TASK, async () => {
+    console.log("Background task executed");
+
+    const startTimeString = await AsyncStorage.getItem("shiftStartTime");
+    if (startTimeString) {
+        const startTime = new Date(startTimeString);
+        const elapsed = Math.floor((new Date() - startTime) / 1000);
+        await AsyncStorage.setItem("elapsedTime", elapsed.toString());
+
+        // Send a notification when running in the background
+        await Notifications.scheduleNotificationAsync({
+            content: {
+                title: "Shift Still Running",
+                body: `Elapsed time: ${elapsed} seconds`,
+            },
+            trigger: { seconds: 5 },
+        });
+
+        return BackgroundFetch.Result.NewData;
+    }
+
+    return BackgroundFetch.Result.NoData;
+});
 
 export const ShiftTimerContext = createContext();
 
@@ -30,11 +69,49 @@ export const ShiftTimerProvider = ({ children }) => {
         return () => clearInterval(timerRef.current);
     }, [running, paused]);
 
-    const startShift = () => {
+    useEffect(() => {
+        const restoreElapsedTime = async () => {
+            const savedElapsed = await AsyncStorage.getItem("elapsedTime");
+            if (savedElapsed) {
+                setElapsedTime(parseInt(savedElapsed, 10));
+            }
+        };
+    
+        restoreElapsedTime();
+    }, []);
+    
+
+    const startShift = async () => {
         setRunning(true);
         setPaused(false);
-        if (!startTime) {
-            setStartTime(new Date());
+        const now = new Date();
+        setStartTime(now);
+    
+        await AsyncStorage.setItem("shiftStartTime", now.toISOString());
+    
+        // Request notification permission
+        const { status } = await Notifications.requestPermissionsAsync();
+        if (status === "granted") {
+            await Notifications.scheduleNotificationAsync({
+                content: {
+                    title: "Shift Running",
+                    body: "Your shift is still running in the background.",
+                },
+                trigger: { seconds: 5 },
+            });
+        }
+
+        // Check if task is already registered
+        const isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_TIMER_TASK);
+        if (!isRegistered) {
+            await BackgroundFetch.registerTaskAsync(BACKGROUND_TIMER_TASK, {
+                minimumInterval: 1,
+                stopOnTerminate: false,
+                startOnBoot: true,
+            });
+            console.log("Background task registered");
+        } else {
+            console.log("Background task already registered");
         }
     };
 
@@ -53,48 +130,30 @@ export const ShiftTimerProvider = ({ children }) => {
     };
 
     const stopShift = async () => {
-            setRunning(false);
-            setPaused(false);
-            setIsModalVisible(false);
+        setRunning(false);
+        setPaused(false);
+        setIsModalVisible(false);
     
-            const currentTime = new Date();
-            const formattedDuration = formatTime(elapsedTime);
-            const formattedBreakDuration = formatTime(elapsedBreak);
-            const shiftData = {
-                name: shiftName,
-                description: shiftDescription,
-                startTime: startTime ? startTime.toISOString() : currentTime.toISOString(),
-                endTime: currentTime.toISOString(),
-                duration: formattedDuration,
-                breakDuration: formattedBreakDuration,
-                date: currentTime.toISOString(),
-            };
+        await BackgroundFetch.unregisterTaskAsync(BACKGROUND_TIMER_TASK);
+        await AsyncStorage.removeItem("shiftStartTime");
+        await AsyncStorage.removeItem("elapsedTime");
     
-            try {
-                const savedShifts = await AsyncStorage.getItem("shifts");
-                const shifts = savedShifts ? JSON.parse(savedShifts) : [];
-                shifts.push(shiftData);
-                await AsyncStorage.setItem("shifts", JSON.stringify(shifts));
-            } catch (error) {
-                console.error("Failed to save shift:", error);
-            }
+        console.log("Shift stopped & background task unregistered");
     
-            setStartTime(null);
-            setElapsedTime(0);
-            setElapsedBreak(0);
-            setShiftName("");
-            setShiftDescription("");
-            console.log("Shift saved:", shiftData);
-        };
+        setStartTime(null);
+        setElapsedTime(0);
+        setElapsedBreak(0);
+        setShiftName("");
+        setShiftDescription("");
+    };
 
-        const formatTime = (seconds) => {
-                const hrs = Math.floor(seconds / 3600);
-                const mins = Math.floor((seconds % 3600) / 60);
-                const secs = seconds % 60;
-                return `${("0" + hrs).slice(-2)}:${("0" + mins).slice(-2)}:${("0" + secs).slice(-2)}`;
-            };
-        
-        
+    const formatTime = (seconds) => {
+        const hrs = Math.floor(seconds / 3600);
+        const mins = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+        return `${("0" + hrs).slice(-2)}:${("0" + mins).slice(-2)}:${("0" + secs).slice(-2)}`;
+    };
+
     return (
         <ShiftTimerContext.Provider value={{ 
             elapsedTime, elapsedBreak, running, paused, shiftDescription, shiftName, isModalVisible, startShift, pauseShift, resumeShift, stopShift, formatTime, openModal, setShiftDescription, setShiftName, 
