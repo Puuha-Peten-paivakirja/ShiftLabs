@@ -73,6 +73,8 @@ export default function SignInScreen() {
               onChangeText={text => setUserInfo({...userInfo, email: text})}
               keyboardType='email-address'
               numberOfLines={1}
+              autoCapitalize='none'
+              autoCorrect={false}
             />
             <TouchableOpacity style={styles.clearCredentialsIcon} onPress={() => setUserInfo({...userInfo, email: ''})}>
               <Ionicons name='close-circle' size={20} />
@@ -87,6 +89,8 @@ export default function SignInScreen() {
               onChangeText={text => setUserInfo({...userInfo, password: text})}
               secureTextEntry={true}
               numberOfLines={1}
+              autoCapitalize='none'
+              autoCorrect={false}
             />
             <TouchableOpacity style={styles.clearCredentialsIcon} onPress={() => setUserInfo({...userInfo, password: ''})}>
               <Ionicons name='close-circle' size={20} />

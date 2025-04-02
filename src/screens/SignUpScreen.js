@@ -148,6 +148,7 @@ export default function SignUpScreen() {
                 value={userInfo.firstName}
                 onChangeText={text => setUserInfo({...userInfo, firstName: text})}
                 numberOfLines={1}
+                autoCorrect={false}
               />
               <TouchableOpacity style={styles.clearNameIcon} onPress={() => setUserInfo({...userInfo, firstName: ''})}>
                 <Ionicons name='close-circle' size={20} />
@@ -161,6 +162,7 @@ export default function SignUpScreen() {
                 value={userInfo.lastName}
                 onChangeText={text => setUserInfo({...userInfo, lastName: text})}
                 numberOfLines={1}
+                autoCorrect={false}
               />
               <TouchableOpacity style={styles.clearNameIcon} onPress={() => setUserInfo({...userInfo, lastName: ''})}>
                 <Ionicons name='close-circle' size={20} />
@@ -176,6 +178,8 @@ export default function SignUpScreen() {
               onChangeText={text => setUserInfo({...userInfo, email: text})}
               keyboardType='email-address'
               numberOfLines={1}
+              autoCapitalize='none'
+              autoCorrect={false}
             />
             <TouchableOpacity style={styles.clearCredentialsIcon} onPress={() => setUserInfo({...userInfo, email: ''})}>
               <Ionicons name='close-circle' size={20} />
@@ -190,6 +194,8 @@ export default function SignUpScreen() {
               onChangeText={text => setUserInfo({...userInfo, password: text})}
               secureTextEntry={true}
               numberOfLines={1}
+              autoCapitalize='none'
+              autoCorrect={false}
             />
             <TouchableOpacity style={styles.clearCredentialsIcon} onPress={() => setUserInfo({...userInfo, password: ''})}>
               <Ionicons name='close-circle' size={20} />
@@ -204,6 +210,8 @@ export default function SignUpScreen() {
               onChangeText={text => setUserInfo({...userInfo, confirmedPassword: text})}
               secureTextEntry={true}
               numberOfLines={1}
+              autoCapitalize='none'
+              autoCorrect={false}
             />
             <TouchableOpacity style={styles.clearCredentialsIcon} onPress={() => setUserInfo({...userInfo, confirmedPassword: ''})}>
               <Ionicons name='close-circle' size={20} />
