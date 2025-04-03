@@ -1,11 +1,11 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState } from 'react'
 import { View, TouchableOpacity, Text, Alert } from 'react-native'
 import { TextInput } from 'react-native-paper'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import styles from '../styles/SignIn.js'
 import { CustomButton } from '../components/CustomButton'
 import { Topbar } from '../components/Topbar.js'
-import { CommonActions, useNavigation, useFocusEffect } from '@react-navigation/native'
+import { CommonActions, useNavigation } from '@react-navigation/native'
 import { auth, signInWithEmailAndPassword } from '../firebase/config.js' 
 
 export default function SignInScreen() {
@@ -13,12 +13,6 @@ export default function SignInScreen() {
 
   const [isDisabled, setIsDisabled] = useState(false)
   const [userInfo, setUserInfo] = useState({email: '', password: '',})
-
-  useFocusEffect(
-    useCallback(() => {
-      setIsDisabled(false)
-    }, [])
-  )
 
   const signIn = () => {
     setIsDisabled(true)
