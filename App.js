@@ -10,6 +10,9 @@ import ShiftScreen from './src/screens/ShiftScreen';
 import AllShiftsScreen from './src/screens/AllShiftsScreen';
 import SignUpScreen from './src/screens/SignUpScreen.js';
 import SignInScreen from './src/screens/SignInScreen.js';
+import CalendarScreen from './src/screens/CalendarScreen.js'
+import SingleCalendarEvent from './src/screens/SingleCalendarEvent.js'
+import AddCalendarEvent from './src/screens/AddCalendarEvent.js';
 
 const Stack = createStackNavigator();
 
@@ -26,6 +29,9 @@ export default function App() {
         <Stack.Screen name="AddShift" component={AddShiftScreen} />
         <Stack.Screen name="Shift" component={ShiftScreen} />
         <Stack.Screen name="AllShifts" component={AllShiftsScreen} />
+        <Stack.Screen name="Calendar" component={CalendarScreen} />
+        <Stack.Screen name="SingleCalendarEvent" component={SingleCalendarEvent} />
+        <Stack.Screen name="AddCalendarEvent" component={AddCalendarEvent} />
       </Stack.Navigator>
     </NavigationContainer>
   );

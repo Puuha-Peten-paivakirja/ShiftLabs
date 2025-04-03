@@ -86,6 +86,10 @@ export default function BurgerMenu({ isOpen, closeMenu }) {
             <Text style={styles.menuText}>Kaikki vuorot</Text>
         </TouchableOpacity>
 
+        <TouchableOpacity onPress={() => navigation.navigate("Calendar")} style={styles.menuItem}>
+            <Text style={styles.menuText}>Kalenteri</Text>
+        </TouchableOpacity>
+
         <TouchableOpacity onPress={() => confirmSignOut()} style={styles.menuItem}>
             <Text style={[styles.menuText, {color: "red"}]}>Sign out</Text>
         </TouchableOpacity>
