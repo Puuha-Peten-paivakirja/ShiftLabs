@@ -96,8 +96,9 @@ export default function SingleCalendarEvent({ route }) {
         return item
       }
     });
-    setAllEvents(newArray)
-    saveEventsLocally(newArray)
+    let sortedArray = sortEventArray(newArray)
+    setAllEvents(sortedArray)
+    saveEventsLocally(sortedArray)
   }
 
   //Save all events locally
@@ -117,15 +118,15 @@ export default function SingleCalendarEvent({ route }) {
     let newArray = [...allEvents] 
     
     //Go through all the calendar events and remove the specified event from the array
-    /*for (let i = 0; i < newArray.length; i++) {
+    for (let i = 0; i < newArray.length; i++) {
       if (newArray[i].id === event.id) {
         newArray.splice(i, 1)
       }
-    }*/
+    }
 
     //Save the new array, which doesn't have the removed value
     let sortedArray = sortEventArray(newArray)
-    console.log(sortedArray)
+    saveEventsLocally(sortedArray)
   }
 
   const sortEventArray = (values) => {

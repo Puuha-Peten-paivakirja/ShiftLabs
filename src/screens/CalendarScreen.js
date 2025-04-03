@@ -81,7 +81,7 @@ export default function CalendarScreen() {
         renderDay={(eventViews, weekdayToAdd, i) => (
           <View key={i.toString()} style={styles.day}>
             <View style={styles.dayLabel}>
-              <Text style={styles.monthDateText}>{weekdayToAdd.format('M/D').toString()}</Text>
+              <Text style={styles.monthDateText}>{weekdayToAdd.format('D/M').toString()}</Text>
               <Text style={styles.dayText}>{weekdayToAdd.format('ddd').toString()}</Text>
             </View>
             <View style={[styles.allEvents, eventViews.length === 0 ? { width: '100%', backgroundColor: '#f8ecf4' } : {}]}>

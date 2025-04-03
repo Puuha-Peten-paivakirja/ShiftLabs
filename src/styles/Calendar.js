@@ -1,4 +1,5 @@
 import { StyleSheet } from "react-native";
+import {Dimensions} from 'react-native';
 
 export default StyleSheet.create({
   container: {
@@ -7,7 +8,7 @@ export default StyleSheet.create({
     backgroundColor: "#FAF5FF",
   },
   calendar: {
-    
+    maxHeight: (Dimensions.get('window').height - 25)
   },
   eventText: {
     color: '#68548c',

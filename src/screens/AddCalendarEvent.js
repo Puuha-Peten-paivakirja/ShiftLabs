@@ -89,8 +89,11 @@ export default function AddCalendarEvent({ route }) {
         note: note
       }
       const tempData = [...allEvents, newEvent]
-      setAllEvents(tempData)
-      saveEventsLocally(tempData)
+
+      let sortedArray = sortEventArray(tempData)
+
+      setAllEvents(sortedArray)
+      saveEventsLocally(sortedArray)
     } catch (e) {
       console.log(e)
     }
@@ -105,6 +108,11 @@ export default function AddCalendarEvent({ route }) {
     } catch (e) {
       console.log(e)
     }
+  }
+
+  const sortEventArray = (values) => {
+    values.sort((a, b) => new Date(a.start) - new Date(b.start))
+    return values
   }
 
     return (
