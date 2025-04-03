@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useRef } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+// import SecureStore from 'expo-secure-store';
 import * as TaskManager from "expo-task-manager";
 import * as BackgroundFetch from "expo-background-fetch";
 import * as Notifications from "expo-notifications";
@@ -80,6 +81,40 @@ export const ShiftTimerProvider = ({ children }) => {
         restoreElapsedTime();
     }, []);
     
+    const saveShift = async () => {
+        console.log("Saving shift...");
+        const formattedDuration = formatTime(elapsedTime);
+        const currentTime = new Date();
+        const shiftData = {
+            startTime: startTime ? startTime.toISOString() : currentTime.toISOString(),
+            endTime: currentTime.toISOString(),
+            duration: formattedDuration,
+            breakDuration: 0,
+            date: new Date().toISOString(),
+        };
+
+            try {
+                const savedShifts = await AsyncStorage.getItem('shifts');
+                const shifts = savedShifts ? JSON.parse(savedShifts) : [];
+                shifts.push(shiftData);
+
+                await AsyncStorage.setItem('shifts', JSON.stringify(shifts));
+                
+            } catch (error) {
+                console.error('Failed to save shift:', error);
+            }
+    
+            // // Example of saving to a database (Firebase or another service)
+            // if (isUserLoggedIn) {
+            //     saveToDatabase(shiftData);  // Save to database
+            // }
+    
+            console.log('Shift saved:', shiftData);
+            setRunning(false);
+            setEndTime(currentTime);
+            setElapsedTime(0);
+        }
+
 
     const startShift = async () => {
         setRunning(true);
@@ -134,10 +169,6 @@ export const ShiftTimerProvider = ({ children }) => {
         setPaused(false);
         setIsModalVisible(false);
     
-        await BackgroundFetch.unregisterTaskAsync(BACKGROUND_TIMER_TASK);
-        await AsyncStorage.removeItem("shiftStartTime");
-        await AsyncStorage.removeItem("elapsedTime");
-    
         console.log("Shift stopped & background task unregistered");
     
         setStartTime(null);
@@ -145,6 +176,7 @@ export const ShiftTimerProvider = ({ children }) => {
         setElapsedBreak(0);
         setShiftName("");
         setShiftDescription("");
+        saveShift();
     };
 
     const formatTime = (seconds) => {
@@ -153,6 +185,7 @@ export const ShiftTimerProvider = ({ children }) => {
         const secs = seconds % 60;
         return `${("0" + hrs).slice(-2)}:${("0" + mins).slice(-2)}:${("0" + secs).slice(-2)}`;
     };
+    
 
     return (
         <ShiftTimerContext.Provider value={{ 
