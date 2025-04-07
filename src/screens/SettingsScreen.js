@@ -15,9 +15,19 @@ export default function SettingsScreen() {
       <View style={styles.nameContainer}>
         <View style={styles.nameTextContainer}>
           <Text style={styles.textStyle}>Name:</Text>
-          <Text style={styles.textStyle} numberOfLines={1}>Placeholder Name</Text>
+          <Text style={styles.textStyle} numberOfLines={1}>placeholder name</Text>
         </View>
         <TouchableOpacity style={styles.editNameIcon}>
+          <Feather name='edit' size={20} />
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.emailContainer}>
+        <View style={styles.emailTextContainer}>
+          <Text style={styles.textStyle}>Email address:</Text>
+          <Text style={styles.textStyle} numberOfLines={1}>placeholder.name@gmail.com</Text>
+        </View>
+        <TouchableOpacity style={styles.editEmailIcon}>
           <Feather name='edit' size={20} />
         </TouchableOpacity>
       </View>
@@ -51,17 +61,36 @@ const styles = StyleSheet.create({
   nameContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 20,
-    maxWidth: '75%',
+    width: '100%'
   },
   nameTextContainer: {
     flexDirection: 'column',
     alignItems: 'center',
+    maxWidth: '60%'
   },
   textStyle: {
     fontSize: 16
   },
   editNameIcon: {
-    marginLeft: 16
+    position: 'absolute',
+    right: 40
+  },
+  emailContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 20,
+    width: '100%'
+  },
+  emailTextContainer: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    maxWidth: '60%',
+  },
+  editEmailIcon: {
+    position: 'absolute',
+    right: 40
   },
 })
