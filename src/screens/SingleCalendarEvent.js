@@ -7,11 +7,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Topbar } from '../components/Topbar.js'
 import styles from '../styles/SingleCalendarEvent'
 import { Button, TextInput } from "react-native-paper";
+import { query, addDoc, collection, firestore, serverTimestamp, auth, USERS, CALENDARENTRIES, setDoc, doc, deleteDoc } from "../firebase/config.js";
 
 export default function SingleCalendarEvent({ route }) {
   //Muuttujia
   const navigation = useNavigation()
   const [event, setEvent] = useState(route.params.event)
+  //In this case allEvents variable refers to all LOCAL events. All firebase events are not needed on this page.
   const [allEvents, setAllEvents] = useState(route.params.allEvents)
 
   //Tapahtuman päivämäärää varten
@@ -84,21 +86,38 @@ export default function SingleCalendarEvent({ route }) {
 
   //Add event to AllEvents-variable
   const addEventToAllEvents = async(start, end, note) => {
-    const newArray = allEvents.map(item => {
-      if (item.id === event.id) {
-        return {
-          ...item,
-          start: start,
-          end: end,
-          note: note
+    //Check if event is saved locally
+    if (allEvents.includes(event)) {
+      const newArray = allEvents.map(item => {
+        if (item.id === event.id) {
+          return {
+            ...item,
+            start: start,
+            end: end,
+            note: note
+          }
+        } else {
+          return item
         }
-      } else {
-        return item
+      });
+      let sortedArray = sortEventArray(newArray)
+      setAllEvents(sortedArray)
+      saveEventsLocally(sortedArray)
+    } else {
+      //Event is in firebase. Check if user is logged in and edit information
+      if(auth.currentUser !== null) {
+        try {
+          setDoc(doc(firestore, USERS, auth.currentUser.uid, CALENDARENTRIES, event.id), {
+            start: start,
+            end: end,
+            note: note
+          })
+          navigation.navigate("Calendar")
+        } catch (e) {
+          console.log(e)
+        }
       }
-    });
-    let sortedArray = sortEventArray(newArray)
-    setAllEvents(sortedArray)
-    saveEventsLocally(sortedArray)
+    }
   }
 
   //Save all events locally
@@ -114,19 +133,33 @@ export default function SingleCalendarEvent({ route }) {
 
   const deleteInformation = () => {
     console.log("Delete Info")
-    //Delete info and navigate to calendar
-    let newArray = [...allEvents] 
-    
-    //Go through all the calendar events and remove the specified event from the array
-    for (let i = 0; i < newArray.length; i++) {
-      if (newArray[i].id === event.id) {
-        newArray.splice(i, 1)
+    //Check if event is local or not
+    if(allEvents.includes(event)) {
+      //Delete info and navigate to calendar
+      let newArray = [...allEvents] 
+      
+      //Go through all the calendar events and remove the specified event from the array
+      for (let i = 0; i < newArray.length; i++) {
+        if (newArray[i].id === event.id) {
+          newArray.splice(i, 1)
+        }
+      }
+
+      //Save the new array, which doesn't have the removed value
+      let sortedArray = sortEventArray(newArray)
+      saveEventsLocally(sortedArray)
+    } else {
+      //Delete from firebase if user is logged in
+      if(auth.currentUser !== null) {
+        try {
+          deleteDoc(doc(firestore, USERS, auth.currentUser.uid, CALENDARENTRIES, event.id))
+          navigation.navigate("Calendar")
+        } catch (e) {
+          console.log(e)
+        }
       }
     }
-
-    //Save the new array, which doesn't have the removed value
-    let sortedArray = sortEventArray(newArray)
-    saveEventsLocally(sortedArray)
+    
   }
 
   const sortEventArray = (values) => {

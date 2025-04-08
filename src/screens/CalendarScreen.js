@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import moment from 'moment/min/moment-with-locales';
+import moment, { locale } from 'moment/min/moment-with-locales';
 import { Text, View, Pressable, TouchableOpacity } from 'react-native';
 import WeeklyCalendar from 'react-native-weekly-calendar';
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -7,6 +7,8 @@ import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Navbar from "../components/Navbar";
 import styles from '../styles/Calendar'
+import { query, addDoc, collection, firestore, serverTimestamp, auth, USERS, CALENDARENTRIES } from "../firebase/config.js";
+import { onSnapshot, orderBy } from 'firebase/firestore';
 
 export default function CalendarScreen() {
   //Defaultprops-error tulee itse kirjastosta
@@ -14,11 +16,14 @@ export default function CalendarScreen() {
   //Koodi on tehty niin, että kirjasto toimii vaikka tämän poistaa.
 
   const navigation = useNavigation()
-  const [allEvents, setAllEvents] = useState([])
+  const [localEvents, setLocalEvents] = useState([])
+  const [firebaseEvents, setFirebaseEvents] = useState([])
+  const [loaded, setLoaded] = useState(false)
 
   //Get all events
   useEffect(() => {
     getAllLocalEvents()
+    getFirebaseEvents()
   }, [])
 
   const getAllLocalEvents = async() => {
@@ -28,23 +33,52 @@ export default function CalendarScreen() {
       if (json === null) {
         json = []
       }
-      setAllEvents(json)
+      setLocalEvents(json)
+      if(auth.currentUser === null) {
+        setFirebaseEvents([])
+        setLoaded(true)
+      }
     } catch (e) {
       console.log(e)
+    }
+  }
+
+  const getFirebaseEvents = async() => {
+    //Check if user is logged in
+    if (auth.currentUser !== null) {
+      //Get users firebase events
+      try {
+        const q = query(collection(firestore, USERS, auth.currentUser.uid, CALENDARENTRIES), orderBy('start', 'desc'))
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+          const tempEventList = []
+          querySnapshot.forEach((doc) => {
+            tempEventList.push({id: doc.id, note: doc.data().note, start: new Date(doc.data().start.seconds * 1000), end:  new Date(doc.data().end.seconds * 1000)})
+          })
+
+          //Save info to variables
+          setFirebaseEvents(tempEventList)
+          setLoaded(true)
+        })
+        return () => {
+          unsubscribe()
+        }
+      } catch (e) {
+        console.log(e)
+      }
     }
   }
  
   return (
     <View style={styles.container}>
       <Navbar />
-      {(allEvents !== undefined && allEvents.length !== 0) &&
+      {(firebaseEvents !== undefined && localEvents !== undefined && loaded === true) &&
         <WeeklyCalendar 
         selected = {moment()}
         startWeekday = {7}
         titleFormat = {undefined}
         weekdayFormat = 'ddd'
         locale = 'fi'
-        events = {allEvents}
+        events = {localEvents.concat(firebaseEvents)}
         renderEvent={(event, j) => {
           moment.locale('fi')
           let startTime = moment(event.start).format('LT').toString()
@@ -52,7 +86,7 @@ export default function CalendarScreen() {
           return (
             <Pressable key={j} onPress={() => navigation.navigate('SingleCalendarEvent', {
               event: event,
-              allEvents: allEvents
+              allEvents: localEvents
             }
             )}>
               <View style={styles.event}>
@@ -98,7 +132,7 @@ export default function CalendarScreen() {
         dayLabelStyle = {{color: '#68548c'}}
       />
       }
-      <TouchableOpacity style={styles.floatingButton} onPress={() => navigation.navigate('AddCalendarEvent', {allEvents: allEvents})}>
+      <TouchableOpacity style={styles.floatingButton} onPress={() => navigation.navigate('AddCalendarEvent', {allEvents: localEvents})}>
         <Ionicons name="add" size={30} />
       </TouchableOpacity>
     </View>

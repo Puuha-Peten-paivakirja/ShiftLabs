@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app'
-import { getFirestore, setDoc, doc, collection, addDoc, serverTimestamp  } from 'firebase/firestore'
+import { getFirestore, setDoc, doc, collection, addDoc, serverTimestamp, query, deleteDoc  } from 'firebase/firestore'
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth'
 
 const firebaseConfig = {
@@ -19,6 +19,7 @@ const auth = getAuth()
 const USERS = 'users' // This is a collection in Firestore
 const GROUPS = 'groups'
 const GROUPUSERS = 'group-users'
+const CALENDARENTRIES = 'calendar-entries'
 
 export { 
     firestore, 
@@ -33,5 +34,8 @@ export {
     addDoc,
     GROUPS,
     GROUPUSERS,
+    CALENDARENTRIES,
     serverTimestamp,
+    query,
+    deleteDoc
  }

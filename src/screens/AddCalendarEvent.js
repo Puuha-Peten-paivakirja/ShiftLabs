@@ -8,6 +8,7 @@ import uuid from 'react-native-uuid'
 import { Topbar } from '../components/Topbar.js'
 import styles from '../styles/SingleCalendarEvent'
 import { Button, TextInput } from "react-native-paper";
+import { query, addDoc, collection, firestore, serverTimestamp, auth, USERS, CALENDARENTRIES } from "../firebase/config.js";
 
 export default function AddCalendarEvent({ route }) {
   //Variables
@@ -18,6 +19,7 @@ export default function AddCalendarEvent({ route }) {
   const [startTime, setStartTime] = useState()
   const [endTime, setEndTime] = useState()
   const [note, setNote] = useState()
+  //In this case allEvents variable refers to all LOCAL events. All firebase events are not needed on this page.
   const [allEvents, setAllEvents] = useState(route.params.allEvents)
 
   const saveInformation = () => {
@@ -81,21 +83,36 @@ export default function AddCalendarEvent({ route }) {
 
   //Add event to AllEvents-variable
   const addEventToAllEvents = async(start, end, note) => {
-    try {
-      const newEvent = {
-        id: uuid.v4(),
-        start: start,
-        end: end,
-        note: note
+    if (auth.currentUser !== null) {
+      //If user is logged in, save information to firebase and navigate back.
+      try {
+        await addDoc(collection(firestore, USERS, auth.currentUser.uid, CALENDARENTRIES), {
+          start: start,
+          end: end,
+          note: note
+        })
+        console.log("Entry added to firebase.")
+        navigation.navigate("Calendar")
+      } catch (e) {
+        console.log(e)
       }
-      const tempData = [...allEvents, newEvent]
-
-      let sortedArray = sortEventArray(tempData)
-
-      setAllEvents(sortedArray)
-      saveEventsLocally(sortedArray)
-    } catch (e) {
-      console.log(e)
+    } else {
+      try {
+        const newEvent = {
+          id: uuid.v4(),
+          start: start,
+          end: end,
+          note: note
+        }
+        const tempData = [...allEvents, newEvent]
+  
+        let sortedArray = sortEventArray(tempData)
+  
+        setAllEvents(sortedArray)
+        saveEventsLocally(sortedArray)
+      } catch (e) {
+        console.log(e)
+      }
     }
   }
 
