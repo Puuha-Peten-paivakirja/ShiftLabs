@@ -31,6 +31,22 @@ export default function SignUpScreen() {
       ])
       return false
     }
+    else if (userInfo.firstName.length > 35) {
+      Alert.alert('Error', 'Maximum length of first name is 35 characters', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
+      return false
+    }
+    else if (userInfo.lastName.length > 35) {
+      Alert.alert('Error', 'Maximum length of last name is 35 characters', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
+      return false
+    }
     else if (userInfo.lastName.trim().length === 0) {
       Alert.alert('Error', 'Lastname is required', [
         {
