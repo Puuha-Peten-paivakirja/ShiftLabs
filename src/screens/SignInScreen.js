@@ -1,11 +1,11 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState } from 'react'
 import { View, TouchableOpacity, Text, Alert } from 'react-native'
 import { TextInput } from 'react-native-paper'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import styles from '../styles/SignIn.js'
 import { CustomButton } from '../components/CustomButton'
 import { Topbar } from '../components/Topbar.js'
-import { CommonActions, useNavigation, useFocusEffect } from '@react-navigation/native'
+import { CommonActions, useNavigation } from '@react-navigation/native'
 import { auth, signInWithEmailAndPassword } from '../firebase/config.js' 
 
 export default function SignInScreen() {
@@ -13,12 +13,6 @@ export default function SignInScreen() {
 
   const [isDisabled, setIsDisabled] = useState(false)
   const [userInfo, setUserInfo] = useState({email: '', password: '',})
-
-  useFocusEffect(
-    useCallback(() => {
-      setIsDisabled(false)
-    }, [])
-  )
 
   const signIn = () => {
     setIsDisabled(true)
@@ -73,6 +67,8 @@ export default function SignInScreen() {
               onChangeText={text => setUserInfo({...userInfo, email: text})}
               keyboardType='email-address'
               numberOfLines={1}
+              autoCapitalize='none'
+              autoCorrect={false}
             />
             <TouchableOpacity style={styles.clearCredentialsIcon} onPress={() => setUserInfo({...userInfo, email: ''})}>
               <Ionicons name='close-circle' size={20} />
@@ -87,6 +83,8 @@ export default function SignInScreen() {
               onChangeText={text => setUserInfo({...userInfo, password: text})}
               secureTextEntry={true}
               numberOfLines={1}
+              autoCapitalize='none'
+              autoCorrect={false}
             />
             <TouchableOpacity style={styles.clearCredentialsIcon} onPress={() => setUserInfo({...userInfo, password: ''})}>
               <Ionicons name='close-circle' size={20} />
@@ -103,7 +101,7 @@ export default function SignInScreen() {
           />
             <View style={styles.bottomText}>
               <Text style={styles.signInText}>Forgot your password? </Text>
-              <TouchableOpacity activeOpacity={0.75}>
+              <TouchableOpacity activeOpacity={0.75} onPress={() => navigation.navigate('ResetPassword')}>
                 <Text style={styles.signInTextLink}>Reset password</Text>
               </TouchableOpacity>
             </View>
