@@ -1,5 +1,5 @@
 import react, { useState, useEffect } from 'react'
-import { View, StyleSheet, Image, Text, TouchableOpacity } from 'react-native'
+import { View, StyleSheet, Image, Text, TouchableOpacity, Platform } from 'react-native'
 import Navbar from '../components/Navbar'
 import Feather from '@expo/vector-icons/Feather'
 import { TextInput } from 'react-native-paper'
@@ -11,17 +11,18 @@ export default function SettingsScreen() {
   const { user } = useUser()
   const userRef = user ? doc(firestore, USERS, user.uid) : null
   const [editingName, setEditingName] = useState(false)
+  const [editingEmail, setEditingEmail] = useState(false)
   const [userInfo, setUserInfo] = useState({
     firstName: '',
     lastName: '',
     email: '',
-    password: ''
+    currentPassword: '',
   })
   const [editInfo, setEditInfo] = useState({
     firstName: '',
     lastName: '',
     email: '',
-    password: ''
+    newPassword: ''
   })
 
 
@@ -40,10 +41,14 @@ export default function SettingsScreen() {
     }
   }, [])
 
-
-
   const startNameEdit = () => {
+    setEditingEmail(false)
     setEditingName(true)
+  }
+
+  const startEmailEdit = () => {
+    setEditingName(false)
+    setEditingEmail(true)
   }
 
   const cancelEdit = () => {
@@ -51,9 +56,11 @@ export default function SettingsScreen() {
       firstName: userInfo.firstName,
       lastName: userInfo.lastName,
       email: userInfo.emailName,
-      password: ''
+      newPassword: ''
     })
+    setUserInfo({...userInfo, currentPassword: ''})
     setEditingName(false)
+    setEditingEmail(false)
   }
 
   return (
@@ -120,16 +127,75 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
       )}
-
-      <View style={styles.emailContainer}>
-        <View style={styles.emailTextContainer}>
+      {editingEmail ? (
+        <View style={styles.editEmailContainer}>
           <Text style={styles.textStyle}>Email address:</Text>
-          <Text style={styles.textStyle} numberOfLines={1}>{userInfo.email}</Text>
+
+          <View style={styles.editEmailRow}>
+            <TextInput
+              style={styles.emailInput}
+              label='Current email address'
+              value={userInfo.email}
+              numberOfLines={1}
+              disabled={true}
+            />
+          </View>
+
+          <View style={styles.editEmailRow}>
+            <TextInput
+              style={styles.emailInput}
+              label='New email address'
+              value={editInfo.email}
+              onChangeText={text => setEditInfo({...editInfo, email: text})}
+              numberOfLines={1}
+              autoCapitalize='none'
+              autoCorrect={false}
+            />
+            <TouchableOpacity style={styles.clearEmailIcon} onPress={() => setEditInfo({...editInfo, email: ''})}>
+              <Ionicons name='close-circle' size={20} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.passwordRow}>
+            <TextInput
+              style={styles.passwordInput}
+              label='Password'
+              value={userInfo.currentPassword}
+              onChangeText={text => setUserInfo({...userInfo, currentPassword: text})}
+              secureTextEntry={true}
+              numberOfLines={1}
+              autoCapitalize='none'
+              autoCorrect={false}
+            />
+            <TouchableOpacity style={styles.clearPasswordIcon} onPress={() => setUserInfo({...userInfo, currentPassword: ''})}>
+              <Ionicons name='close-circle' size={20} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.confirmAndCancel}>
+            <TouchableOpacity style={styles.confirmButton} activeOpacity={0.75}>
+              <Text style={styles.buttonText}>Confirm</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              activeOpacity={0.75}
+              onPress={() => cancelEdit()}
+            >
+              <Text style={styles.buttonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-        <TouchableOpacity style={styles.editEmailIcon}>
-          <Feather name='edit' size={20} />
-        </TouchableOpacity>
-      </View>
+      ) : ( 
+        <View style={styles.emailContainer}>
+          <View style={styles.emailTextContainer}>
+            <Text style={styles.textStyle}>Email address:</Text>
+            <Text style={styles.textStyle} numberOfLines={1}>{userInfo.email}</Text>
+          </View>
+          <TouchableOpacity style={styles.editEmailIcon} onPress={() => startEmailEdit()}>
+            <Feather name='edit' size={20} />
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   )
 }
@@ -226,6 +292,26 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 40
   },
+  editEmailContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  editEmailRow: {
+    flexDirection: 'row',
+    marginTop: 20,
+    alignItems: 'center'
+  },
+  emailInput: {
+    width: 292,
+    backgroundColor: '#e6e0e9',
+    paddingRight: 32,
+    borderBottomColor: 'black',
+    borderBottomWidth: 0.8
+  },
+  clearEmailIcon: {
+    position: 'absolute',
+    right: Platform.OS === 'ios' ? 4 : 3.5
+  },
   emailContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -241,5 +327,21 @@ const styles = StyleSheet.create({
   editEmailIcon: {
     position: 'absolute',
     right: 40
+  },
+  passwordRow: {
+    flexDirection: 'row',
+    marginTop: 20,
+    alignItems: 'center'
+  },
+  passwordInput: {
+    width: 292,
+    backgroundColor: '#e6e0e9',
+    paddingRight: 32,
+    borderBottomColor: 'black',
+    borderBottomWidth: 0.8
+  },
+  clearPasswordIcon: {
+    position: 'absolute',
+    right: Platform.OS === 'ios' ? 4 : 3.5
   },
 })
