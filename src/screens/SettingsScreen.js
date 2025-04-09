@@ -1,5 +1,5 @@
 import react, { useState, useEffect } from 'react'
-import { View, StyleSheet, Image, Text, TouchableOpacity, Platform } from 'react-native'
+import { View, StyleSheet, Image, Text, TouchableOpacity, Platform, Alert } from 'react-native'
 import Navbar from '../components/Navbar'
 import Feather from '@expo/vector-icons/Feather'
 import { TextInput } from 'react-native-paper'
@@ -63,6 +63,28 @@ export default function SettingsScreen() {
     setEditingEmail(false)
   }
 
+  const updateNameInUsersCollection = async () => {
+      await updateDoc(userRef, {
+        firstName: editInfo.firstName,
+        lastName: editInfo.lastName
+      })
+  }
+
+  const updateNameInGroupUsersSubCollection = async () => {
+    
+  }
+
+  const updateName = async () => {
+    if (editInfo.firstName.length > 35 || editInfo.lastName.length > 35) {
+      Alert.alert(('Error', 'Maximum length for first/last name is 35 characters'))
+      return
+    }
+    await updateNameInUsersCollection()
+    await updateNameInGroupUsersSubCollection()
+  }
+
+
+
   return (
     <View style={styles.container}>
       <Navbar />
@@ -70,6 +92,7 @@ export default function SettingsScreen() {
       <View style={styles.profilePictureContainer}>
         <Image source={{ uri: 'https://reactnative.dev/img/tiny_logo.png' }} style={styles.profilePicture}/>
       </View>
+
       {editingName ? (
         <View style={styles.editNameContainer}>
           <Text style={styles.textStyle}>Name:</Text>
@@ -127,6 +150,7 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
       )}
+
       {editingEmail ? (
         <View style={styles.editEmailContainer}>
           <Text style={styles.textStyle}>Email address:</Text>
