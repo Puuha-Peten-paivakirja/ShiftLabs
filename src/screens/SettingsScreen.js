@@ -1,11 +1,15 @@
-import react, { useState } from 'react'
+import react, { useState, useEffect } from 'react'
 import { View, StyleSheet, Image, Text, TouchableOpacity } from 'react-native'
 import Navbar from '../components/Navbar'
 import Feather from '@expo/vector-icons/Feather'
 import { TextInput } from 'react-native-paper'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import { useUser } from '../context/useUser'
+import { firestore, USERS, doc, updateDoc, onSnapshot } from '../firebase/config.js' 
 
 export default function SettingsScreen() {
+  const { user } = useUser()
+  const userRef = user ? doc(firestore, USERS, user.uid) : null
   const [editingName, setEditingName] = useState(false)
   const [userInfo, setUserInfo] = useState({
     firstName: '',
@@ -13,16 +17,40 @@ export default function SettingsScreen() {
     email: '',
     password: ''
   })
+  const [editInfo, setEditInfo] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: ''
+  })
+
+
+  useEffect(() => {
+    if(!user) return
+    
+    const unsubscribe = onSnapshot(userRef, (document) => {
+      setUserInfo({
+        firstName: document.data().firstName,
+        lastName: document.data().lastName,
+        email: document.data().email
+      })
+    })
+    return () => {
+      unsubscribe()
+    }
+  }, [])
+
+
 
   const startNameEdit = () => {
     setEditingName(true)
   }
 
   const cancelEdit = () => {
-    setUserInfo({
-      firstName: '',
-      lastName: '',
-      email: '',
+    setEditInfo({
+      firstName: userInfo.firstName,
+      lastName: userInfo.lastName,
+      email: userInfo.emailName,
       password: ''
     })
     setEditingName(false)
@@ -43,12 +71,12 @@ export default function SettingsScreen() {
               <TextInput 
                 style={styles.nameInput}
                 label='First name'
-                value={userInfo.firstName}
-                onChangeText={text => setUserInfo({...userInfo, firstName: text})}
+                value={editInfo.firstName}
+                onChangeText={text => setEditInfo({...editInfo, firstName: text})}
                 numberOfLines={1}
                 autoCorrect={false}
               />
-              <TouchableOpacity style={styles.clearNameIcon} onPress={() => setUserInfo({...userInfo, firstName: ''})}>
+              <TouchableOpacity style={styles.clearNameIcon} onPress={() => setEditInfo({...editInfo, firstName: ''})}>
                 <Ionicons name='close-circle' size={20} />
               </TouchableOpacity>
             </View>
@@ -57,12 +85,12 @@ export default function SettingsScreen() {
             <TextInput 
                 style={styles.nameInput}
                 label='Last name'
-                value={userInfo.lastName}
-                onChangeText={text => setUserInfo({...userInfo, lastName: text})}
+                value={editInfo.lastName}
+                onChangeText={text => setEditInfo({...editInfo, lastName: text})}
                 numberOfLines={1}
                 autoCorrect={false}
               />
-              <TouchableOpacity style={styles.clearNameIcon} onPress={() => setUserInfo({...userInfo, lastName: ''})}>
+              <TouchableOpacity style={styles.clearNameIcon} onPress={() => setEditInfo({...editInfo, lastName: ''})}>
                 <Ionicons name='close-circle' size={20} />
               </TouchableOpacity>
             </View>
@@ -85,7 +113,7 @@ export default function SettingsScreen() {
         <View style={styles.nameContainer}>
           <View style={styles.nameTextContainer}>
             <Text style={styles.textStyle}>Name:</Text>
-            <Text style={styles.textStyle} numberOfLines={1}>placeholder name</Text>
+            <Text style={styles.textStyle} numberOfLines={1}>{userInfo.firstName} {userInfo.lastName}</Text>
           </View>
           <TouchableOpacity style={styles.editNameIcon} onPress={() => startNameEdit()}>
             <Feather name='edit' size={20} />
@@ -96,7 +124,7 @@ export default function SettingsScreen() {
       <View style={styles.emailContainer}>
         <View style={styles.emailTextContainer}>
           <Text style={styles.textStyle}>Email address:</Text>
-          <Text style={styles.textStyle} numberOfLines={1}>placeholder.name@gmail.com</Text>
+          <Text style={styles.textStyle} numberOfLines={1}>{userInfo.email}</Text>
         </View>
         <TouchableOpacity style={styles.editEmailIcon}>
           <Feather name='edit' size={20} />
