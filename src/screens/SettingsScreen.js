@@ -5,7 +5,7 @@ import Feather from '@expo/vector-icons/Feather'
 import { TextInput } from 'react-native-paper'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useUser } from '../context/useUser'
-import { firestore, USERS, doc, updateDoc, onSnapshot } from '../firebase/config.js' 
+import { firestore, USERS, doc, updateDoc, onSnapshot, getDocs, collection, GROUPS } from '../firebase/config.js' 
 
 export default function SettingsScreen() {
   const { user } = useUser()
@@ -25,7 +25,6 @@ export default function SettingsScreen() {
     newPassword: ''
   })
 
-
   useEffect(() => {
     if(!user) return
     
@@ -33,7 +32,14 @@ export default function SettingsScreen() {
       setUserInfo({
         firstName: document.data().firstName,
         lastName: document.data().lastName,
-        email: document.data().email
+        email: document.data().email,
+        currentPassword: '',
+      })
+      setEditInfo({
+        firstName: document.data().firstName,
+        lastName: document.data().lastName,
+        email: document.data().email,
+        newPassword: ''
       })
     })
     return () => {
@@ -71,7 +77,10 @@ export default function SettingsScreen() {
   }
 
   const updateNameInGroupUsersSubCollection = async () => {
-    
+    const groupsRef = collection(firestore, GROUPS)
+    const allGroups = await getDocs(groupsRef)
+    const groupIds = allGroups.docs.map((doc) => doc.id)
+
   }
 
   const updateName = async () => {
@@ -79,11 +88,20 @@ export default function SettingsScreen() {
       Alert.alert(('Error', 'Maximum length for first/last name is 35 characters'))
       return
     }
-    await updateNameInUsersCollection()
-    await updateNameInGroupUsersSubCollection()
+    else if (editInfo.firstName.trim().length === 0) {
+      Alert.alert(('Error', 'Firstname is required'))
+      return
+    }
+    else if (editInfo.lastName.trim().length === 0) {
+      Alert.alert(('Error', 'Lastname is required'))
+      return
+    }
+    else {
+      await updateNameInUsersCollection()
+      await updateNameInGroupUsersSubCollection()
+      setEditingName(false)
+    }
   }
-
-
 
   return (
     <View style={styles.container}>
@@ -127,7 +145,11 @@ export default function SettingsScreen() {
           </View>
 
           <View style={styles.confirmAndCancel}>
-            <TouchableOpacity style={styles.confirmButton} activeOpacity={0.75}>
+            <TouchableOpacity
+              style={styles.confirmButton}
+              activeOpacity={0.75}
+              onPress={() => updateName()}
+            >
               <Text style={styles.buttonText}>Confirm</Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -223,15 +245,6 @@ export default function SettingsScreen() {
     </View>
   )
 }
-
-
-
-
-
-
-
-
-
 
 const styles = StyleSheet.create({
   container: {
