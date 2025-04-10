@@ -32,14 +32,11 @@ export default function SettingsScreen() {
       setUserInfo({
         firstName: document.data().firstName,
         lastName: document.data().lastName,
-        email: document.data().email,
-        currentPassword: '',
+        email: document.data().email
       })
       setEditInfo({
         firstName: document.data().firstName,
-        lastName: document.data().lastName,
-        email: document.data().email,
-        newPassword: ''
+        lastName: document.data().lastName
       })
     })
     return () => {
@@ -61,7 +58,7 @@ export default function SettingsScreen() {
     setEditInfo({
       firstName: userInfo.firstName,
       lastName: userInfo.lastName,
-      email: userInfo.emailName,
+      email: '',
       newPassword: ''
     })
     setUserInfo({...userInfo, currentPassword: ''})
@@ -162,12 +159,12 @@ export default function SettingsScreen() {
           </View>
         </View>
       ) : (
-        <View style={styles.nameContainer}>
-          <View style={styles.nameTextContainer}>
+        <View style={styles.notEditingContainer}>
+          <View style={styles.textContainer}>
             <Text style={styles.textStyle}>Name:</Text>
             <Text style={styles.textStyle} numberOfLines={1}>{userInfo.firstName} {userInfo.lastName}</Text>
           </View>
-          <TouchableOpacity style={styles.editNameIcon} onPress={() => startNameEdit()}>
+          <TouchableOpacity style={styles.editIcon} onPress={() => startNameEdit()}>
             <Feather name='edit' size={20} />
           </TouchableOpacity>
         </View>
@@ -232,16 +229,26 @@ export default function SettingsScreen() {
           </View>
         </View>
       ) : ( 
-        <View style={styles.emailContainer}>
-          <View style={styles.emailTextContainer}>
+        <View style={styles.notEditingContainer}>
+          <View style={styles.textContainer}>
             <Text style={styles.textStyle}>Email address:</Text>
             <Text style={styles.textStyle} numberOfLines={1}>{userInfo.email}</Text>
           </View>
-          <TouchableOpacity style={styles.editEmailIcon} onPress={() => startEmailEdit()}>
+          <TouchableOpacity style={styles.editIcon} onPress={() => startEmailEdit()}>
             <Feather name='edit' size={20} />
           </TouchableOpacity>
         </View>
       )}
+
+      <View style={styles.notEditingContainer}>
+        <View style={styles.textContainer}>
+          <Text style={styles.textStyle}>Change password</Text>
+          <Text style={styles.textStyle} numberOfLines={1}>* * * * * * * *</Text>
+        </View>
+        <TouchableOpacity style={styles.editIcon}>
+          <Feather name='edit' size={20} />
+        </TouchableOpacity>
+      </View>
     </View>
   )
 }
@@ -310,14 +317,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#ffffff'
   },
-  nameContainer: {
+  notEditingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 20,
     width: '100%'
   },
-  nameTextContainer: {
+  textContainer: {
     flexDirection: 'column',
     alignItems: 'center',
     maxWidth: '60%'
@@ -325,7 +332,7 @@ const styles = StyleSheet.create({
   textStyle: {
     fontSize: 16
   },
-  editNameIcon: {
+  editIcon: {
     position: 'absolute',
     right: 40
   },
@@ -348,22 +355,6 @@ const styles = StyleSheet.create({
   clearEmailIcon: {
     position: 'absolute',
     right: Platform.OS === 'ios' ? 4 : 3.5
-  },
-  emailContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 20,
-    width: '100%'
-  },
-  emailTextContainer: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    maxWidth: '60%',
-  },
-  editEmailIcon: {
-    position: 'absolute',
-    right: 40
   },
   passwordRow: {
     flexDirection: 'row',
