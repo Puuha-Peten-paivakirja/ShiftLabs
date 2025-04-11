@@ -5,13 +5,16 @@ import Feather from '@expo/vector-icons/Feather'
 import { TextInput } from 'react-native-paper'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useUser } from '../context/useUser'
-import { firestore, USERS, doc, updateDoc, onSnapshot, getDocs, collection, GROUPS } from '../firebase/config.js' 
+import { firestore, USERS, doc, updateDoc, onSnapshot, getDocs, collection, GROUPS, EmailAuthProvider, reauthenticateWithCredential, updatePassword } from '../firebase/config.js'
+import isStrongPassword from 'validator/lib/isStrongPassword' 
 
 export default function SettingsScreen() {
   const { user } = useUser()
   const userRef = user ? doc(firestore, USERS, user.uid) : null
+  const [isDisabled, setIsDisabled] = useState(false)
   const [editingName, setEditingName] = useState(false)
   const [editingEmail, setEditingEmail] = useState(false)
+  const [editingPassword, setEditingPassword] = useState(false)
   const [userInfo, setUserInfo] = useState({
     firstName: '',
     lastName: '',
@@ -22,7 +25,8 @@ export default function SettingsScreen() {
     firstName: '',
     lastName: '',
     email: '',
-    newPassword: ''
+    newPassword: '',
+    confirmedNewPassword: ''
   })
 
   useEffect(() => {
@@ -46,12 +50,20 @@ export default function SettingsScreen() {
 
   const startNameEdit = () => {
     setEditingEmail(false)
+    setEditingPassword(false)
     setEditingName(true)
   }
 
   const startEmailEdit = () => {
     setEditingName(false)
+    setEditingPassword(false)
     setEditingEmail(true)
+  }
+
+  const startPasswordEdit = () => {
+    setEditingEmail(false)
+    setEditingName(false)
+    setEditingPassword(true)
   }
 
   const cancelEdit = () => {
@@ -59,11 +71,79 @@ export default function SettingsScreen() {
       firstName: userInfo.firstName,
       lastName: userInfo.lastName,
       email: '',
-      newPassword: ''
+      newPassword: '',
+      confirmedNewPassword: ''
     })
     setUserInfo({...userInfo, currentPassword: ''})
     setEditingName(false)
     setEditingEmail(false)
+    setEditingPassword(false)
+  }
+
+  const checkPasswordInputs = () => {
+    if (!editInfo.newPassword || editInfo.newPassword.length > 30 || !isStrongPassword(editInfo.newPassword, {minLength: 8, minLowercase:1 , minUppercase: 1, minNumbers: 1, minSymbols: 0})) {
+      Alert.alert('Error', 'Password must contain 8-30 characters, 1 number, 1 uppercase letter and 1 lowercase letter', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
+      return false
+    }
+    else if (!editInfo.confirmedNewPassword || editInfo.confirmedNewPassword !== editInfo.newPassword) {
+      Alert.alert('Error', 'Confirmed password does not match with new password', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
+      return false
+    }
+    else {
+      return true
+    }
+  }
+
+  const updateUserPassword = async () => {
+    setIsDisabled(true)
+
+    if (!checkPasswordInputs()) {
+      return
+    }
+
+    try {
+      const credential = EmailAuthProvider.credential(user.email, userInfo.currentPassword)
+      await reauthenticateWithCredential(user, credential)
+      await updatePassword(user, editInfo.newPassword)
+      setEditingPassword(false)
+      cancelEdit()
+      Alert.alert('Password changed', 'Password changed successfully', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
+    }
+    catch (error) {
+      if (error.code === 'auth/missing-password') {
+        Alert.alert('Error', 'Password is missing', [
+          {
+            onPress: () => setIsDisabled(false)
+          }
+        ])
+      }
+      else if (error.code === 'auth/invalid-credential') {
+        Alert.alert('Error', 'Current password is invalid', [
+          {
+            onPress: () => setIsDisabled(false)
+          }
+        ])
+      }
+      else {
+        Alert.alert('Error', error.message, [
+          {
+            onPress: () => setIsDisabled(false)
+          }
+        ])
+      }
+    }
   }
 
   const updateNameInUsersCollection = async () => {
@@ -85,11 +165,11 @@ export default function SettingsScreen() {
       Alert.alert(('Error', 'Maximum length for first/last name is 35 characters'))
       return
     }
-    else if (editInfo.firstName.trim().length === 0) {
+    else if (!editInfo.firstName || editInfo.firstName.trim().length === 0) {
       Alert.alert(('Error', 'Firstname is required'))
       return
     }
-    else if (editInfo.lastName.trim().length === 0) {
+    else if (!editInfo.lastName || editInfo.lastName.trim().length === 0) {
       Alert.alert(('Error', 'Lastname is required'))
       return
     }
@@ -109,7 +189,7 @@ export default function SettingsScreen() {
       </View>
 
       {editingName ? (
-        <View style={styles.editNameContainer}>
+        <View style={styles.editContainer}>
           <Text style={styles.textStyle}>Name:</Text>
           <View style={styles.editNameRow}>
             <View style={styles.editNameHalf}>
@@ -146,6 +226,7 @@ export default function SettingsScreen() {
               style={styles.confirmButton}
               activeOpacity={0.75}
               onPress={() => updateName()}
+              disabled={isDisabled}
             >
               <Text style={styles.buttonText}>Confirm</Text>
             </TouchableOpacity>
@@ -153,6 +234,7 @@ export default function SettingsScreen() {
               style={styles.cancelButton}
               activeOpacity={0.75}
               onPress={() => cancelEdit()}
+              disabled={isDisabled}
             >
               <Text style={styles.buttonText}>Cancel</Text>
             </TouchableOpacity>
@@ -171,12 +253,12 @@ export default function SettingsScreen() {
       )}
 
       {editingEmail ? (
-        <View style={styles.editEmailContainer}>
+        <View style={styles.editContainer}>
           <Text style={styles.textStyle}>Email address:</Text>
 
-          <View style={styles.editEmailRow}>
+          <View style={styles.editRow}>
             <TextInput
-              style={styles.emailInput}
+              style={styles.input}
               label='Current email address'
               value={userInfo.email}
               numberOfLines={1}
@@ -184,9 +266,9 @@ export default function SettingsScreen() {
             />
           </View>
 
-          <View style={styles.editEmailRow}>
+          <View style={styles.editRow}>
             <TextInput
-              style={styles.emailInput}
+              style={styles.input}
               label='New email address'
               value={editInfo.email}
               onChangeText={text => setEditInfo({...editInfo, email: text})}
@@ -194,14 +276,14 @@ export default function SettingsScreen() {
               autoCapitalize='none'
               autoCorrect={false}
             />
-            <TouchableOpacity style={styles.clearEmailIcon} onPress={() => setEditInfo({...editInfo, email: ''})}>
+            <TouchableOpacity style={styles.clearIcon} onPress={() => setEditInfo({...editInfo, email: ''})}>
               <Ionicons name='close-circle' size={20} />
             </TouchableOpacity>
           </View>
 
-          <View style={styles.passwordRow}>
+          <View style={styles.editRow}>
             <TextInput
-              style={styles.passwordInput}
+              style={styles.input}
               label='Password'
               value={userInfo.currentPassword}
               onChangeText={text => setUserInfo({...userInfo, currentPassword: text})}
@@ -210,19 +292,25 @@ export default function SettingsScreen() {
               autoCapitalize='none'
               autoCorrect={false}
             />
-            <TouchableOpacity style={styles.clearPasswordIcon} onPress={() => setUserInfo({...userInfo, currentPassword: ''})}>
+            <TouchableOpacity style={styles.clearIcon} onPress={() => setUserInfo({...userInfo, currentPassword: ''})}>
               <Ionicons name='close-circle' size={20} />
             </TouchableOpacity>
           </View>
 
           <View style={styles.confirmAndCancel}>
-            <TouchableOpacity style={styles.confirmButton} activeOpacity={0.75}>
+            <TouchableOpacity 
+              style={styles.confirmButton} 
+              activeOpacity={0.75}
+            
+              disabled={isDisabled}
+            >
               <Text style={styles.buttonText}>Confirm</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.cancelButton}
               activeOpacity={0.75}
               onPress={() => cancelEdit()}
+              disabled={isDisabled}
             >
               <Text style={styles.buttonText}>Cancel</Text>
             </TouchableOpacity>
@@ -240,15 +328,88 @@ export default function SettingsScreen() {
         </View>
       )}
 
-      <View style={styles.notEditingContainer}>
-        <View style={styles.textContainer}>
-          <Text style={styles.textStyle}>Change password</Text>
-          <Text style={styles.textStyle} numberOfLines={1}>* * * * * * * *</Text>
+      {editingPassword ? (
+        <View style={styles.editContainer}>
+          <Text style={styles.textStyle}>Change password:</Text>
+
+          <View style={styles.editRow}>
+            <TextInput
+              style={styles.input}
+              label='Current password'
+              value={userInfo.currentPassword}
+              onChangeText={text => setUserInfo({...userInfo, currentPassword: text})}
+              secureTextEntry={true}
+              numberOfLines={1}
+              autoCapitalize='none'
+              autoCorrect={false}
+            />
+            <TouchableOpacity style={styles.clearIcon} onPress={() => setUserInfo({...userInfo, currentPassword: ''})}>
+              <Ionicons name='close-circle' size={20} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.editRow}>
+            <TextInput
+              style={styles.input}
+              label='New password'
+              value={editInfo.newPassword}
+              onChangeText={text => setEditInfo({...editInfo, newPassword: text})}
+              secureTextEntry={true}
+              numberOfLines={1}
+              autoCapitalize='none'
+              autoCorrect={false}
+            />
+            <TouchableOpacity style={styles.clearIcon} onPress={() => setEditInfo({...editInfo, newPassword: ''})}>
+              <Ionicons name='close-circle' size={20} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.editRow}>
+            <TextInput
+              style={styles.input}
+              label='Confirm new password'
+              value={editInfo.confirmedNewPassword}
+              onChangeText={text => setEditInfo({...editInfo, confirmedNewPassword: text})}
+              secureTextEntry={true}
+              numberOfLines={1}
+              autoCapitalize='none'
+              autoCorrect={false}
+            />
+            <TouchableOpacity style={styles.clearIcon} onPress={() => setEditInfo({...editInfo, confirmedNewPassword: ''})}>
+              <Ionicons name='close-circle' size={20} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.confirmAndCancel}>
+            <TouchableOpacity
+              style={styles.confirmButton}
+              activeOpacity={0.75}
+              onPress={() => updateUserPassword()}
+              disabled={isDisabled}
+            >
+              <Text style={styles.buttonText}>Confirm</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              activeOpacity={0.75}
+              onPress={() => cancelEdit()}
+              disabled={isDisabled}
+            >
+              <Text style={styles.buttonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-        <TouchableOpacity style={styles.editIcon}>
-          <Feather name='edit' size={20} />
-        </TouchableOpacity>
-      </View>
+      ) : (
+        <View style={styles.notEditingContainer}>
+          <View style={styles.textContainer}>
+            <Text style={styles.textStyle}>Change password:</Text>
+            <Text style={styles.textStyle} numberOfLines={1}>* * * * * * * *</Text>
+          </View>
+          <TouchableOpacity style={styles.editIcon} onPress={() => startPasswordEdit()}>
+            <Feather name='edit' size={20} />
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   )
 }
@@ -267,7 +428,7 @@ const styles = StyleSheet.create({
     width: 160,
     borderRadius: 80
   },
-  editNameContainer: {
+  editContainer: {
     marginTop: 20,
     alignItems: 'center',
   },
@@ -336,39 +497,19 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 40
   },
-  editEmailContainer: {
-    marginTop: 20,
-    alignItems: 'center',
-  },
-  editEmailRow: {
+  editRow: {
     flexDirection: 'row',
     marginTop: 20,
     alignItems: 'center'
   },
-  emailInput: {
+  input: {
     width: 292,
     backgroundColor: '#e6e0e9',
     paddingRight: 32,
     borderBottomColor: 'black',
     borderBottomWidth: 0.8
   },
-  clearEmailIcon: {
-    position: 'absolute',
-    right: Platform.OS === 'ios' ? 4 : 3.5
-  },
-  passwordRow: {
-    flexDirection: 'row',
-    marginTop: 20,
-    alignItems: 'center'
-  },
-  passwordInput: {
-    width: 292,
-    backgroundColor: '#e6e0e9',
-    paddingRight: 32,
-    borderBottomColor: 'black',
-    borderBottomWidth: 0.8
-  },
-  clearPasswordIcon: {
+  clearIcon: {
     position: 'absolute',
     right: Platform.OS === 'ios' ? 4 : 3.5
   },
