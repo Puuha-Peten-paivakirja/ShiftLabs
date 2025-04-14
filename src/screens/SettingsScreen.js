@@ -5,8 +5,9 @@ import Feather from '@expo/vector-icons/Feather'
 import { TextInput } from 'react-native-paper'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useUser } from '../context/useUser'
-import { firestore, USERS, doc, updateDoc, onSnapshot, getDocs, collection, GROUPS, EmailAuthProvider, reauthenticateWithCredential, updatePassword, GROUPUSERS, query, where } from '../firebase/config.js'
-import isStrongPassword from 'validator/lib/isStrongPassword' 
+import { firestore, USERS, doc, updateDoc, onSnapshot, getDocs, collection, GROUPS, EmailAuthProvider, reauthenticateWithCredential, updatePassword, GROUPUSERS, query, where, verifyBeforeUpdateEmail } from '../firebase/config.js'
+import isStrongPassword from 'validator/lib/isStrongPassword'
+import isEmail from 'validator/lib/isEmail' 
 
 export default function SettingsScreen() {
   const { user } = useUser()
@@ -18,13 +19,13 @@ export default function SettingsScreen() {
   const [userInfo, setUserInfo] = useState({
     firstName: '',
     lastName: '',
-    email: '',
+    currentEmail: '',
     currentPassword: '',
   })
   const [editInfo, setEditInfo] = useState({
     firstName: '',
     lastName: '',
-    email: '',
+    newEmail: '',
     newPassword: '',
     confirmedNewPassword: ''
   })
@@ -36,7 +37,7 @@ export default function SettingsScreen() {
       setUserInfo({
         firstName: document.data().firstName,
         lastName: document.data().lastName,
-        email: document.data().email
+        currentEmail: document.data().email
       })
       setEditInfo({
         firstName: document.data().firstName,
@@ -70,7 +71,7 @@ export default function SettingsScreen() {
     setEditInfo({
       firstName: userInfo.firstName,
       lastName: userInfo.lastName,
-      email: '',
+      newEmail: '',
       newPassword: '',
       confirmedNewPassword: ''
     })
@@ -233,6 +234,84 @@ export default function SettingsScreen() {
     }
   }
 
+  const checkEmailInput = () => {
+    if (!editInfo.newEmail || editInfo.newEmail.trim().length === 0) {
+      Alert.alert('Error', 'Email is required', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
+      return false
+    }
+    else if (!isEmail(editInfo.newEmail)) {
+      Alert.alert('Error', 'Email is not valid', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
+      return false
+    }
+    else {
+      return true
+    }
+  }
+
+  const updateEmailInUsersCollection = async () => {
+    await updateDoc(userRef, {
+      email: editInfo.newEmail
+    })
+  }
+
+  const updateEmailInGroupUsersSubCollection = async () => {
+    const groupsRef = collection(firestore, GROUPS)
+    const allGroups = await getDocs(groupsRef)
+    const groupIds = allGroups.docs.map((doc) => doc.id)
+
+    await Promise.all(groupIds.map(async (groupId) => {
+      const groupUsersRef = collection(firestore, GROUPS, groupId, GROUPUSERS)
+      const q = query(groupUsersRef, where('email', '==', user.email))
+      const groupUserDocument = await getDocs(q)
+
+      if (!groupUserDocument.empty) {
+        const documentId = groupUserDocument.docs[0].id
+        const groupRef = doc(firestore, GROUPS, groupId, GROUPUSERS, documentId)
+
+        await updateDoc(groupRef, {
+          email: editInfo.newEmail
+        })
+      }
+    }))
+  }
+
+  const updateUserEmail = async () => {
+    setIsDisabled(true)
+
+    if (!checkEmailInput()) {
+      return
+    }
+
+    try {
+      const credential = EmailAuthProvider.credential(user.email, userInfo.currentPassword)
+      await reauthenticateWithCredential(user, credential)
+      // await updateEmail(user, editInfo.newEmail) This does not work without disabling email enumeration protection. Must try something else
+      await Promise.all([updateEmailInUsersCollection(), updateEmailInGroupUsersSubCollection()])
+      setEditingEmail(false)
+      Alert.alert('Email changed', 'Email address changed successfully', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
+    }
+    catch (error) {
+      console.log(error)
+      Alert.alert('Error', 'Error while changing email address', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
+    }
+  }
+
   return (
     <View style={styles.container}>
       <Navbar />
@@ -313,7 +392,7 @@ export default function SettingsScreen() {
             <TextInput
               style={styles.input}
               label='Current email address'
-              value={userInfo.email}
+              value={userInfo.currentEmail}
               numberOfLines={1}
               disabled={true}
             />
@@ -323,13 +402,14 @@ export default function SettingsScreen() {
             <TextInput
               style={styles.input}
               label='New email address'
-              value={editInfo.email}
-              onChangeText={text => setEditInfo({...editInfo, email: text})}
+              value={editInfo.newEmail}
+              onChangeText={text => setEditInfo({...editInfo, newEmail: text})}
+              keyboardType='email-address'
               numberOfLines={1}
               autoCapitalize='none'
               autoCorrect={false}
             />
-            <TouchableOpacity style={styles.clearIcon} onPress={() => setEditInfo({...editInfo, email: ''})}>
+            <TouchableOpacity style={styles.clearIcon} onPress={() => setEditInfo({...editInfo, newEmail: ''})}>
               <Ionicons name='close-circle' size={20} />
             </TouchableOpacity>
           </View>
@@ -354,7 +434,7 @@ export default function SettingsScreen() {
             <TouchableOpacity 
               style={styles.confirmButton} 
               activeOpacity={0.75}
-            
+              onPress={() => updateUserEmail()}
               disabled={isDisabled}
             >
               <Text style={styles.buttonText}>Confirm</Text>
@@ -373,7 +453,7 @@ export default function SettingsScreen() {
         <View style={styles.notEditingContainer}>
           <View style={styles.textContainer}>
             <Text style={styles.textStyle}>Email address:</Text>
-            <Text style={styles.textStyle} numberOfLines={1}>{userInfo.email}</Text>
+            <Text style={styles.textStyle} numberOfLines={1}>{userInfo.currentEmail}</Text>
           </View>
           <TouchableOpacity style={styles.editIcon} onPress={() => startEmailEdit()}>
             <Feather name='edit' size={20} />
