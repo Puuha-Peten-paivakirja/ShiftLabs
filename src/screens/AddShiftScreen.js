@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
-import { View, Text, Modal, TouchableOpacity, Animated, Easing, TextInput, Alert } from "react-native";
+import { View, Text, Modal, TouchableOpacity, Animated, Easing, TextInput, Alert, Touchable } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import Navbar from "../components/Navbar";
 import styles from "../styles/AddShift";
@@ -57,10 +57,11 @@ useEffect(() => {
                 </View>
 
                 <View style={styles.buttonContainer}>
-                    {!running && !paused ? (
+                    {!running && !paused ? ((
                         <TouchableOpacity style={styles.button} onPress={startShift}>
                             <Text style={styles.buttonText}>Aloita</Text>
                         </TouchableOpacity>
+                    )
                     ) : (
                         <>
                             {running && (
@@ -83,7 +84,7 @@ useEffect(() => {
                 <Modal animationType="slide" transparent={true} visible={isModalVisible} onRequestClose={() => setIsModalVisible(false)}>
                     <View style={styles.modalContainer}>
                         <View style={styles.modalContent}>
-                            <Text style={styles.modalText}>Haluatko varmasti lopettaa vuoron?</Text>
+                            <Text style={styles.modalText}>Pysäytetäänkö, ja tallennetaanko vuoro?</Text>
                             <TouchableOpacity style={styles.modalButton} onPress={stopShift}>
                                 <Text style={styles.modalButtonText}>Kyllä</Text>
                             </TouchableOpacity>

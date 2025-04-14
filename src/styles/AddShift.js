@@ -42,6 +42,13 @@ export default StyleSheet.create({
         fontSize: 16,
         fontWeight: "bold",
     },
+    //modalStyles
+    modalContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+    },
     modalBackground: {
         flex: 1,
         justifyContent: "center",
