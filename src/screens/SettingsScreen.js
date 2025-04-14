@@ -5,7 +5,7 @@ import Feather from '@expo/vector-icons/Feather'
 import { TextInput } from 'react-native-paper'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useUser } from '../context/useUser'
-import { firestore, USERS, doc, updateDoc, onSnapshot, getDocs, collection, GROUPS, EmailAuthProvider, reauthenticateWithCredential, updatePassword } from '../firebase/config.js'
+import { firestore, USERS, doc, updateDoc, onSnapshot, getDocs, collection, GROUPS, EmailAuthProvider, reauthenticateWithCredential, updatePassword, GROUPUSERS, query, where } from '../firebase/config.js'
 import isStrongPassword from 'validator/lib/isStrongPassword' 
 
 export default function SettingsScreen() {
@@ -114,7 +114,8 @@ export default function SettingsScreen() {
       await reauthenticateWithCredential(user, credential)
       await updatePassword(user, editInfo.newPassword)
       setEditingPassword(false)
-      cancelEdit()
+      setUserInfo({...userInfo, currentPassword: ''})
+      setEditInfo({...editInfo, newPassword: '', confirmedNewPassword: ''})
       Alert.alert('Password changed', 'Password changed successfully', [
         {
           onPress: () => setIsDisabled(false)
@@ -137,7 +138,8 @@ export default function SettingsScreen() {
         ])
       }
       else {
-        Alert.alert('Error', error.message, [
+        console.log(error)
+        Alert.alert('Error', 'Error while changing password', [
           {
             onPress: () => setIsDisabled(false)
           }
@@ -146,11 +148,41 @@ export default function SettingsScreen() {
     }
   }
 
+  const checkNameInput = () => {
+    if (editInfo.firstName.length > 35 || editInfo.lastName.length > 35) {
+      Alert.alert('Error', 'Maximum length for first/last name is 35 characters', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
+      return false
+    }
+    else if (!editInfo.firstName || editInfo.firstName.trim().length === 0) {
+      Alert.alert('Error', 'Firstname is required', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
+      return false
+    }
+    else if (!editInfo.lastName || editInfo.lastName.trim().length === 0) {
+      Alert.alert('Error', 'Lastname is required', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
+      return false
+    }
+    else {
+      return true
+    }
+  }
+
   const updateNameInUsersCollection = async () => {
-      await updateDoc(userRef, {
-        firstName: editInfo.firstName,
-        lastName: editInfo.lastName
-      })
+    await updateDoc(userRef, {
+      firstName: editInfo.firstName,
+      lastName: editInfo.lastName
+    })
   }
 
   const updateNameInGroupUsersSubCollection = async () => {
@@ -158,25 +190,46 @@ export default function SettingsScreen() {
     const allGroups = await getDocs(groupsRef)
     const groupIds = allGroups.docs.map((doc) => doc.id)
 
+    await Promise.all(groupIds.map(async (groupId) => {
+      const groupUsersRef = collection(firestore, GROUPS, groupId, GROUPUSERS)
+      const q = query(groupUsersRef, where('email', '==', user.email))
+      const groupUserDocument = await getDocs(q)
+
+      if (!groupUserDocument.empty) {
+        const documentId = groupUserDocument.docs[0].id
+        const groupRef = doc(firestore, GROUPS, groupId, GROUPUSERS, documentId)
+
+        await updateDoc(groupRef, {
+          firstName: editInfo.firstName,
+          lastName: editInfo.lastName
+        })
+      }
+    }))
   }
 
   const updateName = async () => {
-    if (editInfo.firstName.length > 35 || editInfo.lastName.length > 35) {
-      Alert.alert(('Error', 'Maximum length for first/last name is 35 characters'))
+    setIsDisabled(true)
+
+    if (!checkNameInput()) {
       return
     }
-    else if (!editInfo.firstName || editInfo.firstName.trim().length === 0) {
-      Alert.alert(('Error', 'Firstname is required'))
-      return
-    }
-    else if (!editInfo.lastName || editInfo.lastName.trim().length === 0) {
-      Alert.alert(('Error', 'Lastname is required'))
-      return
-    }
-    else {
-      await updateNameInUsersCollection()
-      await updateNameInGroupUsersSubCollection()
+
+    try {
+      await Promise.all([updateNameInUsersCollection(), updateNameInGroupUsersSubCollection()])
       setEditingName(false)
+      Alert.alert('Name changed', 'Name changed successfully', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
+    }
+    catch (error) {
+      console.log(error)
+      Alert.alert('Error', 'Error while changing name', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
     }
   }
 
