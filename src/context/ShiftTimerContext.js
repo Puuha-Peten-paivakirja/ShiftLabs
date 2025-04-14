@@ -181,6 +181,10 @@ export const ShiftTimerProvider = ({ children }) => {
         setShiftName("");
         setShiftDescription("");
         saveShift();
+        await AsyncStorage.removeItem("shiftStartTime");
+        await AsyncStorage.removeItem("elapsedTime");
+        await AsyncStorage.removeItem("elapsedBreak");
+        await BackgroundFetch.unregisterTaskAsync(BACKGROUND_TIMER_TASK);
     };
 
     const formatTime = (seconds) => {

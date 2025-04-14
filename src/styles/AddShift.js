@@ -22,16 +22,19 @@ export default StyleSheet.create({
         fontWeight: "bold",
         color: "#000",
     },
-    buttonContainer: {
-        flexDirection: "row",
-        gap: 20,
-        marginTop: 20,
-    },
     button: {
         backgroundColor: "#6A4BA6",
         paddingVertical: 12,
         paddingHorizontal: 30,
         borderRadius: 25,
+        marginTop: 20,
+    },
+    saveshiftbtn: {
+        backgroundColor: "#6A4BA6",
+        paddingVertical: 12,
+        paddingHorizontal: 30,
+        borderRadius: 25,
+        marginTop: "60%",
     },
     disabled: {
         opacity: 0.5,
@@ -76,5 +79,21 @@ export default StyleSheet.create({
         borderRadius: 5,
         width: "45%",
         alignItems: "center",
+    },
+    startLabel: {
+        fontSize: 18,
+        fontWeight: '600',
+        marginRight: 12,
+        marginTop: "5%",
+    },
+    rowWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginVertical: 10,
+    },
+    startRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginVertical: 10,
     },
 });
