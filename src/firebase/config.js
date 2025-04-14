@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app'
 import { getFirestore, setDoc, doc, collection, addDoc, serverTimestamp, query, getDocs, where, onSnapshot  } from 'firebase/firestore'
-import { initializeAuth, getReactNativePersistence, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'firebase/auth'
+import { initializeAuth, getReactNativePersistence, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from 'firebase/auth'
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage'
 
 const firebaseConfig = {
@@ -45,4 +45,5 @@ export {
     getDocs,
     USERGROUPS,
     onSnapshot,
+    sendPasswordResetEmail
  }

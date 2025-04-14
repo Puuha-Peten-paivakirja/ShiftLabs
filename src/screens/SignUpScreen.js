@@ -1,11 +1,11 @@
-import React, { useCallback, useState } from 'react'
+import React, { useState } from 'react'
 import { View, TouchableOpacity, Text, Alert } from 'react-native'
 import { TextInput } from 'react-native-paper'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import styles from '../styles/SignUp.js'
 import { CustomButton } from '../components/CustomButton'
 import { Topbar } from '../components/Topbar.js'
-import { useNavigation, useFocusEffect, CommonActions } from '@react-navigation/native'
+import { useNavigation, CommonActions } from '@react-navigation/native'
 import { auth, createUserWithEmailAndPassword, firestore, USERS, setDoc, doc } from '../firebase/config.js' 
 import isEmail from 'validator/lib/isEmail'
 import isStrongPassword from 'validator/lib/isStrongPassword'
@@ -21,12 +21,6 @@ export default function SignUpScreen() {
     password: '',
     confirmedPassword: ''
   })
-
-  useFocusEffect(
-    useCallback(() => {
-      setIsDisabled(false)
-    }, [])
-  )
 
   const validateUserInputs = () => {
     if (userInfo.firstName.trim().length === 0) {
@@ -148,6 +142,7 @@ export default function SignUpScreen() {
                 value={userInfo.firstName}
                 onChangeText={text => setUserInfo({...userInfo, firstName: text})}
                 numberOfLines={1}
+                autoCorrect={false}
               />
               <TouchableOpacity style={styles.clearNameIcon} onPress={() => setUserInfo({...userInfo, firstName: ''})}>
                 <Ionicons name='close-circle' size={20} />
@@ -161,6 +156,7 @@ export default function SignUpScreen() {
                 value={userInfo.lastName}
                 onChangeText={text => setUserInfo({...userInfo, lastName: text})}
                 numberOfLines={1}
+                autoCorrect={false}
               />
               <TouchableOpacity style={styles.clearNameIcon} onPress={() => setUserInfo({...userInfo, lastName: ''})}>
                 <Ionicons name='close-circle' size={20} />
@@ -176,6 +172,8 @@ export default function SignUpScreen() {
               onChangeText={text => setUserInfo({...userInfo, email: text})}
               keyboardType='email-address'
               numberOfLines={1}
+              autoCapitalize='none'
+              autoCorrect={false}
             />
             <TouchableOpacity style={styles.clearCredentialsIcon} onPress={() => setUserInfo({...userInfo, email: ''})}>
               <Ionicons name='close-circle' size={20} />
@@ -190,6 +188,8 @@ export default function SignUpScreen() {
               onChangeText={text => setUserInfo({...userInfo, password: text})}
               secureTextEntry={true}
               numberOfLines={1}
+              autoCapitalize='none'
+              autoCorrect={false}
             />
             <TouchableOpacity style={styles.clearCredentialsIcon} onPress={() => setUserInfo({...userInfo, password: ''})}>
               <Ionicons name='close-circle' size={20} />
@@ -204,6 +204,8 @@ export default function SignUpScreen() {
               onChangeText={text => setUserInfo({...userInfo, confirmedPassword: text})}
               secureTextEntry={true}
               numberOfLines={1}
+              autoCapitalize='none'
+              autoCorrect={false}
             />
             <TouchableOpacity style={styles.clearCredentialsIcon} onPress={() => setUserInfo({...userInfo, confirmedPassword: ''})}>
               <Ionicons name='close-circle' size={20} />
