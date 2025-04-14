@@ -5,7 +5,7 @@ import Feather from '@expo/vector-icons/Feather'
 import { TextInput } from 'react-native-paper'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useUser } from '../context/useUser'
-import { firestore, USERS, doc, updateDoc, onSnapshot, getDocs, collection, GROUPS, EmailAuthProvider, reauthenticateWithCredential, updatePassword, GROUPUSERS, query, where, verifyBeforeUpdateEmail } from '../firebase/config.js'
+import { firestore, USERS, doc, updateDoc, onSnapshot, getDocs, collection, GROUPS, EmailAuthProvider, reauthenticateWithCredential, updatePassword, GROUPUSERS, query, where } from '../firebase/config.js'
 import isStrongPassword from 'validator/lib/isStrongPassword'
 import isEmail from 'validator/lib/isEmail' 
 
@@ -234,84 +234,6 @@ export default function SettingsScreen() {
     }
   }
 
-  const checkEmailInput = () => {
-    if (!editInfo.newEmail || editInfo.newEmail.trim().length === 0) {
-      Alert.alert('Error', 'Email is required', [
-        {
-          onPress: () => setIsDisabled(false)
-        }
-      ])
-      return false
-    }
-    else if (!isEmail(editInfo.newEmail)) {
-      Alert.alert('Error', 'Email is not valid', [
-        {
-          onPress: () => setIsDisabled(false)
-        }
-      ])
-      return false
-    }
-    else {
-      return true
-    }
-  }
-
-  const updateEmailInUsersCollection = async () => {
-    await updateDoc(userRef, {
-      email: editInfo.newEmail
-    })
-  }
-
-  const updateEmailInGroupUsersSubCollection = async () => {
-    const groupsRef = collection(firestore, GROUPS)
-    const allGroups = await getDocs(groupsRef)
-    const groupIds = allGroups.docs.map((doc) => doc.id)
-
-    await Promise.all(groupIds.map(async (groupId) => {
-      const groupUsersRef = collection(firestore, GROUPS, groupId, GROUPUSERS)
-      const q = query(groupUsersRef, where('email', '==', user.email))
-      const groupUserDocument = await getDocs(q)
-
-      if (!groupUserDocument.empty) {
-        const documentId = groupUserDocument.docs[0].id
-        const groupRef = doc(firestore, GROUPS, groupId, GROUPUSERS, documentId)
-
-        await updateDoc(groupRef, {
-          email: editInfo.newEmail
-        })
-      }
-    }))
-  }
-
-  const updateUserEmail = async () => {
-    setIsDisabled(true)
-
-    if (!checkEmailInput()) {
-      return
-    }
-
-    try {
-      const credential = EmailAuthProvider.credential(user.email, userInfo.currentPassword)
-      await reauthenticateWithCredential(user, credential)
-      // await updateEmail(user, editInfo.newEmail) This does not work without disabling email enumeration protection. Must try something else
-      await Promise.all([updateEmailInUsersCollection(), updateEmailInGroupUsersSubCollection()])
-      setEditingEmail(false)
-      Alert.alert('Email changed', 'Email address changed successfully', [
-        {
-          onPress: () => setIsDisabled(false)
-        }
-      ])
-    }
-    catch (error) {
-      console.log(error)
-      Alert.alert('Error', 'Error while changing email address', [
-        {
-          onPress: () => setIsDisabled(false)
-        }
-      ])
-    }
-  }
-
   return (
     <View style={styles.container}>
       <Navbar />
@@ -434,7 +356,7 @@ export default function SettingsScreen() {
             <TouchableOpacity 
               style={styles.confirmButton} 
               activeOpacity={0.75}
-              onPress={() => updateUserEmail()}
+              // onPress not implemented yet
               disabled={isDisabled}
             >
               <Text style={styles.buttonText}>Confirm</Text>
@@ -546,104 +468,3 @@ export default function SettingsScreen() {
     </View>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center'
-  },
-  profilePictureContainer: {
-    marginTop: 20
-  },
-  profilePicture: {
-    height: 160,
-    width: 160,
-    borderRadius: 80
-  },
-  editContainer: {
-    marginTop: 20,
-    alignItems: 'center',
-  },
-  editNameRow: {
-    flexDirection: 'row',
-    marginTop: 20,
-    gap: 4
-  },
-  editNameHalf: {
-    flexDirection: 'row',
-    alignItems: 'center'
-  },
-  nameInput: {
-    width: 144,
-    backgroundColor: '#e6e0e9',
-    paddingRight: 32,
-    borderBottomColor: 'black',
-    borderBottomWidth: 0.8
-  },
-  clearNameIcon: {
-    position: 'absolute',
-    right: 4
-  },
-  confirmAndCancel: {
-    marginTop: 20,
-    flexDirection: 'row',
-    gap: 4
-  },
-  confirmButton: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 100,
-    height: 40,
-    backgroundColor: '#228B22',
-    borderRadius: 4,
-  },
-  cancelButton: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 100,
-    height: 40,
-    backgroundColor: '#D22B2B',
-    borderRadius: 4,
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#ffffff'
-  },
-  notEditingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 20,
-    width: '100%'
-  },
-  textContainer: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    maxWidth: '60%'
-  },
-  textStyle: {
-    fontSize: 16
-  },
-  editIcon: {
-    position: 'absolute',
-    right: 40
-  },
-  editRow: {
-    flexDirection: 'row',
-    marginTop: 20,
-    alignItems: 'center'
-  },
-  input: {
-    width: 292,
-    backgroundColor: '#e6e0e9',
-    paddingRight: 32,
-    borderBottomColor: 'black',
-    borderBottomWidth: 0.8
-  },
-  clearIcon: {
-    position: 'absolute',
-    right: Platform.OS === 'ios' ? 4 : 3.5
-  },
-})
