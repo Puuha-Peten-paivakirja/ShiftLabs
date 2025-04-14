@@ -19,7 +19,7 @@ export default function Navbar() {
           <MaterialIcons name="menu" size={24} color="black" />
         </TouchableOpacity>
         <Text style={styles.headerText}>
-          Hei {user?.name || "Guest"} {/* Display username or "Guest" */}
+          Hei {user?.displayName ?? user?.email?.split('@')[0] ?? "Guest"}
         </Text>
         <TouchableOpacity onPress={() => navigation.navigate("Settings")}>
           <MaterialIcons name="settings" size={24} color="black" />
