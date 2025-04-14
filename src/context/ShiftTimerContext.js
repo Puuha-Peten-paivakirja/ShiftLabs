@@ -84,12 +84,15 @@ export const ShiftTimerProvider = ({ children }) => {
     const saveShift = async () => {
         console.log("Saving shift...");
         const formattedDuration = formatTime(elapsedTime);
+        const formattedBreakDuration = formatTime(elapsedBreak);
         const currentTime = new Date();
         const shiftData = {
+            name: shiftName,
+            description: shiftDescription,
             startTime: startTime ? startTime.toISOString() : currentTime.toISOString(),
             endTime: currentTime.toISOString(),
             duration: formattedDuration,
-            breakDuration: 0,
+            breakDuration: formattedBreakDuration,
             date: new Date().toISOString(),
         };
 
@@ -117,6 +120,7 @@ export const ShiftTimerProvider = ({ children }) => {
 
 
     const startShift = async () => {
+        setElapsedTime(0);
         setRunning(true);
         setPaused(false);
         const now = new Date();
@@ -132,7 +136,7 @@ export const ShiftTimerProvider = ({ children }) => {
                     title: "Shift Running",
                     body: "Your shift is still running in the background.",
                 },
-                trigger: { seconds: 5 },
+                trigger: { seconds: 900 }, // 15 minutes
             });
         }
 
