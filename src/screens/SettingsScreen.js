@@ -7,7 +7,7 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import { useUser } from '../context/useUser'
 import { firestore, USERS, doc, updateDoc, onSnapshot, getDocs, collection, GROUPS, EmailAuthProvider, reauthenticateWithCredential, updatePassword, GROUPUSERS, query, where } from '../firebase/config.js'
 import isStrongPassword from 'validator/lib/isStrongPassword'
-import isEmail from 'validator/lib/isEmail' 
+import styles from '../styles/Settings.js'
 
 export default function SettingsScreen() {
   const { user } = useUser()
