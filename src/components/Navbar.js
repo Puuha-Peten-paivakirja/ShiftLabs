@@ -4,13 +4,14 @@ import { useNavigation } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
 //lets import user for the name in navbar
 import { UserContext } from "../context/UserContext";
+import { useUser } from "../context/useUser";
 import BurgerMenu from "./BurgerMenu";
 
 export default function Navbar() {
   const navigation = useNavigation();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const { user } = React.useContext(UserContext); // Access user from UserContext
+  const { user } = useUser() // Access user from UserContext
 
   return (
     <>
