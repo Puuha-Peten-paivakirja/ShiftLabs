@@ -23,7 +23,7 @@ export default function SignUpScreen() {
   })
 
   const validateUserInputs = () => {
-    if (userInfo.firstName.trim().length === 0) {
+    if (!userInfo.firstName || userInfo.firstName.trim().length === 0) {
       Alert.alert('Error', 'Firstname is required', [
         {
           onPress: () => setIsDisabled(false)
@@ -31,7 +31,23 @@ export default function SignUpScreen() {
       ])
       return false
     }
-    else if (userInfo.lastName.trim().length === 0) {
+    else if (userInfo.firstName.length > 35) {
+      Alert.alert('Error', 'Maximum length of first name is 35 characters', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
+      return false
+    }
+    else if (userInfo.lastName.length > 35) {
+      Alert.alert('Error', 'Maximum length of last name is 35 characters', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
+      return false
+    }
+    else if (!userInfo.lastName ||userInfo.lastName.trim().length === 0) {
       Alert.alert('Error', 'Lastname is required', [
         {
           onPress: () => setIsDisabled(false)
@@ -39,7 +55,7 @@ export default function SignUpScreen() {
       ])
       return false
     }
-    else if (userInfo.email.trim().length === 0) {
+    else if (!userInfo.email ||userInfo.email.trim().length === 0) {
       Alert.alert('Error', 'Email is required', [
         {
           onPress: () => setIsDisabled(false)
@@ -55,7 +71,7 @@ export default function SignUpScreen() {
       ])
       return false
     }
-    else if (!isStrongPassword(userInfo.password, {minLength: 8, minLowercase:1 , minUppercase: 1, minNumbers: 1, minSymbols: 0} || userInfo.password.length > 30)) {
+    else if (!userInfo.password || !isStrongPassword(userInfo.password, {minLength: 8, minLowercase:1 , minUppercase: 1, minNumbers: 1, minSymbols: 0}) || userInfo.password.length > 30) {
       Alert.alert('Error', 'Password must contain 8-30 characters, 1 number, 1 uppercase letter and 1 lowercase letter', [
         {
           onPress: () => setIsDisabled(false)
@@ -63,7 +79,7 @@ export default function SignUpScreen() {
       ])
       return false
     }
-    else if (userInfo.confirmedPassword.trim().length === 0 || userInfo.confirmedPassword !== userInfo.password) {
+    else if (!userInfo.confirmedPassword || userInfo.confirmedPassword !== userInfo.password) {
       Alert.alert('Error', 'Passwords do not match', [
         {
           onPress: () => setIsDisabled(false)
