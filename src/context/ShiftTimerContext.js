@@ -5,8 +5,12 @@ import * as TaskManager from "expo-task-manager";
 import * as BackgroundFetch from "expo-background-fetch";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
+import { useAuth } from "../hooks/useAuth";
+import { firestore, USERS} from "../firebase/config";
+import { addDoc, collection } from "firebase/firestore";
 
 const BACKGROUND_TIMER_TASK = "BACKGROUND_TIMER_TASK";
+
 
 // Ensure notification handler is set
 Notifications.setNotificationHandler({
@@ -53,6 +57,7 @@ export const ShiftTimerProvider = ({ children }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [shiftName, setShiftName] = useState("");
     const [shiftDescription, setShiftDescription] = useState("");
+    const {user} = useAuth();
 
     useEffect(() => {
         if (running && !paused) {
@@ -103,15 +108,23 @@ export const ShiftTimerProvider = ({ children }) => {
 
                 await AsyncStorage.setItem('shifts', JSON.stringify(shifts));
                 
+                //sync to Firebase if current user is authenticated
+                
+                if (user) {
+                    console.log('Firestore instance:', firestore);
+                    console.log('User ID:', user.uid);
+
+                    const userShiftsRef = collection(firestore, USERS, user.uid, 'shifts');
+                    console.log('User shifts reference:', userShiftsRef);
+
+                    await addDoc(userShiftsRef, shiftData);
+                    console.log('Shift saved to Firebase:');
+                } else {
+                    console.log('User not authenticated, shift not saved to Firebase');
+                }
             } catch (error) {
                 console.error('Failed to save shift:', error);
             }
-    
-            // // Example of saving to a database (Firebase or another service)
-            // if (isUserLoggedIn) {
-            //     saveToDatabase(shiftData);  // Save to database
-            // }
-    
             console.log('Shift saved:', shiftData);
             setRunning(false);
             setEndTime(currentTime);
@@ -173,7 +186,6 @@ export const ShiftTimerProvider = ({ children }) => {
         setPaused(false);
         setIsModalVisible(false);
     
-        console.log("Shift stopped & background task unregistered");
     
         setStartTime(null);
         setElapsedTime(0);
@@ -184,7 +196,13 @@ export const ShiftTimerProvider = ({ children }) => {
         await AsyncStorage.removeItem("shiftStartTime");
         await AsyncStorage.removeItem("elapsedTime");
         await AsyncStorage.removeItem("elapsedBreak");
-        await BackgroundFetch.unregisterTaskAsync(BACKGROUND_TIMER_TASK);
+        await BackgroundFetch.unregisterTaskAsync(BACKGROUND_TIMER_TASK)
+        .then(() => {
+            console.log("Background task unregistered")
+            .catch((error) => {
+                console.error("Error unregistering background task:", error);
+            });
+        })
     };
 
     const formatTime = (seconds) => {
