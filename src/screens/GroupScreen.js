@@ -3,7 +3,7 @@ import { View, Image, Text,TouchableOpacity } from "react-native";
 import Navbar from "../components/Navbar";
 import { TextInput, Checkbox  } from "react-native-paper";
 import Ionicons from '@expo/vector-icons/Ionicons'
-import { addDoc, collection, firestore, GROUPS, GROUPUSERS, serverTimestamp, USERS, query, where, getDocs, USERGROUPS, onSnapshot } from "../firebase/config.js";
+import { addDoc, setDoc, collection, firestore, GROUPS, GROUPUSERS, serverTimestamp, USERS, query, where, getDocs, USERGROUPS, onSnapshot, doc } from "../firebase/config.js";
 import { useUser } from "../context/useUser";
 import { FlatList, ScrollView } from "react-native-gesture-handler";
 import filter from "lodash.filter";
@@ -99,11 +99,15 @@ export default function GroupScreen() {
       // Query to find the maching user info
       const q = query(
         collection(firestore, USERS), 
-        where("email", "==", userEmail));
+        where("email", "==", userEmail)
+      );
       const querySnapshot = await getDocs(q);
+
       if (!querySnapshot.empty) { 
-        const userData = querySnapshot.docs[0].data();
-        return { firstName: userData.firstName, lastName: userData.lastName }
+        const docSnap = querySnapshot.docs[0];       // First matching document
+        const userData = docSnap.data();              // The data
+        const userId = docSnap.id;
+        return { firstName: userData.firstName, lastName: userData.lastName, id: userId }
       } else {
           console.log("Käyttäjää ei löytynyt.");
       }
@@ -133,7 +137,7 @@ export default function GroupScreen() {
           const userName = await getUserName(email);
           
           // Add the current user to the group's "GroupUsers" subcollection as an admin
-          await addDoc(collection(firestore, GROUPS, docRef.id, GROUPUSERS), {
+          await setDoc(doc(firestore, GROUPS, docRef.id, GROUPUSERS, userName.id ), {
             firstName: userName.firstName,
             lastName: userName.lastName,
             email: email,
@@ -144,7 +148,7 @@ export default function GroupScreen() {
             // Add group info to the user's "UserGroups" subcollection
             // This is a shortcut reference to the group for quicker lookups
             // It avoids needing to query the entire Groups/GroupUsers structure
-          await addDoc(collection(firestore, USERS, user.uid, USERGROUPS), {
+          await setDoc(doc(firestore, USERS, user.uid, USERGROUPS, docRef.id), {
             groupId: docRef.id,
             groupName: newGroup.groupName,
             groupDesc: newGroup.groupDesc,
@@ -153,11 +157,11 @@ export default function GroupScreen() {
           console.log("Group added to user subcollection");
 
           // Add all selected users to "GroupUsers" as members
-          const groupUsersCollection = collection(firestore, GROUPS, docRef.id, GROUPUSERS);
+          
           // Map to get all users into "GroupUsers"
           const addMembers = checkedUsers.map((member) => {
-              const { firstName, lastName, email} = member;
-              return addDoc(groupUsersCollection, {
+              const { firstName, lastName, email, id} = member;
+              return setDoc(doc(firestore, GROUPS, docRef.id, GROUPUSERS, id), {
                 firstName,
                 lastName,
                 email,
@@ -171,7 +175,7 @@ export default function GroupScreen() {
           // Add group info to all selected users
           const addGroupsToUsers = checkedUsers.map((member) => {
               const { id } = member;
-              return addDoc(collection(firestore, USERS, id, USERGROUPS),{
+              return setDoc(doc(firestore, USERS, id, USERGROUPS, docRef.id),{
                 groupId: docRef.id,
                 groupName: newGroup.groupName,
                 groupDesc: newGroup.groupDesc,
@@ -208,6 +212,7 @@ export default function GroupScreen() {
     <View style={styles.container}>
       <Navbar />
       {user ? (
+      <ScrollView>
       <View style={styles.group}>
         <Text style={styles.headings}>Omat ryhmät:</Text>
 
@@ -298,7 +303,8 @@ export default function GroupScreen() {
 
 
         
-      </View>) :(
+      </View>
+      </ScrollView>) :(
       <View style={styles.loginContainer}>
         <Text style={styles.loginMessage}>Kirjaudu sisään käyttääksesi ryhmiä!</Text>
         <Image 

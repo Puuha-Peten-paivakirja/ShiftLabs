@@ -38,7 +38,7 @@ export default function SpesificGroupScreen({ route }) {
         unsubscribe()
         
         }
- })
+ },[])
     
  
 
