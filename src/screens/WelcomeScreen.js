@@ -1,18 +1,33 @@
-import React from "react";
-import { View, StyleSheet } from "react-native";
-import Navbar from "../components/Navbar";
+import React from 'react'
+import { View, StyleSheet, Text } from 'react-native'
+import { Topbar } from '../components/Topbar.js'
+import { CustomButton } from '../components/CustomButton'
+import { useNavigation } from '@react-navigation/native'
+import styles from '../styles/Welcome.js'
 
 export default function WelcomeScreen() {
+  const navigation = useNavigation()
+
   return (
     <View style={styles.container}>
-      <Navbar />
-    </View>
-  );
-}
+      <Topbar title='Welcome'/>
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-});
+      <View style={styles.contentContainer}>
+        <View></View>
+        <View style={styles.buttonsContainer}>
+          <CustomButton title={'Sign up'} onPress={() => navigation.navigate('SignUp')} />
+          <CustomButton
+            title={'Sign in'}
+            onPress={() => navigation.navigate('SignIn')} 
+            style={{backgroundColor: '#d8bcfc'}}
+          />
+          <CustomButton
+            title={'Guest'}
+            onPress={() => navigation.navigate('Home')}
+            style={{backgroundColor: '#d8bcfc'}}
+          />        
+        </View>
+      </View>
+    </View>
+  )
+}

@@ -1,11 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Animated } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { View, Text, TouchableOpacity, StyleSheet, Animated, Alert } from "react-native";
+import { CommonActions, useNavigation } from "@react-navigation/native";
+import { auth, signOut } from "../firebase/config";
+import { useUser } from "../context/useUser";
 
 export default function BurgerMenu({ isOpen, closeMenu }) {
   const navigation = useNavigation();
   const slideAnim = useRef(new Animated.Value(-250)).current; // Off-screen left
   const [menuVisible, setMenuVisible] = useState(isOpen); // Controls mounting
+  const { user } = useUser()
 
   useEffect(() => {
     if (isOpen) {
@@ -23,6 +26,34 @@ export default function BurgerMenu({ isOpen, closeMenu }) {
       }).start(() => setMenuVisible(false)); // Hide after animation
     }
   }, [isOpen]);
+
+  const confirmSignOut = () => {
+    Alert.alert("Sign out", "Are you sure you want sign out?",[
+      {
+        text: "Sign out",
+        onPress: () => userSignOut(),
+      },
+      {
+        text: "Cancel",
+        style: "cancel"
+      }
+    ])
+  }
+
+  const userSignOut = () => {
+    signOut(auth)
+      .then(() =>{
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{name: 'Welcome' }]
+          })
+        )
+      })
+      .catch((error) => {
+         Alert.alert('Error', error.message)
+      })
+  }
 
   if (!menuVisible) return null; // Unmount only AFTER animation completes
 
@@ -45,10 +76,6 @@ export default function BurgerMenu({ isOpen, closeMenu }) {
           <Text style={styles.menuText}>Ryhmät</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate("Welcome")} style={styles.menuItem}>
-          <Text style={styles.menuText}>Tervetuloa</Text>
-        </TouchableOpacity>
-
         <TouchableOpacity onPress={() => navigation.navigate("Shift")} style={styles.menuItem}>
             <Text style={styles.menuText}>Kalenteri</Text>
         </TouchableOpacity>
@@ -60,8 +87,11 @@ export default function BurgerMenu({ isOpen, closeMenu }) {
         <TouchableOpacity onPress={() => navigation.navigate("AllShifts")} style={styles.menuItem}>
             <Text style={styles.menuText}>Kaikki vuorot</Text>
         </TouchableOpacity>
-
-
+        {user &&
+          <TouchableOpacity onPress={() => confirmSignOut()} style={styles.menuItem}>
+              <Text style={[styles.menuText, {color: "red"}]}>Sign out</Text>
+          </TouchableOpacity>
+        }
       </Animated.View>
     </View>
   );
