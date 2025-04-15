@@ -92,6 +92,7 @@ export const ShiftTimerProvider = ({ children }) => {
         const formattedBreakDuration = formatTime(elapsedBreak);
         const currentTime = new Date();
         const shiftData = {
+            // project: "Project Name", // Replace with actual project name when implemented
             name: shiftName,
             description: shiftDescription,
             startTime: startTime ? startTime.toISOString() : currentTime.toISOString(),
@@ -111,7 +112,6 @@ export const ShiftTimerProvider = ({ children }) => {
                 //sync to Firebase if current user is authenticated
                 
                 if (user) {
-                    console.log('Firestore instance:', firestore);
                     console.log('User ID:', user.uid);
 
                     const userShiftsRef = collection(firestore, USERS, user.uid, 'shifts');
@@ -214,7 +214,7 @@ export const ShiftTimerProvider = ({ children }) => {
     
 
     return (
-        <ShiftTimerContext.Provider value={{ 
+        <ShiftTimerContext.Provider value={{
             elapsedTime, elapsedBreak, running, paused, shiftDescription, shiftName, isModalVisible, startShift, pauseShift, resumeShift, stopShift, formatTime, openModal, setShiftDescription, setShiftName, setIsModalVisible, 
         }}>
             {children}

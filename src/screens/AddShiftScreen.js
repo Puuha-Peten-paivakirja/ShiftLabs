@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
-import { View, Text, Modal, TouchableOpacity, Animated, Easing, TextInput, Alert, Touchable, Dimensions } from "react-native";
+import { View, Text, Modal, TouchableOpacity, Animated, Easing, TextInput, FlatList, Alert, Touchable, Dimensions } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import Navbar from "../components/Navbar";
 import styles from "../styles/AddShift";
 import { ShiftTimerContext } from "../context/ShiftTimerContext";
 import TimePicker from "../components/TimePicker";
 import DatePicker from "../components/DatePicker";
-
+import ShiftGroupDropDown  from "../components/ShiftGroupDropDown";
 
 const RADIUS = 45;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
@@ -15,6 +15,8 @@ const AddShiftScreen = () => {
     const { saveShift, elapsedTime, running, paused, startShift, pauseShift, resumeShift, stopShift, setIsModalVisible, isModalVisible, openModal, formatTime, setShiftDescription, setShiftName, shiftName, shiftDescription } = useContext(ShiftTimerContext);
 
     const [isRecordMode, setIsRecordMode] = useState(true);
+    const [inputDropDownVisible, setInputDropDownVisible] = useState(false);
+    const [groupOptions, setGroupOptions] = useState([]);
 
     const toggleMode = () => {
         setIsRecordMode(!isRecordMode);
@@ -53,6 +55,8 @@ useEffect(() => {
                 <TouchableOpacity style={styles.button}onPress={toggleMode}>
                     <Text style={styles.buttonText}>{isRecordMode ? "Vaihda syöttötilaan" : "Vaihda tallennustilaan"}</Text>
                 </TouchableOpacity>
+
+                <ShiftGroupDropDown shiftName={shiftName} setShiftName={setShiftName} />
 
                 {/* Conditionally render content based on recordmode status */}
                 {isRecordMode ? (
@@ -129,20 +133,47 @@ useEffect(() => {
             ) : (
                 
                 <View style={styles.container}>
-                    {/* <TimePicker></TimePicker> */}
+                    {/*Input View! */}
                     {/* Nimi, kuvaus, aloitusaika, lopetusaika, tauko, päivämäärä */}
-                    <View style={styles.rowWrapper}>
-                    <Text style={styles.startLabel}>
-                        Aloitusaika
-                    </Text>
-                    <View style={styles.startRow}>
-                    <TouchableOpacity style={styles.button} onPress={TimePicker}>
-                        <Text style={styles.buttonText}>%time%</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.button} onPress={DatePicker}>
-                        <Text style={styles.buttonText}>%date%</Text>
-                    </TouchableOpacity>
+
+                    {/* Shift Description Section */}
+                    <View style={styles.shiftDataInputRow}>
+                        <Text style={styles.shiftDataLabel}>
+                            Aloitusaika
+                        </Text>
+                        <View style={styles.row}>
+                        <TouchableOpacity style={styles.inputbutton} onPress={TimePicker}>
+                            <Text style={styles.buttonText}>%time%</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.inputbutton} onPress={DatePicker}>
+                            <Text style={styles.buttonText}>%date%</Text>
+                        </TouchableOpacity>
+                        </View>
                     </View>
+
+
+
+                    {/* End Time Section */}
+                    <View style={styles.rowWrapper}>
+                        <Text style={styles.Label}>Lopetusaika</Text>
+                        <View style={styles.row}>
+                            <TouchableOpacity style={styles.inputbutton} onPress={TimePicker}>
+                                <Text style={styles.buttonText}>%time%</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.inputbutton} onPress={DatePicker}>
+                                <Text style={styles.buttonText}>%date%</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
+                    {/* Break Section */}
+                    <View style={styles.rowWrapper}>
+                        <Text style={styles.Label}>Tauko</Text>
+                        <View style={styles.row}>
+                        </View>
+                        <Text style={styles.breakDuration}>
+                            Tauon kesto: {}
+                        </Text>
                     </View>
 
                     
