@@ -213,17 +213,17 @@ export default function GroupScreen() {
       <Navbar />
       {user ? (
       <ScrollView>
-      <View style={styles.group}>
+      <View style={styles.groupView}>
         <Text style={styles.headings}>Omat ryhmät:</Text>
 
-        <ScrollView style={styles.srollwiew} >
-          {
+        <ScrollView style={styles.scrollviewGroups} nestedScrollEnabled={true}>
+        {
             joinedGroups.map((joinedGroup)=>(
-              <View key={joinedGroup.id} style={styles.groupItem}>
+              <View key={joinedGroup.id} style={styles.groupViewItem}>
                 <Text style={styles.groupText}>{joinedGroup.groupName}</Text>
 
                 <TouchableOpacity 
-                  style={styles.groupInfo} 
+                  style={styles.groupInfoButton} 
                   onPress={() => navigateToGroup(joinedGroup.id)}
                 >
                   <Ionicons name='add-outline' size={30} />
@@ -234,9 +234,9 @@ export default function GroupScreen() {
         </ScrollView>
 
         <View style={styles.separator} />
+
         {/*------------------------------------*/}
         <Text style={styles.headings}>Luo uusi ryhmä:</Text>
-
 
         <View style={styles.nameInputHalf}>
           <TextInput
@@ -247,11 +247,13 @@ export default function GroupScreen() {
             onChangeText={text => setNewGroup({...newGroup, groupName:text})}
             numberOfLines={1}
           />
-          <TouchableOpacity style={styles.clearNameIcon} onPress={() => setNewGroup({...newGroup, groupName:''})}>
+          <TouchableOpacity 
+            style={styles.clearNameIcon} 
+            onPress={() => setNewGroup({...newGroup, groupName:''})}
+          >
             <Ionicons name='close-circle' size={20} />
           </TouchableOpacity>
         </View> 
-
 
         <View style={styles.nameInputHalf}>
           <TextInput
@@ -263,11 +265,13 @@ export default function GroupScreen() {
             onChangeText={text => setNewGroup({...newGroup, groupDesc:text})}
             numberOfLines={3}
           />
-          <TouchableOpacity style={styles.clearNameIcon} onPress={() => setNewGroup({...newGroup, groupDesc:''})}>
+          <TouchableOpacity 
+            style={styles.clearNameIcon} 
+            onPress={() => setNewGroup({...newGroup, groupDesc:''})}
+          >
             <Ionicons name='close-circle' size={20} />
           </TouchableOpacity>
         </View> 
-
 
         <View style={styles.serachContainer}>
           <TextInput 
@@ -276,35 +280,31 @@ export default function GroupScreen() {
             autoCorrect={false}
             value={searchQuery}
             onChangeText={(query) => handleSearch(query)}
-            />
+          />
         </View>
 
-          <FlatList
-              data={filteredUsers}
-              keyExtractor={(item) => item.id}
-              style={styles.scrollviewUser}
-              renderItem={({ item }) => (
-              <View>
-                <View style={styles.userItem}>
-                  <Text style={styles.userText}>{item.firstName} {item.lastName}</Text>
-                  <Checkbox
-                    style={styles.checkbox}
-                    status={checkedUsers.find(u => u.id === item.id) ? 'checked' : 'unchecked'}
-                    onPress={() => toggleUser(item)}
-                    />
-                  </View>
-                <View style={styles.userSeparator} />
+        <ScrollView style={styles.scrollviewUser} nestedScrollEnabled={true}>
+          {filteredUsers.map((item) => (
+            <View key={item.id}>
+              <View style={styles.userViewItem}>
+                <Text style={styles.userText}>{item.firstName} {item.lastName}</Text>
+                <Checkbox
+                  style={styles.checkbox}
+                  status={checkedUsers.find(u => u.id === item.id) ? 'checked' : 'unchecked'}
+                  onPress={() => toggleUser(item)}
+                />
               </View>
-            )}
-          />
-          <TouchableOpacity style={styles.createGroup} onPress={save}>
-            <Text style={styles.createButton}>Luo</Text>
-          </TouchableOpacity>
+              <View style={styles.userSeparator} />
+            </View>
+          ))}
+        </ScrollView>
 
-
-        
+        <TouchableOpacity style={styles.createGroupButton} onPress={save}>
+          <Text style={styles.createButtonText}>Luo</Text>
+        </TouchableOpacity>
       </View>
-      </ScrollView>) :(
+    </ScrollView>
+    ) :(
       <View style={styles.loginContainer}>
         <Text style={styles.loginMessage}>Kirjaudu sisään käyttääksesi ryhmiä!</Text>
         <Image 
