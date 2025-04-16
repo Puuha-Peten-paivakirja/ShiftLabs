@@ -18,7 +18,7 @@ const ShiftGroupDropDown = ({ shiftName, setShiftName }) => {
     };
 
     const selectGroupName = (name) => {
-        setShiftName(name);
+        setShiftName(name == "Ei ryhmää" ? "" : name);
         setInputDropDownVisible(false);
     };
 
@@ -26,14 +26,14 @@ const ShiftGroupDropDown = ({ shiftName, setShiftName }) => {
         try {
                 if (user) {
                     console.log("Fetching groups for user:", user.uid);
-                    console.log("Found groups:", user.groups);
                 const userGroupsRef = collection(firestore, "users", user.uid, "user-groups");
                 const querySnapshot = await getDocs(userGroupsRef);
+                console.log("Found groups:", groupOptions);
                 const groups = querySnapshot.docs.map((doc) => ({
                     id: doc.id,
                     ...doc.data(),
                 }));
-                setGroupOptions(groups);
+                setGroupOptions([{ id: "default", groupName: "Ei valittua ryhmää" }, ...groups]);
             }
         } catch (error) {
             console.error("Error fetching user groups:", error);
