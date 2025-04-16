@@ -12,7 +12,7 @@ const RADIUS = 45;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 const AddShiftScreen = () => {
-    const { saveShift, elapsedTime, running, paused, startShift, pauseShift, resumeShift, stopShift, setIsModalVisible, isModalVisible, openModal, formatTime, setShiftDescription, setShiftName, shiftName, shiftDescription } = useContext(ShiftTimerContext);
+    const { setBreakDuration, breakDuration, saveShift, elapsedTime, running, paused, startShift, pauseShift, resumeShift, stopShift, setIsModalVisible, isModalVisible, openModal, formatTime, setShiftDescription, setShiftName, shiftName, shiftDescription } = useContext(ShiftTimerContext);
 
     const [isRecordMode, setIsRecordMode] = useState(true);
     const [inputDropDownVisible, setInputDropDownVisible] = useState(false);
@@ -283,12 +283,27 @@ useEffect(() => {
                 </View>
             </Modal>
 
+                    {/* Duration Section */}
+                    <View style={styles.shiftDataInputRow}>
+                        <Text style={styles.shiftDataLabel}>Kesto</Text>
+                        <View style={styles.row}>
+                            <TextInput 
+                            style={styles.shiftDataInputField}
+                            placeholder="Kesto"
+                            value={breakDuration}
+                            onChangeText={setBreakDuration}
+                            keyboardType="numeric"
+                            >
+                            </TextInput>
+                        </View>
+                    </View>
+
                     {/* Break Section */}
-                    <View style={styles.rowWrapper}>
-                        <Text style={styles.Label}>Tauko</Text>
+                    <View style={styles.shiftDataInputRow}>
+                        <Text style={styles.shiftDataLabel}>Tauko</Text>
                         <View style={styles.row}>
                         </View>
-                        <Text style={styles.breakDuration}>
+                        <Text style={styles.shiftDataInputField}>
                             Tauon kesto: {}
                         </Text>
                     </View>
