@@ -21,7 +21,8 @@ export default StyleSheet.create({
       backgroundColor: 'darkgrey',
       marginVertical: 10,
       width: '90%',
-      marginTop: 20,
+      marginTop: 30,
+      marginBottom: 30,
     },
     nameInput: {
       width: 280,
@@ -58,7 +59,7 @@ export default StyleSheet.create({
       flex: 1,
     },
     srollwiew: {
-      maxHeight: 170,
+      maxHeight: 250,
       width: "90%",
     },
     groupInfo: {
@@ -75,12 +76,12 @@ export default StyleSheet.create({
       paddingRight: 40,
       paddingLeft: 40,
       marginTop: 20,
+      marginBottom: 20,
   
     },
     createButton:{
       fontSize: 20,
       color: '#FFFFFF',
-      
     },
     loginMessage:{
       textAlign: 'center',
@@ -98,7 +99,7 @@ export default StyleSheet.create({
       marginTop: 50, 
     },
     scrollviewUser:{
-      maxHeight: 150,
+      maxHeight: 200,
       width: "73%",
     },
     userItem: {
