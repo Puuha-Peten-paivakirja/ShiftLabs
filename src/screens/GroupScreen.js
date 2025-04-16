@@ -3,7 +3,7 @@ import { View, Image, Text,TouchableOpacity } from "react-native";
 import Navbar from "../components/Navbar";
 import { TextInput, Checkbox  } from "react-native-paper";
 import Ionicons from '@expo/vector-icons/Ionicons'
-import { addDoc, setDoc, collection, firestore, GROUPS, GROUPUSERS, serverTimestamp, USERS, query, where, getDocs, USERGROUPS, onSnapshot, doc } from "../firebase/config.js";
+import { addDoc, setDoc, collection, firestore, GROUPS, GROUPUSERS, serverTimestamp, USERS, query, where, getDoc, USERGROUPS, onSnapshot, doc } from "../firebase/config.js";
 import { useUser } from "../context/useUser";
 import { FlatList, ScrollView } from "react-native-gesture-handler";
 import filter from "lodash.filter";
@@ -94,20 +94,17 @@ export default function GroupScreen() {
     });
   };
   
-  const getUserName = async (userEmail) => {
+  const getUserName = async () => {
     try {
       // Query to find the maching user info
-      const q = query(
-        collection(firestore, USERS), 
-        where("email", "==", userEmail)
-      );
-      const querySnapshot = await getDocs(q);
+      const docRef = doc(firestore, USERS, user.uid);
+      const docSnap = await getDoc(docRef);
 
-      if (!querySnapshot.empty) { 
-        const docSnap = querySnapshot.docs[0];       // First matching document
-        const userData = docSnap.data();              // The data
-        const userId = docSnap.id;
-        return { firstName: userData.firstName, lastName: userData.lastName, id: userId }
+
+      if(docSnap.exists()) { 
+        const userData = docSnap.data();
+        return { firstName: userData.firstName, lastName: userData.lastName }
+        console.log("kauttaja haettu onnistuneesti")
       } else {
           console.log("Käyttäjää ei löytynyt.");
       }
@@ -120,8 +117,6 @@ export default function GroupScreen() {
   const save = async () => {
     // Only proceed if user is logged in
     if (user !== null) {
-      const email = user.email
-
       if(newGroup.groupName !== ''){
         try{
           // Create a new group document in the "Groups" collection
@@ -134,13 +129,12 @@ export default function GroupScreen() {
           setNewGroup({ groupDesc:'', groupName:''})
           console.log('New group saved')
           // Fetch full name of the current user using email
-          const userName = await getUserName(email);
+          const userName = await getUserName();
           
           // Add the current user to the group's "GroupUsers" subcollection as an admin
-          await setDoc(doc(firestore, GROUPS, docRef.id, GROUPUSERS, userName.id ), {
+          await setDoc(doc(firestore, GROUPS, docRef.id, GROUPUSERS, user.uid ), {
             firstName: userName.firstName,
             lastName: userName.lastName,
-            email: email,
             joined: serverTimestamp(),
             role: "admin",
           })
@@ -160,11 +154,10 @@ export default function GroupScreen() {
           
           // Map to get all users into "GroupUsers"
           const addMembers = checkedUsers.map((member) => {
-              const { firstName, lastName, email, id} = member;
+              const { firstName, lastName, id} = member;
               return setDoc(doc(firestore, GROUPS, docRef.id, GROUPUSERS, id), {
                 firstName,
                 lastName,
-                email,
                 joined: serverTimestamp(),
                 role: "member",
               })
