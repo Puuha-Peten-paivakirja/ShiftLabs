@@ -1,30 +1,54 @@
-import React, { useRef, useState } from "react";
-import { View, Text, FlatList, StyleSheet, Dimensions } from "react-native";
-import { Modal } from "react-native-paper";
+import React, { useState, useRef } from "react";
+import { View, Text, FlatList, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
 
-const { height } = Dimensions.get("window");
+const DatePicker = ({ onDateSelected }) => {
+    const days = Array.from({ length: 31 }, (_, i) => String(i + 1).padStart(2, "0"));
+    const months = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
+    const years = Array.from({ length: 101 }, (_, i) => String(2025 + i)); // Years from 1900 to 2000
 
-const DatePicker = () => {
-    const hours = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0"));
-    const minutes = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0"));
+    const itemHeight = 40; // Height of each item
+    const pickerHeight = itemHeight * 5; // Visible area height (5 items visible)
 
-    const itemHeight = 60;
-    const pickerHeight = itemHeight * 5;
+    const [selectedDay, setSelectedDay] = useState(days[0]);
+    const [selectedMonth, setSelectedMonth] = useState(months[0]);
+    const [selectedYear, setSelectedYear] = useState(years[0]);
 
-    const [selectedHour, setSelectedHour] = useState("12");
-    const [selectedMinute, setSelectedMinute] = useState("00");
+    const dayRef = useRef(null);
+    const monthRef = useRef(null);
+    const yearRef = useRef(null);
 
-    const hourRef = useRef(null);
-    const minuteRef = useRef(null);
-
-    const onScrollEnd = (event, type) => {
-        const offsetY = event.nativeEvent.contentOffset.y;
-        const index = Math.round(offsetY / itemHeight);
-        const value = type === "hour" ? hours[index] : minutes[index];
-        type === "hour" ? setSelectedHour(value) : setSelectedMinute(value);
+    const scrollToIndex = (ref, index) => {
+        ref.current?.scrollToOffset({
+            offset: index * itemHeight,
+            animated: true,
+        });
     };
 
-    const renderItem = ({ item }) => (
+    const handleScrollEnd = (event, type) => {
+        const offsetY = event.nativeEvent.contentOffset.y;
+        const index = Math.round(offsetY / itemHeight);
+
+        if (type === "day") {
+            setSelectedDay(days[index % days.length]);
+        } else if (type === "month") {
+            setSelectedMonth(months[index % months.length]);
+        } else if (type === "year") {
+            setSelectedYear(years[index % years.length]);
+        }
+    };
+
+    const handleConfirm = () => {
+        const monthIndex = months.indexOf(selectedMonth) + 1; // Convert month name to index
+        const formattedDate = `${selectedDay}-${String(monthIndex).padStart(2, "0")}-${selectedYear}`;
+        if (onDateSelected) {
+            onDateSelected(formattedDate); // Pass the selected date to the parent
+        }
+    };
+
+    const renderItem = ({ item, type }) => (
         <View style={[styles.item, { height: itemHeight }]}>
             <Text style={styles.itemText}>{item}</Text>
         </View>
@@ -32,37 +56,54 @@ const DatePicker = () => {
 
     return (
         <View style={styles.container}>
-            <Modal>
-            <Text style={styles.title}>Select Time</Text>
-            <View style={styles.pickerWrapper}>
-                {/* Hours */}
+            <Text style={styles.title}>Valitse Päivämäärä</Text>
+            <View style={[styles.pickerWrapper, { height: pickerHeight }]}>
+                {/* Day Picker */}
                 <FlatList
-                    ref={hourRef}
-                    data={hours}
-                    keyExtractor={(item) => item}
-                    renderItem={renderItem}
+                    ref={dayRef}
+                    data={Array(100).fill(days).flat()} // Simulate infinite scrolling
+                    keyExtractor={(item, index) => `${item}-${index}`}
+                    renderItem={({ item }) => renderItem({ item, type: "day" })}
                     showsVerticalScrollIndicator={false}
                     snapToInterval={itemHeight}
                     decelerationRate="fast"
-                    onMomentumScrollEnd={(e) => onScrollEnd(e, "hour")}
-                    contentContainerStyle={{ paddingVertical: pickerHeight / 2 - itemHeight / 2 }}
+                    onMomentumScrollEnd={(event) => handleScrollEnd(event, "day")}
+                    contentContainerStyle={{
+                        paddingVertical: pickerHeight / 2 - itemHeight / 2,
+                    }}
                 />
-                <Text style={styles.colon}>:</Text>
-                {/* Minutes */}
+                {/* Month Picker */}
                 <FlatList
-                    ref={minuteRef}
-                    data={minutes}
-                    keyExtractor={(item) => item}
-                    renderItem={renderItem}
+                    ref={monthRef}
+                    data={Array(100).fill(months).flat()} // Simulate infinite scrolling
+                    keyExtractor={(item, index) => `${item}-${index}`}
+                    renderItem={({ item }) => renderItem({ item, type: "month" })}
                     showsVerticalScrollIndicator={false}
                     snapToInterval={itemHeight}
                     decelerationRate="fast"
-                    onMomentumScrollEnd={(e) => onScrollEnd(e, "minute")}
-                    contentContainerStyle={{ paddingVertical: pickerHeight / 2 - itemHeight / 2 }}
+                    onMomentumScrollEnd={(event) => handleScrollEnd(event, "month")}
+                    contentContainerStyle={{
+                        paddingVertical: pickerHeight / 2 - itemHeight / 2,
+                    }}
+                />
+                {/* Year Picker */}
+                <FlatList
+                    ref={yearRef}
+                    data={Array(100).fill(years).flat()} // Simulate infinite scrolling
+                    keyExtractor={(item, index) => `${item}-${index}`}
+                    renderItem={({ item }) => renderItem({ item, type: "year" })}
+                    showsVerticalScrollIndicator={false}
+                    snapToInterval={itemHeight}
+                    decelerationRate="fast"
+                    onMomentumScrollEnd={(event) => handleScrollEnd(event, "year")}
+                    contentContainerStyle={{
+                        paddingVertical: pickerHeight / 2 - itemHeight / 2,
+                    }}
                 />
             </View>
-            <Text style={styles.selectedTime}>Selected: {selectedHour}:{selectedMinute}</Text>
-            </Modal>
+            <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
+                <Text style={styles.confirmButtonText}>Tallenna</Text>
+            </TouchableOpacity>
         </View>
     );
 };
@@ -70,7 +111,7 @@ const DatePicker = () => {
 const styles = StyleSheet.create({
     container: {
         alignItems: "center",
-        paddingTop: 50,
+        padding: 20,
     },
     title: {
         fontSize: 24,
@@ -78,24 +119,26 @@ const styles = StyleSheet.create({
     },
     pickerWrapper: {
         flexDirection: "row",
-        height: 300,
+        justifyContent: "space-between",
+        width: "100%",
     },
     item: {
         justifyContent: "center",
         alignItems: "center",
-        width: 80,
     },
     itemText: {
-        fontSize: 24,
+        fontSize: 16,
+        color: "#333",
     },
-    colon: {
-        fontSize: 30,
-        paddingHorizontal: 10,
-        paddingTop: 120,
-    },
-    selectedTime: {
+    confirmButton: {
         marginTop: 20,
-        fontSize: 20,
+        backgroundColor: "#6A4BA6",
+        padding: 10,
+        borderRadius: 5,
+    },
+    confirmButtonText: {
+        color: "#fff",
+        fontSize: 16,
         fontWeight: "bold",
     },
 });

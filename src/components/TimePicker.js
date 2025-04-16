@@ -1,10 +1,10 @@
 import React, { useRef, useState } from "react";
-import { View, Text, FlatList, StyleSheet, Dimensions } from "react-native";
+import { View, Text, FlatList, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
 import { Modal } from "react-native-paper";
 
 const { height } = Dimensions.get("window");
 
-const TimePicker = () => {
+const TimePicker = ({onTimeSelected}) => {
     const hours = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0"));
     const minutes = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0"));
 
@@ -16,6 +16,14 @@ const TimePicker = () => {
 
     const hourRef = useRef(null);
     const minuteRef = useRef(null);
+
+    const handleConfirm = () => {
+        const time = `${selectedHour}:${selectedMinute}`;
+        console.log("Selected Time:", time);
+        if (onTimeSelected) {
+            onTimeSelected(time);
+        }
+    };
 
     const onScrollEnd = (event, type) => {
         const offsetY = event.nativeEvent.contentOffset.y;
@@ -32,37 +40,33 @@ const TimePicker = () => {
 
     return (
         <View style={styles.container}>
-            <Modal>
-            <Text style={styles.title}>Select Time</Text>
+            <Text style={styles.title}>Valitse Aika</Text>
             <View style={styles.pickerWrapper}>
-                {/* Hours */}
+                {/* Hour Picker */}
                 <FlatList
-                    ref={hourRef}
                     data={hours}
                     keyExtractor={(item) => item}
-                    renderItem={renderItem}
-                    showsVerticalScrollIndicator={false}
-                    snapToInterval={itemHeight}
-                    decelerationRate="fast"
-                    onMomentumScrollEnd={(e) => onScrollEnd(e, "hour")}
-                    contentContainerStyle={{ paddingVertical: pickerHeight / 2 - itemHeight / 2 }}
+                    renderItem={({ item }) => (
+                        <TouchableOpacity onPress={() => setSelectedHour(item)}>
+                            <Text style={styles.itemText}>{item}</Text>
+                        </TouchableOpacity>
+                    )}
                 />
                 <Text style={styles.colon}>:</Text>
-                {/* Minutes */}
+                {/* Minute Picker */}
                 <FlatList
-                    ref={minuteRef}
                     data={minutes}
                     keyExtractor={(item) => item}
-                    renderItem={renderItem}
-                    showsVerticalScrollIndicator={false}
-                    snapToInterval={itemHeight}
-                    decelerationRate="fast"
-                    onMomentumScrollEnd={(e) => onScrollEnd(e, "minute")}
-                    contentContainerStyle={{ paddingVertical: pickerHeight / 2 - itemHeight / 2 }}
+                    renderItem={({ item }) => (
+                        <TouchableOpacity onPress={() => setSelectedMinute(item)}>
+                            <Text style={styles.itemText}>{item}</Text>
+                        </TouchableOpacity>
+                    )}
                 />
             </View>
-            <Text style={styles.selectedTime}>Selected: {selectedHour}:{selectedMinute}</Text>
-            </Modal>
+            <TouchableOpacity style={styles.modalButton} onPress={handleConfirm}>
+                <Text style={styles.modalButtonText}>Tallenna</Text>
+            </TouchableOpacity>
         </View>
     );
 };

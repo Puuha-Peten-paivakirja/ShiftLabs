@@ -16,11 +16,60 @@ const AddShiftScreen = () => {
 
     const [isRecordMode, setIsRecordMode] = useState(true);
     const [inputDropDownVisible, setInputDropDownVisible] = useState(false);
-    const [groupOptions, setGroupOptions] = useState([]);
+    const [timePickerVisible, setTimePickerVisible] = useState(false);
+    const [selectedTime, setSelectedTime] = useState("");
+    const [datePickerVisible, setDatePickerVisible] = useState(false);
+    const [selectedDate, setSelectedDate] = useState("");
+
+    const [endTimePickerVisible, setEndTimePickerVisible] = useState(false);
+    const [selectedEndTime, setSelectedEndTime] = useState("");
+    const [endDatePickerVisible, setEndDatePickerVisible] = useState(false);
+    const [selectedEndDate, setSelectedEndDate] = useState("");
 
     const toggleMode = () => {
         setIsRecordMode(!isRecordMode);
         console.log("Mode toggled to:", isRecordMode ? "Input" : "Record");
+    };
+
+    const openTimePicker = () => {
+        setTimePickerVisible(true);
+    };
+
+    const closeTimePicker = () => {
+        setTimePickerVisible(false);
+    };
+
+    const handleTimeSelect = (time) => {
+        setSelectedTime(time);
+        closeTimePicker();
+    };
+
+    const openDatePicker = () => {
+        setDatePickerVisible(true);
+    };
+
+    const closeDatePicker = () => {
+        setDatePickerVisible(false);
+    };
+
+    const handleDateSelect = (date) => {
+        setSelectedDate(date);
+        closeDatePicker();
+    };
+
+    //Handlers for end time and date pickers
+    const openEndTimePicker = () => setEndTimePickerVisible(true);
+    const closeEndTimePicker = () => setEndTimePickerVisible(false);
+    const handleEndTimeSelect = (time) => {
+        setSelectedEndTime(time);
+        closeEndTimePicker();
+    };
+
+    const openEndDatePicker = () => setEndDatePickerVisible(true);
+    const closeEndDatePicker = () => setEndDatePickerVisible(false);
+    const handleEndDateSelect = (date) => {
+        setSelectedEndDate(date);
+        closeEndDatePicker();
     };
     const animatedValue = useRef(new Animated.Value(0)).current;
 
@@ -142,29 +191,97 @@ useEffect(() => {
                             Aloitusaika
                         </Text>
                         <View style={styles.row}>
-                        <TouchableOpacity style={styles.inputbutton} onPress={TimePicker}>
-                            <Text style={styles.buttonText}>%time%</Text>
+                        <TouchableOpacity style={styles.inputbutton} onPress={openTimePicker}>
+                            <Text style={styles.buttonText}>{selectedTime || "Valitse Aika"}</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.inputbutton} onPress={DatePicker}>
-                            <Text style={styles.buttonText}>%date%</Text>
+                        <TouchableOpacity style={styles.inputbutton} onPress={openDatePicker}>
+                            <Text style={styles.buttonText}>{selectedDate || "Valitse pvm"}</Text>
                         </TouchableOpacity>
                         </View>
                     </View>
+
+                    {/* TimePicker Modal for start times */}
+                    <Modal
+                            animationType="slide"
+                            transparent={true}
+                            visible={timePickerVisible}
+                            onRequestClose={closeTimePicker}
+                        >
+                            <View style={styles.modalContainer}>
+                                <View style={styles.modalContent}>
+                                    <TimePicker onTimeSelected={handleTimeSelect} />
+                                    <TouchableOpacity style={styles.modalButton} onPress={closeTimePicker}>
+                                        <Text style={styles.modalButtonText}>Peruuta</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </Modal>
+
+                    {/* DatePicker Modal for end times*/}
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={datePickerVisible}
+                    onRequestClose={closeDatePicker}
+                >
+                    <View style={styles.modalContainer}>
+                        <View style={styles.modalContent}>
+                            <DatePicker onDateSelected={handleDateSelect} />
+                            <TouchableOpacity style={styles.modalButton} onPress={closeDatePicker}>
+                                <Text style={styles.modalButtonText}>Peruuta</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
 
 
 
                     {/* End Time Section */}
-                    <View style={styles.rowWrapper}>
-                        <Text style={styles.Label}>Lopetusaika</Text>
+                    <View style={styles.shiftDataInputRow}>
+                        <Text style={styles.shiftDataLabel}>Lopetusaika</Text>
                         <View style={styles.row}>
-                            <TouchableOpacity style={styles.inputbutton} onPress={TimePicker}>
-                                <Text style={styles.buttonText}>%time%</Text>
+                            <TouchableOpacity style={styles.inputbutton} onPress={openEndTimePicker}>
+                                <Text style={styles.buttonText}>{selectedEndTime || "Valitse Aika"}</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.inputbutton} onPress={DatePicker}>
-                                <Text style={styles.buttonText}>%date%</Text>
+                            <TouchableOpacity style={styles.inputbutton} onPress={openEndDatePicker}>
+                                <Text style={styles.buttonText}>{selectedEndDate || "Valitse pvm"}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
+
+                    {/* TimePicker Modal for End Time */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={endTimePickerVisible}
+                onRequestClose={closeEndTimePicker}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <TimePicker onTimeSelected={handleEndTimeSelect} />
+                        <TouchableOpacity style={styles.modalButton} onPress={closeEndTimePicker}>
+                            <Text style={styles.modalButtonText}>Peruuta</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* DatePicker Modal for End Date */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={endDatePickerVisible}
+                onRequestClose={closeEndDatePicker}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <DatePicker onDateSelected={handleEndDateSelect} />
+                        <TouchableOpacity style={styles.modalButton} onPress={closeEndDatePicker}>
+                            <Text style={styles.modalButtonText}>Peruuta</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
 
                     {/* Break Section */}
                     <View style={styles.rowWrapper}>
