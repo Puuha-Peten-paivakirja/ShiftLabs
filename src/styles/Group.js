@@ -45,6 +45,27 @@ export default StyleSheet.create({
       width: '73%',
       maxHeight: 150,
     },
+    centeredView: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    modalView: {
+      margin: 20,
+      backgroundColor: 'white',
+      borderRadius: 20,
+      height: '70%',
+      width: '80%',
+      alignItems: 'center',
+      shadowColor: 'black',
+      elevation: 20,
+      backgroundColor: '#e6e0e9', 
+    },
+    modalTextView:{
+      alignItems: 'flex-start',
+      marginTop: 10,
+      marginLeft: 1,
+    },
 
   // Scrollviews
       scrollviewGroups: {
@@ -79,6 +100,20 @@ export default StyleSheet.create({
       textAlign: 'center',
       marginBottom: 30, 
       fontSize: 20,
+    },
+    groupSettingsText: {
+      fontSize: 15,
+      color: '#68548c',
+      textAlignVertical: 'center',
+    },
+    groupDeleteText: {
+      fontSize: 15,
+      color: 'darkred',
+      textAlignVertical: 'center',
+    },
+    modalHeader:{
+      fontSize: 20,
+      fontWeight: 'bold',
     },
 
   // Separatorlines
@@ -148,6 +183,37 @@ export default StyleSheet.create({
       paddingLeft: 40,
       marginTop: 20,
       marginBottom: 20,
+    },
+    groupSettingsButton: {
+      backgroundColor: '#e6e0e9',
+      borderRadius: 15,
+      paddingVertical: 10,
+      paddingHorizontal: 15,
+      marginTop: 10,
+      marginBottom: 10,
+      flexDirection: "row",
+      justifyContent: 'center',
+      alignItems: 'center', 
+      width: 280,
+      gap: 5
+    },
+    groupDeleteButton: {
+      backgroundColor: '#e6e0e9',
+      borderRadius: 15,
+      paddingVertical: 10,
+      paddingHorizontal: 15,
+      marginTop: 10,
+      marginBottom: 10,
+      flexDirection: "row",
+      justifyContent: 'center',
+      alignItems: 'center', 
+      width: 280,
+      gap: 5
+    },
+    modalButton: {
+      borderRadius: 20,
+      padding: 10,
+      elevation: 2,
     },
   
   });

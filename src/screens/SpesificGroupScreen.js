@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Modal, } from "react-native";
 import Navbar from "../components/Navbar";
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useNavigation } from '@react-navigation/native';
 import styles from "../styles/Group.js";
 import { useUser } from "../context/useUser";
-import { addDoc, updateDoc, doc, collection, firestore, GROUPS, GROUPUSERS, serverTimestamp, USERS, query, where, getDocs, USERGROUPS, onSnapshot, deleteDoc } from "../firebase/config.js";
+import { updateDoc, doc, collection, firestore, GROUPS, GROUPUSERS, USERS, query, getDocs, USERGROUPS, onSnapshot, deleteDoc } from "../firebase/config.js";
 import { FlatList } from "react-native-gesture-handler";
 import { TextInput  } from "react-native-paper";
 
@@ -20,6 +20,8 @@ export default function SpesificGroupScreen({ route }) {
     const [ userHours, setUserHours ] = useState([]);
     const [admin, setAdmin] = useState(false);
     const [ newName, setNewName] = useState('');
+    const [modalVisible, setModalVisible] = useState(false);
+
 
 
  useEffect(() => {
@@ -94,19 +96,28 @@ export default function SpesificGroupScreen({ route }) {
         }
     }
     const changeAdmin = async () => {
-        console.log("hih")
+        try{
+
+        }catch(e){
+            console.log(e)
+        }
     }
     const deleteGroup = async () => {
-        console.log("heh")
+        try{
+
+        }catch(e){
+            console.log(e)
+        }
 
     }
     return (
         <View style={styles.container}>
             <Navbar />
+                
                 <TouchableOpacity  
                     style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
                     onPress={() => {navigation.navigate('Group')}}>
-                    <Ionicons name='arrow-back-outline' size={30} />
+                    <Ionicons name='arrow-back-outline' size={25} />
                     <Text style={{fontSize:15, fontWeight: 'bold'}} >Takaisin</Text>
                 </TouchableOpacity>
                 <View style={{flex:1, alignItems: 'center',}}>
@@ -146,24 +157,60 @@ export default function SpesificGroupScreen({ route }) {
 
 
                     </View>
-                    {admin == true && (
-                        <View>
+                    {admin === true && (
+                        <View style={styles.groupView}>
+
                             <Text style={styles.headings}>Asetukset:</Text>
                             <View style={styles.nameInputHalf}>
-                            <TextInput
-                                style={styles.nameInput}
-                                maxLength={50}
-                                value={newName}
-                                placeholder="Vaihda ryhmän nimeä..."
-                                onChangeText={text => setNewName(text)}
-                            />
-                            <TouchableOpacity 
-                                style={styles.clearNameIcon} 
-                                onPress={() => newGroupName()}
-                            >
-                                <Ionicons name='checkmark-outline' size={30} />
-                            </TouchableOpacity>
+                                <TextInput
+                                    style={styles.nameInput}
+                                    maxLength={25}
+                                    value={newName}
+                                    placeholder="Vaihda ryhmän nimeä..."
+                                    onChangeText={text => setNewName(text)}
+                                />
+                                <TouchableOpacity 
+                                    style={styles.clearNameIcon} 
+                                    onPress={() => newGroupName()}
+                                >
+                                    <Ionicons name='checkmark-outline' size={30} />
+                                </TouchableOpacity>
                             </View> 
+
+                            <Modal
+                                animationType="fade"
+                                transparent={true}
+                                visible={modalVisible}
+                                onRequestClose={() => {
+                                    setModalVisible(!modalVisible);
+                                }}>
+                                <View style={styles.centeredView}>
+                                    <View style={styles.modalView}>
+                                        <View style={styles.modalTextView}>
+                                            <Text style={styles.modalHeader}>Ryhmän omistajan vaihtaminen:</Text>
+                                        </View>
+                                            <TouchableOpacity
+                                                style={styles.modalButton}
+                                                onPress={() => setModalVisible(!modalVisible)}>
+                                                <Text style={styles.textStyle}>Peruuta</Text>
+                                            </TouchableOpacity>
+
+                                    </View>
+                                </View>
+                            </Modal>
+
+                            <TouchableOpacity
+                                style={styles.groupSettingsButton}
+                                onPress={() => setModalVisible(true)}>
+                                <Ionicons name='pencil-outline' size={25} />
+                                <Text style={styles.groupSettingsText}>Muokkaa hallintaoikeuksia</Text>
+                            </TouchableOpacity>
+
+
+                            <TouchableOpacity style={styles.groupDeleteButton} onPress={deleteGroup}>
+                                <Ionicons name='trash-sharp' size={30} color="darkred"/>
+                                <Text style={styles.groupDeleteText }>Poista Ryhmä</Text>
+                            </TouchableOpacity>
 
 
                         </View>
