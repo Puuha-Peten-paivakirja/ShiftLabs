@@ -3,7 +3,7 @@ import { View, Image, Text,TouchableOpacity } from "react-native";
 import Navbar from "../components/Navbar";
 import { TextInput, Checkbox  } from "react-native-paper";
 import Ionicons from '@expo/vector-icons/Ionicons'
-import { addDoc, collection, firestore, GROUPS, GROUPUSERS, serverTimestamp, USERS, query, where, getDocs, USERGROUPS, onSnapshot } from "../firebase/config.js";
+import { addDoc, setDoc, collection, firestore, GROUPS, GROUPUSERS, serverTimestamp, USERS, query, where, getDoc, USERGROUPS, onSnapshot, doc } from "../firebase/config.js";
 import { useUser } from "../context/useUser";
 import { FlatList, ScrollView } from "react-native-gesture-handler";
 import filter from "lodash.filter";
@@ -94,16 +94,17 @@ export default function GroupScreen() {
     });
   };
   
-  const getUserName = async (userEmail) => {
+  const getUserName = async () => {
     try {
       // Query to find the maching user info
-      const q = query(
-        collection(firestore, USERS), 
-        where("email", "==", userEmail));
-      const querySnapshot = await getDocs(q);
-      if (!querySnapshot.empty) { 
-        const userData = querySnapshot.docs[0].data();
+      const docRef = doc(firestore, USERS, user.uid);
+      const docSnap = await getDoc(docRef);
+
+
+      if(docSnap.exists()) { 
+        const userData = docSnap.data();
         return { firstName: userData.firstName, lastName: userData.lastName }
+        console.log("kauttaja haettu onnistuneesti")
       } else {
           console.log("Käyttäjää ei löytynyt.");
       }
@@ -116,8 +117,6 @@ export default function GroupScreen() {
   const save = async () => {
     // Only proceed if user is logged in
     if (user !== null) {
-      const email = user.email
-
       if(newGroup.groupName !== ''){
         try{
           // Create a new group document in the "Groups" collection
@@ -130,13 +129,12 @@ export default function GroupScreen() {
           setNewGroup({ groupDesc:'', groupName:''})
           console.log('New group saved')
           // Fetch full name of the current user using email
-          const userName = await getUserName(email);
+          const userName = await getUserName();
           
           // Add the current user to the group's "GroupUsers" subcollection as an admin
-          await addDoc(collection(firestore, GROUPS, docRef.id, GROUPUSERS), {
+          await setDoc(doc(firestore, GROUPS, docRef.id, GROUPUSERS, user.uid ), {
             firstName: userName.firstName,
             lastName: userName.lastName,
-            email: email,
             joined: serverTimestamp(),
             role: "admin",
           })
@@ -144,7 +142,7 @@ export default function GroupScreen() {
             // Add group info to the user's "UserGroups" subcollection
             // This is a shortcut reference to the group for quicker lookups
             // It avoids needing to query the entire Groups/GroupUsers structure
-          await addDoc(collection(firestore, USERS, user.uid, USERGROUPS), {
+          await setDoc(doc(firestore, USERS, user.uid, USERGROUPS, docRef.id), {
             groupId: docRef.id,
             groupName: newGroup.groupName,
             groupDesc: newGroup.groupDesc,
@@ -153,14 +151,13 @@ export default function GroupScreen() {
           console.log("Group added to user subcollection");
 
           // Add all selected users to "GroupUsers" as members
-          const groupUsersCollection = collection(firestore, GROUPS, docRef.id, GROUPUSERS);
+          
           // Map to get all users into "GroupUsers"
           const addMembers = checkedUsers.map((member) => {
-              const { firstName, lastName, email} = member;
-              return addDoc(groupUsersCollection, {
+              const { firstName, lastName, id} = member;
+              return setDoc(doc(firestore, GROUPS, docRef.id, GROUPUSERS, id), {
                 firstName,
                 lastName,
-                email,
                 joined: serverTimestamp(),
                 role: "member",
               })
@@ -171,7 +168,7 @@ export default function GroupScreen() {
           // Add group info to all selected users
           const addGroupsToUsers = checkedUsers.map((member) => {
               const { id } = member;
-              return addDoc(collection(firestore, USERS, id, USERGROUPS),{
+              return setDoc(doc(firestore, USERS, id, USERGROUPS, docRef.id),{
                 groupId: docRef.id,
                 groupName: newGroup.groupName,
                 groupDesc: newGroup.groupDesc,
@@ -208,17 +205,18 @@ export default function GroupScreen() {
     <View style={styles.container}>
       <Navbar />
       {user ? (
-      <View style={styles.group}>
+      <ScrollView>
+      <View style={styles.groupView}>
         <Text style={styles.headings}>Omat ryhmät:</Text>
 
-        <ScrollView style={styles.srollwiew} >
-          {
+        <ScrollView style={styles.scrollviewGroups} nestedScrollEnabled={true}>
+        {
             joinedGroups.map((joinedGroup)=>(
-              <View key={joinedGroup.id} style={styles.groupItem}>
+              <View key={joinedGroup.id} style={styles.groupViewItem}>
                 <Text style={styles.groupText}>{joinedGroup.groupName}</Text>
 
                 <TouchableOpacity 
-                  style={styles.groupInfo} 
+                  style={styles.groupInfoButton} 
                   onPress={() => navigateToGroup(joinedGroup.id)}
                 >
                   <Ionicons name='add-outline' size={30} />
@@ -229,9 +227,9 @@ export default function GroupScreen() {
         </ScrollView>
 
         <View style={styles.separator} />
+
         {/*------------------------------------*/}
         <Text style={styles.headings}>Luo uusi ryhmä:</Text>
-
 
         <View style={styles.nameInputHalf}>
           <TextInput
@@ -242,11 +240,13 @@ export default function GroupScreen() {
             onChangeText={text => setNewGroup({...newGroup, groupName:text})}
             numberOfLines={1}
           />
-          <TouchableOpacity style={styles.clearNameIcon} onPress={() => setNewGroup({...newGroup, groupName:''})}>
+          <TouchableOpacity 
+            style={styles.clearNameIcon} 
+            onPress={() => setNewGroup({...newGroup, groupName:''})}
+          >
             <Ionicons name='close-circle' size={20} />
           </TouchableOpacity>
         </View> 
-
 
         <View style={styles.nameInputHalf}>
           <TextInput
@@ -258,11 +258,13 @@ export default function GroupScreen() {
             onChangeText={text => setNewGroup({...newGroup, groupDesc:text})}
             numberOfLines={3}
           />
-          <TouchableOpacity style={styles.clearNameIcon} onPress={() => setNewGroup({...newGroup, groupDesc:''})}>
+          <TouchableOpacity 
+            style={styles.clearNameIcon} 
+            onPress={() => setNewGroup({...newGroup, groupDesc:''})}
+          >
             <Ionicons name='close-circle' size={20} />
           </TouchableOpacity>
         </View> 
-
 
         <View style={styles.serachContainer}>
           <TextInput 
@@ -271,34 +273,31 @@ export default function GroupScreen() {
             autoCorrect={false}
             value={searchQuery}
             onChangeText={(query) => handleSearch(query)}
-            />
+          />
         </View>
 
-          <FlatList
-              data={filteredUsers}
-              keyExtractor={(item) => item.id}
-              style={styles.scrollviewUser}
-              renderItem={({ item }) => (
-              <View>
-                <View style={styles.userItem}>
-                  <Text style={styles.userText}>{item.firstName} {item.lastName}</Text>
-                  <Checkbox
-                    style={styles.checkbox}
-                    status={checkedUsers.find(u => u.id === item.id) ? 'checked' : 'unchecked'}
-                    onPress={() => toggleUser(item)}
-                    />
-                  </View>
-                <View style={styles.userSeparator} />
+        <ScrollView style={styles.scrollviewUser} nestedScrollEnabled={true}>
+          {filteredUsers.map((item) => (
+            <View key={item.id}>
+              <View style={styles.userViewItem}>
+                <Text style={styles.userText}>{item.firstName} {item.lastName}</Text>
+                <Checkbox
+                  style={styles.checkbox}
+                  status={checkedUsers.find(u => u.id === item.id) ? 'checked' : 'unchecked'}
+                  onPress={() => toggleUser(item)}
+                />
               </View>
-            )}
-          />
-          <TouchableOpacity style={styles.createGroup} onPress={save}>
-            <Text style={styles.createButton}>Luo</Text>
-          </TouchableOpacity>
+              <View style={styles.userSeparator} />
+            </View>
+          ))}
+        </ScrollView>
 
-
-        
-      </View>) :(
+        <TouchableOpacity style={styles.createGroupButton} onPress={save}>
+          <Text style={styles.createButtonText}>Luo</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
+    ) :(
       <View style={styles.loginContainer}>
         <Text style={styles.loginMessage}>Kirjaudu sisään käyttääksesi ryhmiä!</Text>
         <Image 

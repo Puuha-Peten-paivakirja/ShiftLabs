@@ -1,13 +1,14 @@
 import react, { useState, useEffect } from 'react'
-import { View, StyleSheet, Image, Text, TouchableOpacity, Platform, Alert } from 'react-native'
+import { View, Image, Text, TouchableOpacity, Alert } from 'react-native'
 import Navbar from '../components/Navbar'
 import Feather from '@expo/vector-icons/Feather'
 import { TextInput } from 'react-native-paper'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useUser } from '../context/useUser'
-import { firestore, USERS, doc, updateDoc, onSnapshot, getDocs, collection, GROUPS, EmailAuthProvider, reauthenticateWithCredential, updatePassword, GROUPUSERS, query, where } from '../firebase/config.js'
+import { firestore, USERS, doc, updateDoc, onSnapshot, getDocs, collection, GROUPS, EmailAuthProvider, reauthenticateWithCredential, updatePassword, GROUPUSERS, verifyBeforeUpdateEmail, getDoc } from '../firebase/config.js'
 import isStrongPassword from 'validator/lib/isStrongPassword'
 import styles from '../styles/Settings.js'
+import isEmail from 'validator/lib/isEmail'
 
 export default function SettingsScreen() {
   const { user } = useUser()
@@ -37,7 +38,7 @@ export default function SettingsScreen() {
       setUserInfo({
         firstName: document.data().firstName,
         lastName: document.data().lastName,
-        currentEmail: document.data().email
+        currentEmail: user.email
       })
       setEditInfo({
         firstName: document.data().firstName,
@@ -192,19 +193,15 @@ export default function SettingsScreen() {
     const groupIds = allGroups.docs.map((doc) => doc.id)
 
     await Promise.all(groupIds.map(async (groupId) => {
-      const groupUsersRef = collection(firestore, GROUPS, groupId, GROUPUSERS)
-      const q = query(groupUsersRef, where('email', '==', user.email))
-      const groupUserDocument = await getDocs(q)
+      const groupUsersRef = doc(firestore, GROUPS, groupId, GROUPUSERS, user.uid)
+      const document = await getDoc(groupUsersRef)
 
-      if (!groupUserDocument.empty) {
-        const documentId = groupUserDocument.docs[0].id
-        const groupRef = doc(firestore, GROUPS, groupId, GROUPUSERS, documentId)
-
-        await updateDoc(groupRef, {
+      if (document.exists()) {
+        await updateDoc(groupUsersRef, {
           firstName: editInfo.firstName,
           lastName: editInfo.lastName
         })
-      }
+      }  
     }))
   }
 
@@ -227,6 +224,58 @@ export default function SettingsScreen() {
     catch (error) {
       console.log(error)
       Alert.alert('Error', 'Error while changing name', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
+    }
+  }
+
+  const checkEmailInput = () => {
+    if (!editInfo.newEmail || editInfo.newEmail.trim().length === 0) {
+      Alert.alert('Error', 'Email is required', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
+      return false
+    }
+    else if (!isEmail(editInfo.newEmail)) {
+      Alert.alert('Error', 'Email is not valid', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
+      return false
+    }
+    else {
+      return true
+    }
+  }
+
+  const updateUserEmail = async () => {
+    setIsDisabled(true)
+
+    if (!checkEmailInput()) {
+      return
+    }
+
+    try {
+      const credential = EmailAuthProvider.credential(user.email, userInfo.currentPassword)
+      await reauthenticateWithCredential(user, credential)
+      await verifyBeforeUpdateEmail(user, editInfo.newEmail)
+      setEditingEmail(false)
+      setUserInfo({...userInfo, currentPassword: ''})
+      setEditInfo({...editInfo, newEmail: ''})
+      Alert.alert('Email sent', 'A verification email has been sent. Plese verify your new email address to confirm this change.', [
+        {
+          onPress: () => setIsDisabled(false)
+        }
+      ])
+    }
+    catch (error) {
+      console.log(error)
+      Alert.alert('Error', 'Error while changing email address', [
         {
           onPress: () => setIsDisabled(false)
         }
@@ -356,7 +405,7 @@ export default function SettingsScreen() {
             <TouchableOpacity 
               style={styles.confirmButton} 
               activeOpacity={0.75}
-              // onPress not implemented yet
+              onPress={() => updateUserEmail()}
               disabled={isDisabled}
             >
               <Text style={styles.buttonText}>Confirm</Text>
