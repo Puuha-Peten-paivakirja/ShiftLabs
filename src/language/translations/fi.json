@@ -2,5 +2,7 @@
   "welcome": "Tervetuloa",
   "sign-up": "Rekisteröidy",
   "sign-in": "Kirjaudu",
-  "guest": "Vieras"
+  "guest": "Vieras",
+
+  "error": "Virhe"
 }

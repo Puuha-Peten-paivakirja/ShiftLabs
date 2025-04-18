@@ -4,14 +4,20 @@ import Navbar from '../components/Navbar'
 import Feather from '@expo/vector-icons/Feather'
 import { TextInput } from 'react-native-paper'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import { useUser } from '../context/useUser'
 import { firestore, USERS, doc, updateDoc, onSnapshot, getDocs, collection, GROUPS, EmailAuthProvider, reauthenticateWithCredential, updatePassword, GROUPUSERS, verifyBeforeUpdateEmail, getDoc } from '../firebase/config.js'
 import isStrongPassword from 'validator/lib/isStrongPassword'
 import styles from '../styles/Settings.js'
 import isEmail from 'validator/lib/isEmail'
+import { useTranslation } from 'react-i18next'
+import { Dropdown } from 'react-native-element-dropdown'
+import Entypo from '@expo/vector-icons/Entypo'
+
 
 export default function SettingsScreen() {
   const { user } = useUser()
+  const { t, i18n } = useTranslation()
   const userRef = user ? doc(firestore, USERS, user.uid) : null
   const [isDisabled, setIsDisabled] = useState(false)
   const [editingName, setEditingName] = useState(false)
@@ -30,7 +36,11 @@ export default function SettingsScreen() {
     newPassword: '',
     confirmedNewPassword: ''
   })
-
+  const languageOptions = [
+    { label: 'English', value: 'en' },
+    { label: 'Finnish', value: 'fi' },
+  ]
+  
   useEffect(() => {
     if(!user) return
     
@@ -84,7 +94,7 @@ export default function SettingsScreen() {
 
   const checkPasswordInputs = () => {
     if (!editInfo.newPassword || editInfo.newPassword.length > 30 || !isStrongPassword(editInfo.newPassword, {minLength: 8, minLowercase:1 , minUppercase: 1, minNumbers: 1, minSymbols: 0})) {
-      Alert.alert('Error', 'Password must contain 8-30 characters, 1 number, 1 uppercase letter and 1 lowercase letter', [
+      Alert.alert(t('error'), 'Password must contain 8-30 characters, 1 number, 1 uppercase letter and 1 lowercase letter', [
         {
           onPress: () => setIsDisabled(false)
         }
@@ -281,6 +291,10 @@ export default function SettingsScreen() {
         }
       ])
     }
+  }
+
+  const changeAppLanguage = (value) => {
+    i18n.changeLanguage(value)
   }
 
   return (
@@ -514,6 +528,24 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
       )}
+
+      <View style={styles.languageContainer}>
+        <Dropdown
+          style={styles.dropdown}
+          data={languageOptions}
+          labelField='label'
+          valueField='value'
+          value={i18n.language}
+          onChange={item => changeAppLanguage(item.value)}
+          selectedTextStyle={styles.dropdownText}
+          renderLeftIcon={() => (
+            <MaterialIcons name='language' size={20} style={styles.dropdownIconLeft} />
+          )}
+          renderRightIcon={() => (
+            <Entypo name='chevron-right' size={20} style={styles.dropdownIconRight} />
+          )}
+      />
+      </View>
     </View>
   )
 }
