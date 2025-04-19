@@ -1,4 +1,4 @@
-import react, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { View, Image, Text, TouchableOpacity, Alert } from 'react-native'
 import Navbar from '../components/Navbar'
 import Feather from '@expo/vector-icons/Feather'
@@ -13,6 +13,7 @@ import isEmail from 'validator/lib/isEmail'
 import { useTranslation } from 'react-i18next'
 import { Dropdown } from 'react-native-element-dropdown'
 import Entypo from '@expo/vector-icons/Entypo'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 
 export default function SettingsScreen() {
@@ -293,8 +294,15 @@ export default function SettingsScreen() {
     }
   }
 
-  const changeAppLanguage = (value) => {
+  const changeAppLanguage = async (value) => {
     i18n.changeLanguage(value)
+
+    try {
+      await AsyncStorage.setItem('appLanguage', value)
+    } 
+    catch (error) {
+      console.log(error)
+    }
   }
 
   return (
