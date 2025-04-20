@@ -54,7 +54,7 @@ export default function SignInScreen() {
 
   return (
     <View style={styles.container}>
-      <Topbar title='Sign in' />
+      <Topbar title='Sign in' showGoBackButton={true} />
 
       <View style={styles.contentContainer}>
         <View>

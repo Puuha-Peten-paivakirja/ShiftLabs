@@ -145,7 +145,7 @@ export default function SignUpScreen() {
 
   return (
     <View style={styles.container}>
-      <Topbar title='Sign up' />
+      <Topbar title='Sign up' showGoBackButton={true} />
 
       <View style={styles.contentContainer}>
         <View>

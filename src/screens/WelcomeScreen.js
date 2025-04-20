@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, StyleSheet, Text } from 'react-native'
+import { View } from 'react-native'
 import { Topbar } from '../components/Topbar.js'
 import { CustomButton } from '../components/CustomButton'
 import { useNavigation } from '@react-navigation/native'
@@ -12,7 +12,7 @@ export default function WelcomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Topbar title={t('welcome')}/>
+      <Topbar title={t('welcome')} showGoBackButton={false} />
 
       <View style={styles.contentContainer}>
         <View></View>

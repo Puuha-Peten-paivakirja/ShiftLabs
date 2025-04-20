@@ -52,7 +52,7 @@ export default function ResetPasswordScreen() {
 
   return (
     <View style={styles.container}>
-      <Topbar title='Reset password' />
+      <Topbar title='Reset password' showGoBackButton={true} />
       
       <View style={styles.center}>
         <View style={styles.textContent}>
