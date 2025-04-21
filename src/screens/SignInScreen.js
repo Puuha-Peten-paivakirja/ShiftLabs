@@ -6,11 +6,12 @@ import styles from '../styles/SignIn.js'
 import { CustomButton } from '../components/CustomButton'
 import { Topbar } from '../components/Topbar.js'
 import { CommonActions, useNavigation } from '@react-navigation/native'
-import { auth, signInWithEmailAndPassword } from '../firebase/config.js' 
+import { auth, signInWithEmailAndPassword } from '../firebase/config.js'
+import { useTranslation } from 'react-i18next'
 
 export default function SignInScreen() {
   const navigation = useNavigation()
-
+  const { t } = useTranslation()
   const [isDisabled, setIsDisabled] = useState(false)
   const [userInfo, setUserInfo] = useState({email: '', password: '',})
 
@@ -29,21 +30,21 @@ export default function SignInScreen() {
       })
       .catch((error) => {
         if (error.code === 'auth/invalid-email') {
-          Alert.alert('Error', 'Email is not valid', [
+          Alert.alert(t('error'), t('email-is-not-valid'), [
             {
               onPress: () => setIsDisabled(false)
             }
           ])
         }
         else if (error.code === 'auth/invalid-credential' || error.code === 'auth/missing-password') {
-          Alert.alert('Error', 'Invalid credentials', [
+          Alert.alert(t('error'), t('invalid-credentials'), [
             {
               onPress: () => setIsDisabled(false)
             }
           ])
         }
         else {
-          Alert.alert('Error', error.message, [
+          Alert.alert(t('error'), error.message, [
             {
               onPress: () => setIsDisabled(false)
             }
@@ -54,7 +55,7 @@ export default function SignInScreen() {
 
   return (
     <View style={styles.container}>
-      <Topbar title='Sign in' showGoBackButton={true} />
+      <Topbar title={t('sign-in')} showGoBackButton={true} />
 
       <View style={styles.contentContainer}>
         <View>
@@ -62,7 +63,7 @@ export default function SignInScreen() {
           <View style={styles.credentialsInputRow}>
             <TextInput
               style={styles.credentialsInput}
-              label='Email'
+              label={t('email-address')}
               value={userInfo.email}
               onChangeText={text => setUserInfo({...userInfo, email: text})}
               keyboardType='email-address'
@@ -78,7 +79,7 @@ export default function SignInScreen() {
           <View style={styles.credentialsInputRow}>
             <TextInput
               style={styles.credentialsInput}
-              label='Password'
+              label={t('password')}
               value={userInfo.password}
               onChangeText={text => setUserInfo({...userInfo, password: text})}
               secureTextEntry={true}
@@ -95,14 +96,14 @@ export default function SignInScreen() {
 
         <View style={styles.bottomContainer}>
           <CustomButton
-            title={'Sign in'}
+            title={t('sign-in')}
             onPress={() => signIn()}
             isDisabled={isDisabled}
           />
             <View style={styles.bottomText}>
-              <Text style={styles.signInText}>Forgot your password? </Text>
+              <Text style={styles.signInText}>{t('forgot-your-password')}</Text>
               <TouchableOpacity activeOpacity={0.75} onPress={() => navigation.navigate('ResetPassword')}>
-                <Text style={styles.signInTextLink}>Reset password</Text>
+                <Text style={styles.signInTextLink}>{t('reset-password')}</Text>
               </TouchableOpacity>
             </View>
         </View>
