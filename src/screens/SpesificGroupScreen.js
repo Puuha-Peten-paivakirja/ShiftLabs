@@ -7,7 +7,7 @@ import styles from "../styles/Group.js";
 import { useUser } from "../context/useUser";
 import { updateDoc, doc, collection, firestore, GROUPS, GROUPUSERS, USERS, query, getDocs, USERGROUPS, onSnapshot, deleteDoc } from "../firebase/config.js";
 import { FlatList } from "react-native-gesture-handler";
-import { TextInput  } from "react-native-paper";
+import { TextInput, Checkbox  } from "react-native-paper";
 
 
 
@@ -21,6 +21,8 @@ export default function SpesificGroupScreen({ route }) {
     const [admin, setAdmin] = useState(false);
     const [ newName, setNewName] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
+      const [checkedUser, setCheckedUser] = useState([]);
+    
 
 
 
@@ -95,6 +97,17 @@ export default function SpesificGroupScreen({ route }) {
             console.log("Error in setting the newGroup name:", e)
         }
     }
+    const toggleUser = (selectedUser) => {
+        setCheckedUser((prev) => {
+            const exists = prev.find((u) => u.id === selectedUser.id);
+            if (exists) {
+            return prev.filter((u) => u.id !== selectedUser.id);
+            } else {
+            return [...prev, { id: selectedUser.id, firstName: selectedUser.firstName, lastName: selectedUser.lastName, email: selectedUser.email }];
+            }
+        });
+    };
+
     const changeAdmin = async () => {
         try{
 
@@ -120,6 +133,7 @@ export default function SpesificGroupScreen({ route }) {
                     <Ionicons name='arrow-back-outline' size={25} />
                     <Text style={{fontSize:15, fontWeight: 'bold'}} >Takaisin</Text>
                 </TouchableOpacity>
+
                 <View style={{flex:1, alignItems: 'center',}}>
                         <Text style={styles.headings}>Henkilöt:</Text>
                         <FlatList
@@ -145,7 +159,7 @@ export default function SpesificGroupScreen({ route }) {
                                 </View>
 
                                 )}
-                            <View style={styles.userSeparator} />
+                                <View style={styles.userSeparator} />
                             </View> 
                             )}
                         />
@@ -154,11 +168,11 @@ export default function SpesificGroupScreen({ route }) {
 
                     <View>
                         <Text style={styles.headings}>Ryhmän työtunnit:</Text>
-
-
                     </View>
+
+                    
                     {admin === true && (
-                        <View style={styles.groupView}>
+                        <View style={{flex:1, alignItems: 'center',}}>
 
                             <Text style={styles.headings}>Asetukset:</Text>
                             <View style={styles.nameInputHalf}>
@@ -188,12 +202,27 @@ export default function SpesificGroupScreen({ route }) {
                                     <View style={styles.modalView}>
                                         <View style={styles.modalTextView}>
                                             <Text style={styles.modalHeader}>Ryhmän omistajan vaihtaminen:</Text>
+                                            <Text style={styles.modalText}>Valitse yksi ryhmä henkilöistä sen uudeksi omistajaksi</Text>
                                         </View>
-                                            <TouchableOpacity
-                                                style={styles.modalButton}
-                                                onPress={() => setModalVisible(!modalVisible)}>
-                                                <Text style={styles.textStyle}>Peruuta</Text>
-                                            </TouchableOpacity>
+                                        <FlatList
+                                            data={groupUsers}
+                                            keyExtractor={(item) => item.id}
+                                            style={styles.scrollviewGroupsUsers}
+                                            renderItem={({ item }) => (
+                                            <View>
+                                                <View style={styles.userViewItem}>
+                                                    <Text style={styles.userText}>{item.firstName} {item.lastName}</Text>
+                                                    
+                                                </View>
+                                            <View style={styles.userSeparator} />
+                                            </View> 
+                                            )}
+                                        />
+                                        <TouchableOpacity
+                                            style={styles.modalButton}
+                                            onPress={() => setModalVisible(!modalVisible)}>
+                                            <Text style={{color: '#68548c'}}>Peruuta</Text>
+                                        </TouchableOpacity>
 
                                     </View>
                                 </View>

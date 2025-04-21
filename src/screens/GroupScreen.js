@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback  } from "react";
-import { View, Image, Text,TouchableOpacity } from "react-native";
+import { View, Image, Text,TouchableOpacity, Modal  } from "react-native";
 import Navbar from "../components/Navbar";
 import { TextInput, Checkbox  } from "react-native-paper";
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -26,6 +26,7 @@ export default function GroupScreen() {
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [checkedUsers, setCheckedUsers] = useState([]);
   const navigation = useNavigation();
+  const [modalVisible, setModalVisible] = useState(false);
 
 
 
@@ -204,99 +205,133 @@ export default function GroupScreen() {
   return (
     <View style={styles.container}>
       <Navbar />
+
       {user ? (
-      <ScrollView>
-      <View style={styles.groupView}>
-        <Text style={styles.headings}>Omat ryhmät:</Text>
+      <View style={{flex:1, alignItems: 'center',}}>
+        <Text style={[styles.headings, {marginTop: 20}]}>Omat ryhmät:</Text>
 
-        <ScrollView style={styles.scrollviewGroups} nestedScrollEnabled={true}>
-        {
-            joinedGroups.map((joinedGroup)=>(
-              <View key={joinedGroup.id} style={styles.groupViewItem}>
-                <Text style={styles.groupText}>{joinedGroup.groupName}</Text>
+        {joinedGroups.length > 0 ? (
+          <ScrollView style={styles.scrollviewGroups}>
+          {
+              joinedGroups.map((joinedGroup)=>(
+                <View key={joinedGroup.id} style={styles.groupViewItem}>
+                  <Text style={styles.groupText}>{joinedGroup.groupName}</Text>
 
-                <TouchableOpacity 
-                  style={styles.groupInfoButton} 
-                  onPress={() => navigateToGroup(joinedGroup.id)}
-                >
-                  <Ionicons name='add-outline' size={30} />
-                </TouchableOpacity>
-              </View>
-            ))
-          }
-        </ScrollView>
-
-        <View style={styles.separator} />
+                  <TouchableOpacity 
+                    style={styles.groupInfoButton} 
+                    onPress={() => navigateToGroup(joinedGroup.id)}
+                  >
+                    <Ionicons name='add-outline' size={30} />
+                  </TouchableOpacity>
+                </View>
+              ))
+            }
+          </ScrollView>):(
+            <View >
+              <Text style={{fontSize: 18}}>Luo tai liity ryhmään nähdäksesi ne</Text>
+            </View>
+          )}
 
         {/*------------------------------------*/}
-        <Text style={styles.headings}>Luo uusi ryhmä:</Text>
-
-        <View style={styles.nameInputHalf}>
-          <TextInput
-            style={styles.nameInput}
-            placeholder="Ryhmän nimi..."
-            value={newGroup.groupName}
-            maxLength={25}
-            onChangeText={text => setNewGroup({...newGroup, groupName:text})}
-            numberOfLines={1}
-          />
-          <TouchableOpacity 
-            style={styles.clearNameIcon} 
-            onPress={() => setNewGroup({...newGroup, groupName:''})}
-          >
-            <Ionicons name='close-circle' size={20} />
+          <TouchableOpacity
+            style={styles.floatingButton}
+            onPress={()=>setModalVisible(true)}>
+              <Ionicons name='create-outline' size={30} />
+              <Text style={styles.createButtonText}>Uusi Ryhmä</Text>
           </TouchableOpacity>
-        </View> 
+          
+          <Modal
+            animationType="fade"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => {
+                setModalVisible(!modalVisible);
+            }}>
+            <View style={styles.modalCreateContainer}>
+              <View style={styles.modalCreateView}>
+                  <View style={styles.modalTextView}>
+                    <Text style={styles.headings}>Luo uusi ryhmä:</Text>
+                  </View>
+                  <View style={styles.nameInputHalf}>
+                    <TextInput
+                      style={styles.nameInput}
+                      placeholder="Ryhmän nimi..."
+                      value={newGroup.groupName}
+                      maxLength={25}
+                      onChangeText={text => setNewGroup({...newGroup, groupName:text})}
+                      numberOfLines={1}
+                    />
+                    <TouchableOpacity 
+                      style={styles.clearNameIcon} 
+                      onPress={() => setNewGroup({...newGroup, groupName:''})}
+                    >
+                      <Ionicons name='close-circle' size={20} />
+                    </TouchableOpacity>
+                  </View> 
 
-        <View style={styles.nameInputHalf}>
-          <TextInput
-            style={styles.nameInput}
-            multiline
-            maxLength={50}
-            placeholder="Ryhmän kuvaus..."
-            value={newGroup.groupDesc}
-            onChangeText={text => setNewGroup({...newGroup, groupDesc:text})}
-            numberOfLines={3}
-          />
-          <TouchableOpacity 
-            style={styles.clearNameIcon} 
-            onPress={() => setNewGroup({...newGroup, groupDesc:''})}
-          >
-            <Ionicons name='close-circle' size={20} />
-          </TouchableOpacity>
-        </View> 
+                  <View style={styles.nameInputHalf}>
+                    <TextInput
+                      style={styles.nameInput}
+                      multiline
+                      maxLength={50}
+                      placeholder="Ryhmän kuvaus..."
+                      value={newGroup.groupDesc}
+                      onChangeText={text => setNewGroup({...newGroup, groupDesc:text})}
+                      numberOfLines={3}
+                    />
+                    <TouchableOpacity 
+                      style={styles.clearNameIcon} 
+                      onPress={() => setNewGroup({...newGroup, groupDesc:''})}
+                    >
+                      <Ionicons name='close-circle' size={20} />
+                    </TouchableOpacity>
+                  </View> 
 
-        <View style={styles.serachContainer}>
-          <TextInput 
-            placeholder="Etsi henkilöitä..." 
-            autoCapitalize="none" 
-            autoCorrect={false}
-            value={searchQuery}
-            onChangeText={(query) => handleSearch(query)}
-          />
-        </View>
+                  <View style={styles.serachContainer}>
+                    <TextInput 
+                      placeholder="Etsi henkilöitä..." 
+                      autoCapitalize="none" 
+                      autoCorrect={false}
+                      value={searchQuery}
+                      onChangeText={(query) => handleSearch(query)}
+                    />
+                  </View>
 
-        <ScrollView style={styles.scrollviewUser} nestedScrollEnabled={true}>
-          {filteredUsers.map((item) => (
-            <View key={item.id}>
-              <View style={styles.userViewItem}>
-                <Text style={styles.userText}>{item.firstName} {item.lastName}</Text>
-                <Checkbox
-                  style={styles.checkbox}
-                  status={checkedUsers.find(u => u.id === item.id) ? 'checked' : 'unchecked'}
-                  onPress={() => toggleUser(item)}
-                />
+    
+                  <FlatList
+                      data={filteredUsers}
+                      keyExtractor={(item) => item.id}
+                      style={styles.scrollviewUser}
+                      renderItem={({ item }) => (
+                      <View>
+                        <View style={styles.userViewItem}>
+                          <Text style={styles.userText}>{item.firstName} {item.lastName}</Text>
+                          <Checkbox
+                            style={styles.checkbox}
+                            status={checkedUsers.find(u => u.id === item.id) ? 'checked' : 'unchecked'}
+                            onPress={() => toggleUser(item)}
+                            />
+                          </View>
+                        <View style={styles.userSeparator} />
+                      </View>
+                    )}
+                  />
+                  
+                  <View style={styles.modalButtonView}>
+                    <TouchableOpacity
+                        style={styles.createGroupButton}
+                        onPress={() => setModalVisible(!modalVisible)}>
+                        <Text style={styles.createButtonText}>Peruuta</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.createGroupButton} onPress={() => {save(); setModalVisible(!modalVisible)}}>
+                      <Text style={styles.createButtonText}>Luo</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
               </View>
-              <View style={styles.userSeparator} />
-            </View>
-          ))}
-        </ScrollView>
+          </Modal>
 
-        <TouchableOpacity style={styles.createGroupButton} onPress={save}>
-          <Text style={styles.createButtonText}>Luo</Text>
-        </TouchableOpacity>
       </View>
-    </ScrollView>
     ) :(
       <View style={styles.loginContainer}>
         <Text style={styles.loginMessage}>Kirjaudu sisään käyttääksesi ryhmiä!</Text>
@@ -306,6 +341,7 @@ export default function GroupScreen() {
           />
         </View>
       )}
+      
     </View>
   );
 }
