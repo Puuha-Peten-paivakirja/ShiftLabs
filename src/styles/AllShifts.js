@@ -32,5 +32,12 @@ export default StyleSheet.create({
         padding: '3%',
         justifyContent: "center",
         alignItems: "center",
+    },
+    shiftName: {
+        fontSize: 18,
+        fontWeight: "bold",
+        marginBottom: 5,
+    
     }
+
 });

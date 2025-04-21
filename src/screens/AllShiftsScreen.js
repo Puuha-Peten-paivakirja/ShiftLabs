@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, Pressable } from "react-native";
+import { View, Text, FlatList, TouchableOpacity } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Navbar from "../components/Navbar";
 import styles from "../styles/AllShifts";
@@ -47,12 +47,15 @@ export default function AllShiftsScreen() {
         }
         return "00:00:00"; // Fallback for invalid values
     };
-    
-    
-    
-    
-    
 
+    const formatTime = (timeString) => {
+        if (!timeString) return "00:00";
+        const date = new Date(timeString);
+        const hours = ("0" + date.getHours()).slice(-2);
+        const minutes = ("0" + date.getMinutes()).slice(-2);
+        return `${hours}.${minutes}`;
+    }
+    
     return (
         <View style={styles.container}>
             <Navbar />
@@ -66,16 +69,20 @@ export default function AllShiftsScreen() {
                     keyExtractor={(item, index) => index.toString()}
                     renderItem={({ item }) => (
                         <View style={styles.shiftItem}>
+                            {/* Shift Name */}
+                            <Text style={styles.shiftName}>{item.name|| "Undefined"}</Text>
+
+                            {/* Shift Details */}
                             <Text style={styles.shiftText}>
-                                {formatDate(item.startDate)} - {formatDate(item.endDate)}
+                                {formatTime(item.startTime)} - {formatTime(item.endTime)}
                             </Text>
                             <Text>Pvm: {formatDate(item.date)}</Text>
                             <Text>Kesto: {formatDuration(item.duration)}</Text>
                             <Text>Tauot: {formatDuration(item.breakDuration)}</Text>
 
-                            <Pressable onPress={() => deleteShift(item)} style={styles.deleteShiftButton}>
+                            <TouchableOpacity onPress={() => deleteShift(item)} style={styles.deleteShiftButton}>
                                 <Text style={styles.deleteShiftButtonText}>❌</Text>
-                            </Pressable>
+                            </TouchableOpacity>
                         </View>
                     )}
                 />
