@@ -52,5 +52,5 @@ export {
     updatePassword,
     verifyBeforeUpdateEmail,
     deleteDoc,
-    getDocs
+    getDocs,
  }
