@@ -85,6 +85,14 @@ export const ShiftTimerProvider = ({ children }) => {
     
         restoreElapsedTime();
     }, []);
+
+    useEffect(() => {
+        if (!user || !user.groups) {
+            setShiftName("");
+    }
+    }, [user]);
+
+
     
     const saveShift = async () => {
         console.log("Saving shift...");
