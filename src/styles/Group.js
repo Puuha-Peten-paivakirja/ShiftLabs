@@ -92,7 +92,7 @@ export default StyleSheet.create({
   // Scrollviews
       scrollviewGroups: {
         width: "90%",
-        maxHeight: '80%',
+        maxHeight: '76%',
       },
       scrollviewUser:{
         maxHeight: 200,

@@ -240,6 +240,7 @@ export default function GroupScreen() {
               <Text style={styles.createButtonText}>Uusi Ryhmä</Text>
           </TouchableOpacity>
           
+          
           <Modal
             animationType="fade"
             transparent={true}

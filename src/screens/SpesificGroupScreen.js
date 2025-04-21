@@ -135,7 +135,15 @@ export default function SpesificGroupScreen({ route }) {
                 </TouchableOpacity>
 
                 <View style={{flex:1, alignItems: 'center',}}>
-                        <Text style={styles.headings}>Henkilöt:</Text>
+                        
+                    <View>
+                        <Text style={styles.headings}>Ryhmän työtunnit:</Text>
+                    </View>
+                    <View style={styles.separator} />
+                    {/*------------------------------------*/}
+
+                    
+                    <Text style={styles.headings}>Henkilöt:</Text>
                         <FlatList
                             data={groupUsers}
                             keyExtractor={(item) => item.id}
@@ -163,12 +171,6 @@ export default function SpesificGroupScreen({ route }) {
                             </View> 
                             )}
                         />
-                    <View style={styles.separator} />
-                    {/*------------------------------------*/}
-
-                    <View>
-                        <Text style={styles.headings}>Ryhmän työtunnit:</Text>
-                    </View>
 
                     
                     {admin === true && (
