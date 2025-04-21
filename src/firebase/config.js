@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app'
-import { getFirestore, setDoc, doc, collection, addDoc, serverTimestamp, query, getDocs, where, onSnapshot, updateDoc } from 'firebase/firestore'
+import { getFirestore, setDoc, doc, collection, addDoc, serverTimestamp, query, getDoc, where, onSnapshot, updateDoc, deleteDoc } from 'firebase/firestore'
 import { initializeAuth, getReactNativePersistence, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, EmailAuthProvider, reauthenticateWithCredential, updatePassword, verifyBeforeUpdateEmail } from 'firebase/auth'
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage'
 
@@ -42,7 +42,7 @@ export {
     onAuthStateChanged,
     where,
     query,
-    getDocs,
+    getDoc,
     USERGROUPS,
     onSnapshot,
     sendPasswordResetEmail,
@@ -50,5 +50,6 @@ export {
     EmailAuthProvider,
     reauthenticateWithCredential,
     updatePassword,
-    verifyBeforeUpdateEmail
+    verifyBeforeUpdateEmail,
+    deleteDoc,
  }

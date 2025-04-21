@@ -104,7 +104,6 @@ export default function SignUpScreen() {
         setDoc(doc(firestore, USERS, userCredential.user.uid), { // Adding a document into 'users' collection
           firstName: userInfo.firstName,
           lastName: userInfo.lastName,
-          email: userInfo.email
         })
           .then(() => {
             setUserInfo({ // Clear userInfo after a successful registration 
