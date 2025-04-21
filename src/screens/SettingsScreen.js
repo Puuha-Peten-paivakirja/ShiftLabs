@@ -15,7 +15,6 @@ import { Dropdown } from 'react-native-element-dropdown'
 import Entypo from '@expo/vector-icons/Entypo'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-
 export default function SettingsScreen() {
   const { user } = useUser()
   const { t, i18n } = useTranslation()
@@ -38,8 +37,8 @@ export default function SettingsScreen() {
     confirmedNewPassword: ''
   })
   const languageOptions = [
-    { label: 'English', value: 'en' },
-    { label: 'Finnish', value: 'fi' },
+    { label: t('english'), value: 'en' },
+    { label: t('finnish'), value: 'fi' },
   ]
   
   useEffect(() => {
@@ -95,7 +94,7 @@ export default function SettingsScreen() {
 
   const checkPasswordInputs = () => {
     if (!editInfo.newPassword || editInfo.newPassword.length > 30 || !isStrongPassword(editInfo.newPassword, {minLength: 8, minLowercase:1 , minUppercase: 1, minNumbers: 1, minSymbols: 0})) {
-      Alert.alert(t('error'), 'Password must contain 8-30 characters, 1 number, 1 uppercase letter and 1 lowercase letter', [
+      Alert.alert(t('error'), t('password-requirements'), [
         {
           onPress: () => setIsDisabled(false)
         }
@@ -103,7 +102,7 @@ export default function SettingsScreen() {
       return false
     }
     else if (!editInfo.confirmedNewPassword || editInfo.confirmedNewPassword !== editInfo.newPassword) {
-      Alert.alert('Error', 'Confirmed password does not match with new password', [
+      Alert.alert(t('error'), t('confirmed-and-new-password-do-not-match'), [
         {
           onPress: () => setIsDisabled(false)
         }
@@ -129,7 +128,7 @@ export default function SettingsScreen() {
       setEditingPassword(false)
       setUserInfo({...userInfo, currentPassword: ''})
       setEditInfo({...editInfo, newPassword: '', confirmedNewPassword: ''})
-      Alert.alert('Password changed', 'Password changed successfully', [
+      Alert.alert(t('password-changed'), t('password-changed-successfully'), [
         {
           onPress: () => setIsDisabled(false)
         }
@@ -137,14 +136,14 @@ export default function SettingsScreen() {
     }
     catch (error) {
       if (error.code === 'auth/missing-password') {
-        Alert.alert('Error', 'Password is missing', [
+        Alert.alert(t('error'), t('password-is-missing'), [
           {
             onPress: () => setIsDisabled(false)
           }
         ])
       }
       else if (error.code === 'auth/invalid-credential') {
-        Alert.alert('Error', 'Current password is invalid', [
+        Alert.alert(t('error'), t('current-password-is-invalid'), [
           {
             onPress: () => setIsDisabled(false)
           }
@@ -152,7 +151,7 @@ export default function SettingsScreen() {
       }
       else {
         console.log(error)
-        Alert.alert('Error', 'Error while changing password', [
+        Alert.alert(t('error'), t('error-while-changing-password'), [
           {
             onPress: () => setIsDisabled(false)
           }
@@ -163,7 +162,7 @@ export default function SettingsScreen() {
 
   const checkNameInput = () => {
     if (editInfo.firstName.length > 35 || editInfo.lastName.length > 35) {
-      Alert.alert('Error', 'Maximum length for first/last name is 35 characters', [
+      Alert.alert(t('error'), t('first-and-last-name-length'), [
         {
           onPress: () => setIsDisabled(false)
         }
@@ -171,7 +170,7 @@ export default function SettingsScreen() {
       return false
     }
     else if (!editInfo.firstName || editInfo.firstName.trim().length === 0) {
-      Alert.alert('Error', 'Firstname is required', [
+      Alert.alert(t('error'), t('first-name-is-required'), [
         {
           onPress: () => setIsDisabled(false)
         }
@@ -179,7 +178,7 @@ export default function SettingsScreen() {
       return false
     }
     else if (!editInfo.lastName || editInfo.lastName.trim().length === 0) {
-      Alert.alert('Error', 'Lastname is required', [
+      Alert.alert(t('error'), t('last-name-is-required'), [
         {
           onPress: () => setIsDisabled(false)
         }
@@ -226,7 +225,7 @@ export default function SettingsScreen() {
     try {
       await Promise.all([updateNameInUsersCollection(), updateNameInGroupUsersSubCollection()])
       setEditingName(false)
-      Alert.alert('Name changed', 'Name changed successfully', [
+      Alert.alert(t('name-changed'), t('name-changed-successfully'), [
         {
           onPress: () => setIsDisabled(false)
         }
@@ -234,7 +233,7 @@ export default function SettingsScreen() {
     }
     catch (error) {
       console.log(error)
-      Alert.alert('Error', 'Error while changing name', [
+      Alert.alert(t('error'), t('error-while-changing-name'), [
         {
           onPress: () => setIsDisabled(false)
         }
@@ -244,7 +243,7 @@ export default function SettingsScreen() {
 
   const checkEmailInput = () => {
     if (!editInfo.newEmail || editInfo.newEmail.trim().length === 0) {
-      Alert.alert('Error', 'Email is required', [
+      Alert.alert(t('error'), t('email-is-required'), [
         {
           onPress: () => setIsDisabled(false)
         }
@@ -252,7 +251,7 @@ export default function SettingsScreen() {
       return false
     }
     else if (!isEmail(editInfo.newEmail)) {
-      Alert.alert('Error', 'Email is not valid', [
+      Alert.alert(t('error'), t('email-is-not-valid'), [
         {
           onPress: () => setIsDisabled(false)
         }
@@ -278,7 +277,7 @@ export default function SettingsScreen() {
       setEditingEmail(false)
       setUserInfo({...userInfo, currentPassword: ''})
       setEditInfo({...editInfo, newEmail: ''})
-      Alert.alert('Email sent', 'A verification email has been sent. Plese verify your new email address to complete this change.', [
+      Alert.alert(t('email-sent'), t('email-change-email'), [
         {
           onPress: () => setIsDisabled(false)
         }
@@ -286,7 +285,7 @@ export default function SettingsScreen() {
     }
     catch (error) {
       console.log(error)
-      Alert.alert('Error', 'Error while changing email address', [
+      Alert.alert(t('error'), t('error-while-changing-email'), [
         {
           onPress: () => setIsDisabled(false)
         }
@@ -312,12 +311,12 @@ export default function SettingsScreen() {
       <View style={styles.content}>
         {user && editingName &&
           <View style={styles.editContainer}>
-            <Text style={styles.textStyle}>Name:</Text>
+            <Text style={styles.textStyle}>{t('name')}:</Text>
             <View style={styles.editNameRow}>
               <View style={styles.editNameHalf}>
                 <TextInput 
                   style={styles.nameInput}
-                  label='First name'
+                  label={t('first-name')}
                   value={editInfo.firstName}
                   onChangeText={text => setEditInfo({...editInfo, firstName: text})}
                   numberOfLines={1}
@@ -331,7 +330,7 @@ export default function SettingsScreen() {
               <View style={styles.editNameHalf}>
               <TextInput 
                   style={styles.nameInput}
-                  label='Last name'
+                  label={t('last-name')}
                   value={editInfo.lastName}
                   onChangeText={text => setEditInfo({...editInfo, lastName: text})}
                   numberOfLines={1}
@@ -350,7 +349,7 @@ export default function SettingsScreen() {
                 onPress={() => updateName()}
                 disabled={isDisabled}
               >
-                <Text style={styles.buttonText}>Confirm</Text>
+                <Text style={styles.buttonText}>{t('confirm')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.cancelButton}
@@ -358,7 +357,7 @@ export default function SettingsScreen() {
                 onPress={() => cancelEdit()}
                 disabled={isDisabled}
               >
-                <Text style={styles.buttonText}>Cancel</Text>
+                <Text style={styles.buttonText}>{t('cancel')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -367,7 +366,7 @@ export default function SettingsScreen() {
         {user && !editingName &&
           <View style={styles.notEditingContainer}>
             <View style={styles.textContainer}>
-              <Text style={styles.textStyle}>Name:</Text>
+              <Text style={styles.textStyle}>{t('name')}:</Text>
               <Text style={styles.textStyle} numberOfLines={1}>{userInfo.firstName} {userInfo.lastName}</Text>
             </View>
             <TouchableOpacity style={styles.editIcon} onPress={() => startNameEdit()}>
@@ -378,12 +377,12 @@ export default function SettingsScreen() {
         
         {user && editingEmail &&
           <View style={styles.editContainer}>
-            <Text style={styles.textStyle}>Email address:</Text>
+            <Text style={styles.textStyle}>{t('email-address')}:</Text>
 
             <View style={styles.editRow}>
               <TextInput
                 style={styles.input}
-                label='Current email address'
+                label={t('current-email-address')}
                 value={userInfo.currentEmail}
                 numberOfLines={1}
                 disabled={true}
@@ -393,7 +392,7 @@ export default function SettingsScreen() {
             <View style={styles.editRow}>
               <TextInput
                 style={styles.input}
-                label='New email address'
+                label={t('new-email-address')}
                 value={editInfo.newEmail}
                 onChangeText={text => setEditInfo({...editInfo, newEmail: text})}
                 keyboardType='email-address'
@@ -409,7 +408,7 @@ export default function SettingsScreen() {
             <View style={styles.editRow}>
               <TextInput
                 style={styles.input}
-                label='Password'
+                label={t('password')}
                 value={userInfo.currentPassword}
                 onChangeText={text => setUserInfo({...userInfo, currentPassword: text})}
                 secureTextEntry={true}
@@ -429,7 +428,7 @@ export default function SettingsScreen() {
                 onPress={() => updateUserEmail()}
                 disabled={isDisabled}
               >
-                <Text style={styles.buttonText}>Confirm</Text>
+                <Text style={styles.buttonText}>{t('confirm')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.cancelButton}
@@ -437,7 +436,7 @@ export default function SettingsScreen() {
                 onPress={() => cancelEdit()}
                 disabled={isDisabled}
               >
-                <Text style={styles.buttonText}>Cancel</Text>
+                <Text style={styles.buttonText}>{t('cancel')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -446,7 +445,7 @@ export default function SettingsScreen() {
         {user && !editingEmail &&
           <View style={styles.notEditingContainer}>
             <View style={styles.textContainer}>
-              <Text style={styles.textStyle}>Email address:</Text>
+              <Text style={styles.textStyle}>{t('email-address')}:</Text>
               <Text style={styles.textStyle} numberOfLines={1}>{userInfo.currentEmail}</Text>
             </View>
             <TouchableOpacity style={styles.editIcon} onPress={() => startEmailEdit()}>
@@ -457,12 +456,12 @@ export default function SettingsScreen() {
 
         {user && editingPassword &&
           <View style={styles.editContainer}>
-            <Text style={styles.textStyle}>Change password:</Text>
+            <Text style={styles.textStyle}>{t('change-password')}:</Text>
 
             <View style={styles.editRow}>
               <TextInput
                 style={styles.input}
-                label='Current password'
+                label={t('current-password')}
                 value={userInfo.currentPassword}
                 onChangeText={text => setUserInfo({...userInfo, currentPassword: text})}
                 secureTextEntry={true}
@@ -478,7 +477,7 @@ export default function SettingsScreen() {
             <View style={styles.editRow}>
               <TextInput
                 style={styles.input}
-                label='New password'
+                label={t('new-password')}
                 value={editInfo.newPassword}
                 onChangeText={text => setEditInfo({...editInfo, newPassword: text})}
                 secureTextEntry={true}
@@ -494,7 +493,7 @@ export default function SettingsScreen() {
             <View style={styles.editRow}>
               <TextInput
                 style={styles.input}
-                label='Confirm new password'
+                label={t('confirm-new-password')}
                 value={editInfo.confirmedNewPassword}
                 onChangeText={text => setEditInfo({...editInfo, confirmedNewPassword: text})}
                 secureTextEntry={true}
@@ -514,7 +513,7 @@ export default function SettingsScreen() {
                 onPress={() => updateUserPassword()}
                 disabled={isDisabled}
               >
-                <Text style={styles.buttonText}>Confirm</Text>
+                <Text style={styles.buttonText}>{t('confirm')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.cancelButton}
@@ -522,7 +521,7 @@ export default function SettingsScreen() {
                 onPress={() => cancelEdit()}
                 disabled={isDisabled}
               >
-                <Text style={styles.buttonText}>Cancel</Text>
+                <Text style={styles.buttonText}>{t('cancel')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -531,7 +530,7 @@ export default function SettingsScreen() {
         {user && !editingPassword &&
           <View style={styles.notEditingContainer}>
             <View style={styles.textContainer}>
-              <Text style={styles.textStyle}>Change password:</Text>
+              <Text style={styles.textStyle}>{t('change-password')}:</Text>
               <Text style={styles.textStyle} numberOfLines={1}>* * * * * * * *</Text>
             </View>
             <TouchableOpacity style={styles.editIcon} onPress={() => startPasswordEdit()}>
