@@ -4,9 +4,8 @@ import Svg, { Circle } from "react-native-svg";
 import Navbar from "../components/Navbar";
 import styles from "../styles/AddShift";
 import { ShiftTimerContext } from "../context/ShiftTimerContext";
-import TimePicker from "../components/TimePicker";
-import DatePicker from "../components/DatePicker";
 import ShiftGroupDropDown  from "../components/ShiftGroupDropDown";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 const RADIUS = 45;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
@@ -16,63 +15,17 @@ const AddShiftScreen = () => {
 
     const [isRecordMode, setIsRecordMode] = useState(true);
     const [inputDropDownVisible, setInputDropDownVisible] = useState(false);
-    const [timePickerVisible, setTimePickerVisible] = useState(false);
-    const [selectedTime, setSelectedTime] = useState("");
-    const [datePickerVisible, setDatePickerVisible] = useState(false);
-    const [selectedDate, setSelectedDate] = useState("");
 
-    const [endTimePickerVisible, setEndTimePickerVisible] = useState(false);
-    const [selectedEndTime, setSelectedEndTime] = useState("");
-    const [endDatePickerVisible, setEndDatePickerVisible] = useState(false);
-    const [selectedEndDate, setSelectedEndDate] = useState("");
+    //Shift and break duration states
+    const [duration, setDuration ] = useState("");
+
 
     const toggleMode = () => {
         setIsRecordMode(!isRecordMode);
         console.log("Mode toggled to:", isRecordMode ? "Input" : "Record");
     };
 
-    const openTimePicker = () => {
-        setTimePickerVisible(true);
-    };
-
-    const closeTimePicker = () => {
-        setTimePickerVisible(false);
-    };
-
-    const handleTimeSelect = (time) => {
-        setSelectedTime(time);
-        closeTimePicker();
-    };
-
-    const openDatePicker = () => {
-        setDatePickerVisible(true);
-    };
-
-    const closeDatePicker = () => {
-        setDatePickerVisible(false);
-    };
-
-    const handleDateSelect = (date) => {
-        setSelectedDate(date);
-        closeDatePicker();
-    };
-
-    //Handlers for end time and date pickers
-    const openEndTimePicker = () => setEndTimePickerVisible(true);
-    const closeEndTimePicker = () => setEndTimePickerVisible(false);
-    const handleEndTimeSelect = (time) => {
-        setSelectedEndTime(time);
-        closeEndTimePicker();
-    };
-
-    const openEndDatePicker = () => setEndDatePickerVisible(true);
-    const closeEndDatePicker = () => setEndDatePickerVisible(false);
-    const handleEndDateSelect = (date) => {
-        setSelectedEndDate(date);
-        closeEndDatePicker();
-    };
     const animatedValue = useRef(new Animated.Value(0)).current;
-
 
 useEffect(() => {
     if (running && !paused) {
@@ -91,11 +44,92 @@ useEffect(() => {
       outputRange: [CIRCUMFERENCE, 0],
     });
 
-    // Record and input modes:
-    // Record mode: User can start, pause, and stop the timer and save it. [Completed]
-    // Input mode: User can input the shiftdata and save it manually[WIP]
+    // State for managing the date and time pickers
+const [isStartDatePickerVisible, setIsStartDatePickerVisible] = useState(false);
+const [isStartTimePickerVisible, setIsStartTimePickerVisible] = useState(false);
+const [selectedStartDate, setSelectedStartDate] = useState(new Date());
 
+// Show and hide handlers for the date and time pickers
+const showStartDatePicker = () => setIsStartDatePickerVisible(true);
+const hideStartDatePicker = () => setIsStartDatePickerVisible(false);
+const showStartTimePicker = () => setIsStartTimePickerVisible(true);
+const hideStartTimePicker = () => setIsStartTimePickerVisible(false);
 
+// Handle date selection
+const handleStartDateChange = (event, date) => {
+    if (!date) {
+        hideStartDatePicker(); // Close the picker if dismissed
+        return;
+    }
+    setSelectedStartDate(date); // Update the selected date
+    hideStartDatePicker(); // Hide the date picker
+    showStartTimePicker(); // Show the time picker
+};
+
+// Handle time selection
+const handleStartTimeChange = (event, time) => {
+    if (!time) {
+        hideStartTimePicker(); // Close the picker if dismissed
+        return;
+    }
+    // Combine the selected date and time into a single Date object
+    const updatedDate = new Date(
+        selectedStartDate.getFullYear(),
+        selectedStartDate.getMonth(),
+        selectedStartDate.getDate(),
+        time.getHours(),
+        time.getMinutes()
+    );
+    setSelectedStartDate(updatedDate); // Update the selected start date with time
+    hideStartTimePicker(); // Hide the time picker
+};
+
+// Format the selected date and time for display
+const formatDateTime = (date) => {
+    if (!date) return "Valitse aika"; // Fallback text if no date is provided
+    const options = { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" };
+    return date.toLocaleString("fi-FI", options); // Format for Finnish locale
+};
+
+    // State for managing the end date and time pickers
+const [isEndDatePickerVisible, setIsEndDatePickerVisible] = useState(false);
+const [isEndTimePickerVisible, setIsEndTimePickerVisible] = useState(false);
+const [selectedEndDate, setSelectedEndDate] = useState(new Date());
+
+// Show and hide handlers for the end date and time pickers
+const showEndDatePicker = () => setIsEndDatePickerVisible(true);
+const hideEndDatePicker = () => setIsEndDatePickerVisible(false);
+const showEndTimePicker = () => setIsEndTimePickerVisible(true);
+const hideEndTimePicker = () => setIsEndTimePickerVisible(false);
+
+// Handle end date selection
+const handleEndDateChange = (event, date) => {
+    if (!date) {
+        hideEndDatePicker(); // Close the picker if dismissed
+        return;
+    }
+    setSelectedEndDate(date); // Update the selected end date
+    hideEndDatePicker(); // Hide the date picker
+    showEndTimePicker(); // Show the time picker
+};
+
+// Handle end time selection
+const handleEndTimeChange = (event, time) => {
+    if (!time) {
+        hideEndTimePicker(); // Close the picker if dismissed
+        return;
+    }
+    // Combine the selected date and time into a single Date object
+    const updatedDate = new Date(
+        selectedEndDate.getFullYear(),
+        selectedEndDate.getMonth(),
+        selectedEndDate.getDate(),
+        time.getHours(),
+        time.getMinutes()
+    );
+    setSelectedEndDate(updatedDate); // Update the selected end date with time
+    hideEndTimePicker(); // Hide the time picker
+};
 
     return (
         <View style={styles.wrapper}>
@@ -182,138 +216,100 @@ useEffect(() => {
             ) : (
                 
                 <View style={styles.container}>
+                    
                     {/*Input View! */}
                     {/* Nimi, kuvaus, aloitusaika, lopetusaika, tauko, päivämäärä */}
 
-                    {/* Shift Description Section */}
                     <View style={styles.shiftDataInputRow}>
-                        <Text style={styles.shiftDataLabel}>
-                            Aloitusaika
-                        </Text>
-                        <View style={styles.row}>
-                        <TouchableOpacity style={styles.inputbutton} onPress={openTimePicker}>
-                            <Text style={styles.buttonText}>{selectedTime || "Valitse Aika"}</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.inputbutton} onPress={openDatePicker}>
-                            <Text style={styles.buttonText}>{selectedDate || "Valitse pvm"}</Text>
-                        </TouchableOpacity>
-                        </View>
-                    </View>
+            <Text style={styles.shiftDataLabel}>Aloitusaika</Text>
+            <TouchableOpacity style={styles.inputbutton} onPress={showStartDatePicker}>
+                <Text style={styles.buttonText}>{formatDateTime(selectedStartDate)}</Text>
+            </TouchableOpacity>
+        </View>
 
-                    {/* TimePicker Modal for start times */}
-                    <Modal
-                            animationType="slide"
-                            transparent={true}
-                            visible={timePickerVisible}
-                            onRequestClose={closeTimePicker}
-                        >
-                            <View style={styles.modalContainer}>
-                                <View style={styles.modalContent}>
-                                    <TimePicker onTimeSelected={handleTimeSelect} />
-                                    <TouchableOpacity style={styles.modalButton} onPress={closeTimePicker}>
-                                        <Text style={styles.modalButtonText}>Peruuta</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                        </Modal>
+        {/* Start Date Picker */}
+        {isStartDatePickerVisible && (
+            <DateTimePicker
+                value={selectedStartDate}
+                mode="date" // Show only the date picker
+                display="spinner"
+                onChange={handleStartDateChange}
+            />
+        )}
 
-                    {/* DatePicker Modal for end times*/}
-                <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={datePickerVisible}
-                    onRequestClose={closeDatePicker}
-                >
-                    <View style={styles.modalContainer}>
-                        <View style={styles.modalContent}>
-                            <DatePicker onDateSelected={handleDateSelect} />
-                            <TouchableOpacity style={styles.modalButton} onPress={closeDatePicker}>
-                                <Text style={styles.modalButtonText}>Peruuta</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </Modal>
+        {/* Start Time Picker */}
+        {isStartTimePickerVisible && (
+            <DateTimePicker
+                value={selectedStartDate}
+                mode="time" // Show only the time picker
+                display="spinner"
+                onChange={handleStartTimeChange}
+            />
+        )}
 
+        {/* End Time Section */}
+        <View style={styles.shiftDataInputRow}>
+            <Text style={styles.shiftDataLabel}>Lopetusaika</Text>
+            <TouchableOpacity style={styles.inputbutton} onPress={showEndDatePicker}>
+                <Text style={styles.buttonText}>{formatDateTime(selectedEndDate)}</Text>
+            </TouchableOpacity>
+        </View>
 
+        {/* End Date Picker */}
+        {isEndDatePickerVisible && (
+            <DateTimePicker
+                value={selectedEndDate}
+                mode="date" // Show only the date picker
+                display="spinner"
+                onChange={handleEndDateChange}
+            />
+        )}
 
-                    {/* End Time Section */}
-                    <View style={styles.shiftDataInputRow}>
-                        <Text style={styles.shiftDataLabel}>Lopetusaika</Text>
-                        <View style={styles.row}>
-                            <TouchableOpacity style={styles.inputbutton} onPress={openEndTimePicker}>
-                                <Text style={styles.buttonText}>{selectedEndTime || "Valitse Aika"}</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.inputbutton} onPress={openEndDatePicker}>
-                                <Text style={styles.buttonText}>{selectedEndDate || "Valitse pvm"}</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
+        {/* End Time Picker */}
+        {isEndTimePickerVisible && (
+            <DateTimePicker
+                value={selectedEndDate}
+                mode="time" // Show only the time picker
+                display="spinner"
+                onChange={handleEndTimeChange}
+            />
+        )}
 
-                    {/* TimePicker Modal for End Time */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={endTimePickerVisible}
-                onRequestClose={closeEndTimePicker}
-            >
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalContent}>
-                        <TimePicker onTimeSelected={handleEndTimeSelect} />
-                        <TouchableOpacity style={styles.modalButton} onPress={closeEndTimePicker}>
-                            <Text style={styles.modalButtonText}>Peruuta</Text>
-                        </TouchableOpacity>
-                    </View>
+        {/* Duration Field */}
+        <View style={styles.shiftDataInputRow}>
+            <Text style={styles.shiftDataLabel}>Kesto</Text>
+            <TextInput
+                style={styles.inputField}
+                placeholder="hh:mm"
+                value={duration}
+                onChangeText={setDuration}
+                keyboardType="numeric"
+            />
+        </View>
+
+            {/* Break Duration Field */}
+                <View style={styles.shiftDataInputRow}>
+                    <Text style={styles.shiftDataLabel}>Tauon kesto</Text>
+                    <TextInput
+                        style={styles.inputField}
+                        placeholder="hh:mm"
+                        value={breakDuration}
+                        onChangeText={setBreakDuration}
+                        keyboardType="numeric"
+                    />
                 </View>
-            </Modal>
 
-            {/* DatePicker Modal for End Date */}
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={endDatePickerVisible}
-                onRequestClose={closeEndDatePicker}
-            >
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalContent}>
-                        <DatePicker onDateSelected={handleEndDateSelect} />
-                        <TouchableOpacity style={styles.modalButton} onPress={closeEndDatePicker}>
-                            <Text style={styles.modalButtonText}>Peruuta</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal>
+            {/* Save Button */}
+            <TouchableOpacity style={styles.button}
+            onPress={()=> {
+                console.log("Manual save triggered");
+                saveShift();
+            }}>
+                <Text style={styles.buttonText}>Tallenna</Text>
+            </TouchableOpacity>
 
-                    {/* Duration Section */}
-                    <View style={styles.shiftDataInputRow}>
-                        <Text style={styles.shiftDataLabel}>Kesto</Text>
-                        <View style={styles.row}>
-                            <TextInput 
-                            style={styles.shiftDataInputField}
-                            placeholder="Kesto"
-                            value={breakDuration}
-                            onChangeText={setBreakDuration}
-                            keyboardType="numeric"
-                            >
-                            </TextInput>
-                        </View>
-                    </View>
-
-                    {/* Break Section */}
-                    <View style={styles.shiftDataInputRow}>
-                        <Text style={styles.shiftDataLabel}>Tauko</Text>
-                        <View style={styles.row}>
-                        </View>
-                        <Text style={styles.shiftDataInputField}>
-                            Tauon kesto: {}
-                        </Text>
-                    </View>
-
-                    
-                    
-                    <TouchableOpacity style={styles.saveshiftbtn} onPress={stopShift}>
-                        <Text style={styles.buttonText}>Tallenna</Text>
-                    </TouchableOpacity>
-                </View>
+            </View>
+        
             )}
             </View>
         </View>

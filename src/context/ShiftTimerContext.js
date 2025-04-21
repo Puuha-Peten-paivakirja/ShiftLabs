@@ -215,7 +215,7 @@ export const ShiftTimerProvider = ({ children }) => {
 
     return (
         <ShiftTimerContext.Provider value={{
-            elapsedTime, elapsedBreak, running, paused, shiftDescription, shiftName, isModalVisible, startShift, pauseShift, resumeShift, stopShift, formatTime, openModal, setShiftDescription, setShiftName, setIsModalVisible, 
+            elapsedTime, elapsedBreak, running, paused, shiftDescription, shiftName, isModalVisible, saveShift, startShift, pauseShift, resumeShift, stopShift, formatTime, openModal, setShiftDescription, setShiftName, setIsModalVisible, 
         }}>
             {children}
         </ShiftTimerContext.Provider>
