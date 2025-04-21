@@ -3,16 +3,16 @@ import { StyleSheet, Platform } from 'react-native'
 export default StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#fff'
+  },
+  content: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
     alignItems: 'center'
-  },
-  profilePictureContainer: {
-    marginTop: 20
-  },
-  profilePicture: {
-    height: 160,
-    width: 160,
-    borderRadius: 80
   },
   editContainer: {
     marginTop: 20,
