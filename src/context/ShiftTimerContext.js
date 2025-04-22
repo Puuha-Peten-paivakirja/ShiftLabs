@@ -7,7 +7,8 @@ import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 import { useAuth } from "../hooks/useAuth";
 import { firestore, USERS} from "../firebase/config";
-import { addDoc, collection } from "firebase/firestore";
+import { doc, addDoc, collection, getDocs, setDoc, getDoc } from "firebase/firestore";
+import { useUser } from "./useUser";
 
 const BACKGROUND_TIMER_TASK = "BACKGROUND_TIMER_TASK";
 
@@ -57,7 +58,7 @@ export const ShiftTimerProvider = ({ children }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [shiftName, setShiftName] = useState("");
     const [shiftDescription, setShiftDescription] = useState("");
-    const {user} = useAuth();
+    const {user} = useUser();
 
     useEffect(() => {
         if (running && !paused) {
@@ -112,21 +113,66 @@ export const ShiftTimerProvider = ({ children }) => {
         };
     
         try {
+            // Save the shift data to AsyncStorage
             const savedShifts = await AsyncStorage.getItem("shifts");
             const shifts = savedShifts ? JSON.parse(savedShifts) : [];
             shifts.push(shiftData);
-    
             await AsyncStorage.setItem("shifts", JSON.stringify(shifts));
     
             // Sync to Firebase if the user is authenticated
             if (user) {
                 console.log("User ID:", user.uid);
     
-                const userShiftsRef = collection(firestore, USERS, user.uid, "shifts");
-                console.log("User shifts reference:", userShiftsRef);
+                // Fetch all groups and compare the shiftName with groupName
+                const groupsRef = collection(firestore, "groups");
+                const querySnapshot = await getDocs(groupsRef);
     
-                await addDoc(userShiftsRef, shiftData);
-                console.log("Shift saved to Firebase:", shiftData);
+                let groupId = null;
+                querySnapshot.forEach((doc) => {
+                    const groupData = doc.data();
+                    if (groupData.groupName === shiftName) {
+                        groupId = doc.id; // Get the group ID if the names match
+                    }
+                });
+    
+                if (groupId) {
+                    console.log(`Group ID found: ${groupId}`);
+                    console.log(`Path: groups/${groupId}/group-users/${user.uid}`);
+    
+                    // Calculate net duration (duration - breaks)
+                    const [durationHours, durationMinutes] = formattedDuration.split(":").map(Number);
+                    const [breakHours, breakMinutes] = formattedBreakDuration.split(":").map(Number);
+    
+                    const totalDurationMinutes = durationHours * 60 + durationMinutes;
+                    const totalBreakMinutes = breakHours * 60 + breakMinutes;
+                    const netDurationMinutes = totalDurationMinutes - totalBreakMinutes;
+    
+                    const netHours = Math.floor(netDurationMinutes / 60); // Only use whole hours
+                    console.log(`Net Duration: ${netHours}h`);
+    
+                    // Update the `hours` field in Firebase
+                    const userHoursRef = doc(firestore, "groups", groupId, "group-users", user.uid);
+                    const userHoursDoc = await getDoc(userHoursRef);
+    
+                    let currentTotalHours = 0;
+                    if (userHoursDoc.exists()) {
+                        currentTotalHours = userHoursDoc.data().hours || 0;
+                    }
+    
+                    const updatedTotalHours = currentTotalHours + netHours;
+    
+                    await setDoc(userHoursRef, { hours: updatedTotalHours }, { merge: true });
+    
+                    console.log(`Updated total hours in Firebase: ${updatedTotalHours}h`);
+    
+                    // Save the shift data to the user's shifts collection
+                    const userShiftsRef = collection(firestore, "groups", groupId, "group-users", user.uid, "shifts");
+                    await addDoc(userShiftsRef, shiftData);
+    
+                    console.log("Shift saved to Firebase:", shiftData);
+                } else {
+                    console.log("Shift name does not match any group name. Shift not saved to Firebase.");
+                }
             } else {
                 console.log("User not authenticated, shift not saved to Firebase");
             }
