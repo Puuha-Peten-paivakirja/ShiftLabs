@@ -62,5 +62,9 @@
   "all-shifts": "Kaikki työvuorot",
   "hello": "Hei",
   "calendar-language": "fi",
-  "date-format": "D.M"
+  "date-format": "D.M",
+  "return": "Takaisin",
+  "groups-working-hours": "Ryhmän työtunnit",
+  "members": "Jäsenet",
+  "no-working-hours": "Ryhmällä ei ole vielä luotuja työtunteja"
 }

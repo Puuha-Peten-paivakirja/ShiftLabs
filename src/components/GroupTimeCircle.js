@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import { useTranslation } from 'react-i18next';
 
 // Function to calculate the arc (a section of the circle)
 const createArc = (cx, cy, r, startAngle, endAngle) => {
@@ -20,6 +21,8 @@ const generateRandomColor = (index) => {
 };
 
 const CircularSegments = ({ data }) => {
+  const { t } = useTranslation()
+
   // Filter out null, undefined, or NaN hours
   const validData = data.filter(item => item.hours != null && !isNaN(item.hours) && item.hours > 0);
 
@@ -35,7 +38,7 @@ const CircularSegments = ({ data }) => {
             strokeWidth={10}
           />
         </Svg>
-        <Text>Ryhmällä ei ole vielä luotuja työtunteja</Text>
+        <Text>{t("no-working-hours")}</Text>
       </View>
     );
   }
@@ -82,7 +85,7 @@ const CircularSegments = ({ data }) => {
             const segmentColor = item.color || generateRandomColor(index); // Get the same color for the label
             return (
               <Text key={index} style={[styles.label, { color: segmentColor }]}>
-                {item.firstName} - {item.hours} hrs
+                {item.firstName} - {item.hours} h
               </Text>
             );
           })}
@@ -92,7 +95,7 @@ const CircularSegments = ({ data }) => {
             const segmentColor = item.color || generateRandomColor(index  + Math.ceil(validData.length / 2)); // Get the same color for the label
             return (
               <Text key={index} style={[styles.label, { color: segmentColor }]}>
-                {item.firstName} - {item.hours} hrs
+                {item.firstName} - {item.hours} h
               </Text>
             );
           })}

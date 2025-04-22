@@ -62,6 +62,9 @@
   "all-shifts": "All shifts",
   "hello": "Hello",
   "calendar-language": "en",
-  "date-format": "M/D"
-
+  "date-format": "M/D",
+  "return": "Return",
+  "groups-working-hours": "Working hours of the group",
+  "members": "Members",
+  "no-working-hours": "No working hours yet"
 }

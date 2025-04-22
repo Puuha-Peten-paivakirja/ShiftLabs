@@ -8,6 +8,7 @@ import { useUser } from "../context/useUser";
 import { doc, collection, firestore, GROUPS, GROUPUSERS, USERS, HOURS, query, getDocs, USERGROUPS, onSnapshot, deleteDoc } from "../firebase/config.js";
 import { FlatList } from "react-native-gesture-handler";
 import CircularSegments from '../components/GroupTimeCircle.js'
+import { useTranslation } from 'react-i18next'
 
 export default function SpesificGroupScreen({ route }) {
     const navigation = useNavigation();
@@ -15,7 +16,7 @@ export default function SpesificGroupScreen({ route }) {
     const { user } = useUser()
     const [ groupUsersAndHours, setGroupUsersAndHours ] = useState([]);
     const [admin, setAdmin] = useState(false);
-        
+    const { t } = useTranslation()
     
 
 
@@ -114,7 +115,7 @@ export default function SpesificGroupScreen({ route }) {
                         style={styles.backButton}
                         onPress={() => {navigation.navigate('Group')}}>
                         <Ionicons name='arrow-back-outline' size={25} />
-                        <Text style={{fontSize:15, fontWeight: 'bold'}} >Takaisin</Text>
+                        <Text style={{fontSize:15, fontWeight: 'bold'}} >{t('return')}</Text>
                     </TouchableOpacity>
 
                     {admin === true &&(
@@ -128,7 +129,7 @@ export default function SpesificGroupScreen({ route }) {
 
                 <View style={{flex:1, alignItems: 'center',}}>
                 
-                    <Text style={styles.headings}>Ryhmän työtunnit:</Text>
+                    <Text style={styles.headings}>{t('groups-working-hours')}:</Text>
                     <CircularSegments data={groupUsersAndHours} />
 
                     
@@ -137,7 +138,7 @@ export default function SpesificGroupScreen({ route }) {
                     {/*------------------------------------*/}
 
                 
-                    <Text style={styles.headings}>Henkilöt:</Text>
+                    <Text style={styles.headings}>{t('members')}:</Text>
                     <FlatList
                         data={groupUsersAndHours}
                         keyExtractor={(item) => item.id}
