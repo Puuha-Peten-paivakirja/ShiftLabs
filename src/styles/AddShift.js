@@ -31,7 +31,6 @@ export default StyleSheet.create({
         backgroundColor: "#fff",
     },
     container: {
-        paddingTop: 20,
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: "#fff",
@@ -122,8 +121,6 @@ export default StyleSheet.create({
         borderBottomWidth: 0.8,
     },
     shiftDataDropDownContainer: {
-        marginTop: 20,
-        position: 'relative',
         zIndex: 9,
     },
     label: {

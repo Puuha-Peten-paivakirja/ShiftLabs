@@ -22,14 +22,6 @@ const AddShiftScreen = () => {
 
     const recordModeData = [
         {
-            label: "Kuvaus",
-            type: "input",
-            value: shiftDescription,
-            onChange: setShiftDescription,
-            placeholder: "Kuvaus",
-            multiline: true,
-        },
-        {
             label: "Ajastin",
             type: "timer",
         },
@@ -50,10 +42,20 @@ const AddShiftScreen = () => {
                 </Text>
             </TouchableOpacity>
 
-            
 
             <View style={[styles.container, isRecordMode ? styles.recordMode : styles.inputMode]}>
+            <View style={styles.inputGroup}>
             <ShiftGroupDropDown shiftName={shiftName} setShiftName={setShiftName} />
+                    {/* Grouped TextInput Fields */}
+
+                        <TextInput
+                            style={styles.manualInput}
+                            value={shiftDescription}
+                            onChangeText={setShiftDescription}
+                            placeholder="Kuvaus"
+                            multiline={true}
+                        />
+                    </View>
                 {/* FlatList for Record Mode */}
                 {isRecordMode && (
                     <FlatList

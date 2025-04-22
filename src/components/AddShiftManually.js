@@ -229,16 +229,6 @@ const AddShiftManually = () => {
                 }}
             />
         )}
-        {/* Grouped TextInput Fields */}
-        <View style={styles.inputGroup}>
-            <TextInput
-                style={styles.manualInput}
-                value={shiftDescription}
-                onChangeText={setShiftDescription}
-                placeholder="Kuvaus"
-                multiline={true}
-            />
-        </View>
         
         <FlatList
             data={data}
