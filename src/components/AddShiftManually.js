@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect } from "react";
 import { View, Text, TouchableOpacity, TextInput, FlatList } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { ShiftTimerContext } from "../context/ShiftTimerContext";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import styles from "../styles/AddShift";
 
 const AddShiftManually = () => {
@@ -167,13 +168,10 @@ const AddShiftManually = () => {
     };
 
     const data = [
-        { label: "Vuoron nimi", value: shiftName, onChange: setShiftName, isInput: true },
-        { label: "Kuvaus", value: shiftDescription, onChange: setShiftDescription, isInput: true },
         { label: "Aloitusaika", value: formatDateTime(selectedStartDate), onPress: showStartDatePicker },
         { label: "Lopetusaika", value: formatDateTime(selectedEndDate), onPress: showEndDatePicker },
-        { label: "Kesto", value: calculatedDuration },
         { label: "Tauko", value: `${Math.floor(breakDuration / 60)}h ${breakDuration % 60}m`, onPress: showBreakPicker },
-        { label: "Yhteensä", value: totalDuration },
+        { label: "Kesto", value: totalDuration },
     ];
 
     return (
@@ -231,6 +229,17 @@ const AddShiftManually = () => {
                 }}
             />
         )}
+        {/* Grouped TextInput Fields */}
+        <View style={styles.inputGroup}>
+            <TextInput
+                style={styles.manualInput}
+                value={shiftDescription}
+                onChangeText={setShiftDescription}
+                placeholder="Kuvaus"
+                multiline={true}
+            />
+        </View>
+        
         <FlatList
             data={data}
             keyExtractor={(item, index) => index.toString()}
@@ -242,12 +251,23 @@ const AddShiftManually = () => {
                             style={styles.input}
                             value={item.value}
                             onChangeText={item.onChange}
-                            placeholder={item.label}
+                            placeholder={item.placeholder}
                         />
                     ) : (
-                        <TouchableOpacity style={styles.inputbutton} onPress={item.onPress}>
-                            <Text style={styles.buttonText}>{item.value}</Text>
+                        <View style={{ width:220, flexDirection: "row", justifyContent: "space-between", alignItems: "center"}}>
+                            <Text style={styles.input}>{item.value}</Text>
+                        {(item.label === "Aloitusaika" || item.label === "Lopetusaika") && (
+                        <TouchableOpacity onPress={item.onPress}>
+                            <Ionicons name="create-outline" size={25} style={styles.inputIcon} />
                         </TouchableOpacity>
+                    )}
+                        {item.label === "Tauko" && (
+                            <TouchableOpacity onPress={item.onPress}>
+                                <Ionicons name="add-outline" size={25} style={styles.inputIcon} />
+                            </TouchableOpacity>
+                        )}
+                        </View>
+
                     )}
                 </View>
             )}

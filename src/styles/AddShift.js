@@ -10,7 +10,7 @@ export default StyleSheet.create({
         marginVertical: 10, // Add spacing below the Navbar
     },
     row: {
-        flexDirection: "row", // Align items horizontally
+        flexDirection: "column", // Align items horizontally
         justifyContent: "space-between", // Space between text and button
         alignItems: "center", // Align items vertically in the center
         paddingVertical: 10, // Add vertical padding for spacing
@@ -35,6 +35,7 @@ export default StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: "#fff",
+        flex: 1,
     },
     circleContainer: {
         justifyContent: "center",
@@ -88,7 +89,7 @@ export default StyleSheet.create({
         backgroundColor: "#fff",
         padding: 20,
         borderRadius: 10,
-        width: 300,
+        width: 220,
         alignItems: "center",
     },
     modalText: {
@@ -115,7 +116,7 @@ export default StyleSheet.create({
     },
     shiftDataDropDown: {
         marginTop: 20,
-        width: 200,
+        width: 220,
         backgroundColor: '#e6e0e9',
         borderBottomColor: 'black',
         borderBottomWidth: 0.8,
@@ -125,6 +126,12 @@ export default StyleSheet.create({
         position: 'relative',
         zIndex: 9,
     },
+    label: {
+        fontSize: 18,
+        fontWeight: "bold",
+        marginBottom: 10,
+        color: "#333",
+    },
     input: {
         borderWidth: 1,
         borderColor: "#ccc",
@@ -132,6 +139,27 @@ export default StyleSheet.create({
         padding: 8,
         flex: 1, // Allow the input to take up available space
         marginLeft: 10, // Add spacing between the label and input
+        width: "100%", // Set width to 100% of the parent container
+    },
+    inputGroup: {
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginBottom: 20,
+        gap: 10,
+    },
+    inputIcon: {
+
+    },
+    manualInput: {
+        width: 220,
+        backgroundColor: '#e6e0e9',
+        paddingRight: 32,
+        borderBottomColor: 'black',
+        borderBottomWidth: 0.8,
+    },
+    manualTextInput: {
+        width: 220,
     },
     shiftDataInputRow: {
         marginTop: 20,
@@ -145,7 +173,7 @@ export default StyleSheet.create({
         right: Platform.OS === 'ios' ? 35 : 45
       },
       shiftDataInput: {
-        width: 328,
+        width: 220,
         backgroundColor: '#e6e0e9',
         paddingRight: 32,
         borderBottomColor: 'black',

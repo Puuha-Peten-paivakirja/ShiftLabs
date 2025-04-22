@@ -13,14 +13,14 @@ import { useUser } from "./useUser";
 const BACKGROUND_TIMER_TASK = "BACKGROUND_TIMER_TASK";
 
 
-// Ensure notification handler is set
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-  }),
-});
+// // Ensure notification handler is set
+// Notifications.setNotificationHandler({
+//   handleNotification: async () => ({
+//     shouldShowAlert: true,
+//     shouldPlaySound: false,
+//     shouldSetBadge: false,
+//   }),
+// });
 
 TaskManager.defineTask(BACKGROUND_TIMER_TASK, async () => {
     console.log("Background task executed");
@@ -31,14 +31,14 @@ TaskManager.defineTask(BACKGROUND_TIMER_TASK, async () => {
         const elapsed = Math.floor((new Date() - startTime) / 1000);
         await AsyncStorage.setItem("elapsedTime", elapsed.toString());
 
-        // Send a notification when running in the background
-        await Notifications.scheduleNotificationAsync({
-            content: {
-                title: "Shift Still Running",
-                body: `Elapsed time: ${elapsed} seconds`,
-            },
-            trigger: { seconds: 5 },
-        });
+        // // Send a notification when running in the background
+        // await Notifications.scheduleNotificationAsync({
+        //     content: {
+        //         title: "Shift Still Running",
+        //         body: `Elapsed time: ${elapsed} seconds`,
+        //     },
+        //     trigger: { seconds: 5 },
+        // });
 
         return BackgroundFetch.Result.NewData;
     }
@@ -199,17 +199,17 @@ export const ShiftTimerProvider = ({ children }) => {
     
         await AsyncStorage.setItem("shiftStartTime", now.toISOString());
     
-        // Request notification permission
-        const { status } = await Notifications.requestPermissionsAsync();
-        if (status === "granted") {
-            await Notifications.scheduleNotificationAsync({
-                content: {
-                    title: "Shift Running",
-                    body: "Your shift is still running in the background.",
-                },
-                trigger: { seconds: 900 }, // 15 minutes
-            });
-        }
+        // // Request notification permission
+        // const { status } = await Notifications.requestPermissionsAsync();
+        // if (status === "granted") {
+        //     await Notifications.scheduleNotificationAsync({
+        //         content: {
+        //             title: "Shift Running",
+        //             body: "Your shift is still running in the background.",
+        //         },
+        //         trigger: { seconds: 900 }, // 15 minutes
+        //     });
+        // }
 
         // Check if task is already registered
         const isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_TIMER_TASK);

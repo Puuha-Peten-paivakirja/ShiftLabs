@@ -22,13 +22,6 @@ const AddShiftScreen = () => {
 
     const recordModeData = [
         {
-            label: "Vuoron nimi",
-            type: "input",
-            value: shiftName,
-            onChange: setShiftName,
-            placeholder: "Vuoron nimi",
-        },
-        {
             label: "Kuvaus",
             type: "input",
             value: shiftDescription,
