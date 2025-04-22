@@ -50,5 +50,14 @@
   "change-password": "Vaihda salasana",
   "current-password": "Nykyinen salasana",
   "new-password": "Uusi salasana",
-  "confirm-new-password": "Vahvista uusi salasana"
+  "confirm-new-password": "Vahvista uusi salasana",
+  "sign-out": "Kirjaudu ulos",
+  "sign-out-text": "Haluatko varmasti kirjautua ulos?",
+  "exit": "Poistu",
+  "exit-text": "Haluatko varmasti poistua?",
+  "home": "Koti",
+  "groups": "Ryhmät",
+  "calendar": "Kalenteri",
+  "add-shift": "Lisää työvuoro",
+  "all-shifts": "Kaikki työvuorot"
 }

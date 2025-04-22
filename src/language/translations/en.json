@@ -50,5 +50,14 @@
   "change-password": "Change password",
   "current-password": "Current password",
   "new-password": "New password",
-  "confirm-new-password": "Confirm new password"
+  "confirm-new-password": "Confirm new password",
+  "sign-out": "Sign out",
+  "sign-out-text": "Are you sure you want to sign out?",
+  "exit": "Exit",
+  "exit-text": "Are you sure you want to exit?",
+  "home": "Home",
+  "groups": "Groups",
+  "calendar": "Calendar",
+  "add-shift": "Add shift",
+  "all-shifts": "All shifts"
 }

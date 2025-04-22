@@ -3,12 +3,14 @@ import { View, Text, TouchableOpacity, StyleSheet, Animated, Alert } from "react
 import { CommonActions, useNavigation } from "@react-navigation/native";
 import { auth, signOut } from "../firebase/config";
 import { useUser } from "../context/useUser";
+import { useTranslation } from "react-i18next";
 
 export default function BurgerMenu({ isOpen, closeMenu }) {
   const navigation = useNavigation();
   const slideAnim = useRef(new Animated.Value(-250)).current; // Off-screen left
   const [menuVisible, setMenuVisible] = useState(isOpen); // Controls mounting
   const { user } = useUser()
+  const { t } = useTranslation()
 
   useEffect(() => {
     if (isOpen) {
@@ -28,13 +30,13 @@ export default function BurgerMenu({ isOpen, closeMenu }) {
   }, [isOpen]);
 
   const confirmSignOut = () => {
-    Alert.alert("Sign out", "Are you sure you want sign out?",[
+    Alert.alert(t("sign-out"), t("sign-out-text"),[
       {
-        text: "Sign out",
+        text: t("sign-out"),
         onPress: () => userSignOut(),
       },
       {
-        text: "Cancel",
+        text: t("cancel"),
         style: "cancel"
       }
     ])
@@ -51,18 +53,18 @@ export default function BurgerMenu({ isOpen, closeMenu }) {
         )
       })
       .catch((error) => {
-         Alert.alert('Error', error.message)
+         Alert.alert(t("error"), error.message)
       })
   }
 
   const confirmReturnToWelcomeScreen = () => {
-    Alert.alert("Exit", "Are you sure you want to exit?",[
+    Alert.alert(t("Exit"), t("exit-text"),[
       {
-        text: "Exit",
+        text: t("Exit"),
         onPress: () => returnToWelcomeScreen(),
       },
       {
-        text: "Cancel",
+        text: t("cancel"),
         style: "cancel"
       }
     ])
@@ -91,31 +93,31 @@ export default function BurgerMenu({ isOpen, closeMenu }) {
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate("Home")} style={styles.menuItem}>
-          <Text style={styles.menuText}>Koti</Text>
+          <Text style={styles.menuText}>{t("home")}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate("Group")} style={styles.menuItem}>
-          <Text style={styles.menuText}>Ryhmät</Text>
+          <Text style={styles.menuText}>{t("groups")}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate("Calendar")} style={styles.menuItem}>
-            <Text style={styles.menuText}>Kalenteri</Text>
+            <Text style={styles.menuText}>{t("calendar")}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate("AddShift")} style={styles.menuItem}>
-            <Text style={styles.menuText}>Lisää vuoro</Text>
+            <Text style={styles.menuText}>{t("add-shift")}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate("AllShifts")} style={styles.menuItem}>
-            <Text style={styles.menuText}>Kaikki vuorot</Text>
+            <Text style={styles.menuText}>{t("all-shifts")}</Text>
         </TouchableOpacity>
         {user ? (
           <TouchableOpacity onPress={() => confirmSignOut()} style={styles.menuItem}>
-              <Text style={[styles.menuText, {color: "red"}]}>Sign out</Text>
+              <Text style={[styles.menuText, {color: "red"}]}>{t("sign-out")}</Text>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity onPress={() => confirmReturnToWelcomeScreen()} style={styles.menuItem}>
-              <Text style={[styles.menuText, {color: "red"}]}>Exit</Text>
+              <Text style={[styles.menuText, {color: "red"}]}>{t("exit")}</Text>
           </TouchableOpacity>
         )}
       </Animated.View>
