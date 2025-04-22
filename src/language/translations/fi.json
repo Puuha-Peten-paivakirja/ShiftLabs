@@ -73,5 +73,16 @@
   "end-time": "Lopetusaika",
   "description": "Kuvaus",
   "save": "Tallenna",
-  "edit-event": "Muokkaa tapahtumaa"
+  "edit-event": "Muokkaa tapahtumaa",
+  "group-name-change-alert": "Ryhmän nimi vaihdettu",
+  "group-name-change-success": "Ryhmän nimenvaihto onnistui",
+  "settings": "Asetukset",
+  "change-group-name": "Vaihda ryhmän nimeä...",
+  "owner-change": "Ryhmän omistajan vaihtaminen:",
+  "choose-new-owner": "Valitse yksi ryhmän henkilöistä sen uudeksi omistajaksi",
+  "edit-admin-rights": "Muokkaa hallintaoikeuksia",
+  "delete-group": "Poista ryhmä",
+  "are-you-sure": "Oletko täysin varma?",
+  "delete-group-message": "Ryhmän poistaminen on lopullista eikä sitä voi palauttaa enää myöhemmin",
+  "i-am-sure-delete-group": "Olen varma, poista ryhmä"
 }

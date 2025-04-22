@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, Modal, } from "react-native";
+import { View, Text, TouchableOpacity, Modal, Alert } from "react-native";
 import Navbar from "../components/Navbar";
 import { useNavigation } from '@react-navigation/native';
 import styles from "../styles/Group.js";
@@ -7,10 +7,11 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import { TextInput, Checkbox } from "react-native-paper";
 import { FlatList } from "react-native-gesture-handler";
 import { updateDoc, doc, collection, firestore, GROUPS, GROUPUSERS, USERS, HOURS, query, getDocs, USERGROUPS, onSnapshot, deleteDoc } from "../firebase/config.js";
-
+import { useTranslation } from "react-i18next";
 
 
 export default function SpesificGroupScreen({ route }) {
+    const { t } = useTranslation();
     const navigation = useNavigation();
     const [ newName, setNewName] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
@@ -32,7 +33,7 @@ export default function SpesificGroupScreen({ route }) {
                 await Promise.all(userUpdateGroup);
                 console.log("Group Name changed succheesefully")
                 setNewName('')
-                alert("SuccCheeseFull")
+                Alert.alert(t('group-name-change-alert'), t('group-name-change-success'))
                 
             }catch(e){
                 console.log("Error in setting the newGroup name:", e)
@@ -129,17 +130,17 @@ return (
             style={styles.backButton}
             onPress={() => {navigation.navigate('Group')}}>
             <Ionicons name='arrow-back-outline' size={25} />
-            <Text style={{fontSize:15, fontWeight: 'bold'}} >Takaisin</Text>
+            <Text style={{fontSize:15, fontWeight: 'bold'}} >{t('return')}</Text>
         </TouchableOpacity>
         <View style={{flex:1, alignItems: 'center',justifyContent: 'center', }}>
 
-            <Text style={styles.headings}>Asetukset:</Text>
+            <Text style={styles.headings}>{t('settings')}</Text>
             <View style={styles.nameInputHalf}>
                 <TextInput
                     style={styles.nameInput}
                     maxLength={25}
                     value={newName}
-                    placeholder="Vaihda ryhmän nimeä..."
+                    placeholder={t('change-group-name')}
                     onChangeText={text => setNewName(text)}
                 />
                 <TouchableOpacity 
@@ -160,8 +161,8 @@ return (
                 <View style={styles.centeredView}>
                     <View style={styles.modalView}>
                         <View style={styles.modalTextView}>
-                            <Text style={styles.modalHeader}>Ryhmän omistajan vaihtaminen:</Text>
-                            <Text style={styles.modalText}>Valitse yksi ryhmä henkilöistä sen uudeksi omistajaksi</Text>
+                            <Text style={styles.modalHeader}>{t('owner-change')}</Text>
+                            <Text style={styles.modalText}>{t('choose-new-owner')}</Text>
                         </View>
                         <FlatList
                             data={groupUsersAndHours}
@@ -186,12 +187,12 @@ return (
                             <TouchableOpacity
                                 style={styles.modalButton}
                                 onPress={() => setModalVisible(!modalVisible)}>
-                                <Text style={{color: '#68548c'}}>Peruuta</Text>
+                                <Text style={{color: '#68548c'}}>{t('cancel')}</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={styles.modalButton}
                                 onPress={() => changeAdmin()}>
-                                <Text style={{color: '#68548c'}}>Vahvista</Text>
+                                <Text style={{color: '#68548c'}}>{t('confirm')}</Text>
                             </TouchableOpacity>
                         </View>
 
@@ -206,7 +207,7 @@ return (
                     setModalVisible(true);
                   }}>
                 <Ionicons name='pencil-outline' size={25} />
-                <Text style={styles.groupSettingsText}>Muokkaa hallintaoikeuksia</Text>
+                <Text style={styles.groupSettingsText}>{t('edit-admin-rights')}</Text>
             </TouchableOpacity>
 
 
@@ -218,7 +219,7 @@ return (
                   
             >
                 <Ionicons name='trash-sharp' size={30} color="darkred"/>
-                <Text style={styles.groupDeleteText }>Poista Ryhmä</Text>
+                <Text style={styles.groupDeleteText }>{t('delete-group')}</Text>
             </TouchableOpacity>
             <Modal
                 animationType="fade"
@@ -230,17 +231,17 @@ return (
                 <View style={styles.centeredView}>
                     <View style={styles.modalViewDelete}>
                         <View style={styles.modalTextView}>
-                            <Text style={styles.modalHeader}>Oletko täysin varma?</Text>
-                            <Text style={styles.modalText}>Rymän poistaminen on lopullista eikä sitä voi palauttaa enää myöhemmin</Text>
+                            <Text style={styles.modalHeader}>{t('are-you-sure')}</Text>
+                            <Text style={styles.modalText}>{t('delete-group-message')}</Text>
 
                         </View>
                         <TouchableOpacity style={styles.groupDeleteModalButton} 
                             onPress={() => deleteGroup()}>
-                            <Text style={styles.groupDeleteText }>Olen varma, Poista ryhmä</Text>
+                            <Text style={styles.groupDeleteText }>{t('i-am-sure-delete-group')}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.groupDeleteModalButton} 
                             onPress={() => setModalVisible2(!modalVisible2)}>
-                            <Text style={styles.groupDeleteText }>Peruuta</Text>
+                            <Text style={styles.groupDeleteText }>{t('cancel')}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

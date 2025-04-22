@@ -73,5 +73,16 @@
   "end-time": "End time",
   "description": "Description",
   "save": "Save",
-  "edit-event": "Edit calendar event"
+  "edit-event": "Edit calendar event",
+  "group-name-change-alert": "Group's name changed",
+  "group-name-change-success": "Successfully changed the name of your group",
+  "settings": "Settings",
+  "change-group-name": "Change the group's name...",
+  "owner-change": "Change the group's owner:",
+  "choose-new-owner": "Choose the new owner for the group",
+  "edit-admin-rights": "Edit administrator rights",
+  "delete-group": "Delete group",
+  "are-you-sure": "Are you sure?",
+  "delete-group-message": "Deleting the group is permanent and cannot be undone later",
+  "i-am-sure-delete-group": "I am sure, delete group"
 }
