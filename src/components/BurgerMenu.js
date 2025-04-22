@@ -55,6 +55,28 @@ export default function BurgerMenu({ isOpen, closeMenu }) {
       })
   }
 
+  const confirmReturnToWelcomeScreen = () => {
+    Alert.alert("Exit", "Are you sure you want to exit?",[
+      {
+        text: "Exit",
+        onPress: () => returnToWelcomeScreen(),
+      },
+      {
+        text: "Cancel",
+        style: "cancel"
+      }
+    ])
+  }
+
+  const returnToWelcomeScreen = () => {
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{name: 'Welcome'}]
+      })
+    )
+  }
+
   if (!menuVisible) return null; // Unmount only AFTER animation completes
 
   return (
@@ -76,7 +98,7 @@ export default function BurgerMenu({ isOpen, closeMenu }) {
           <Text style={styles.menuText}>Ryhmät</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate("Shift")} style={styles.menuItem}>
+        <TouchableOpacity onPress={() => navigation.navigate("Calendar")} style={styles.menuItem}>
             <Text style={styles.menuText}>Kalenteri</Text>
         </TouchableOpacity>
 
@@ -87,11 +109,15 @@ export default function BurgerMenu({ isOpen, closeMenu }) {
         <TouchableOpacity onPress={() => navigation.navigate("AllShifts")} style={styles.menuItem}>
             <Text style={styles.menuText}>Kaikki vuorot</Text>
         </TouchableOpacity>
-        {user &&
+        {user ? (
           <TouchableOpacity onPress={() => confirmSignOut()} style={styles.menuItem}>
               <Text style={[styles.menuText, {color: "red"}]}>Sign out</Text>
           </TouchableOpacity>
-        }
+        ) : (
+          <TouchableOpacity onPress={() => confirmReturnToWelcomeScreen()} style={styles.menuItem}>
+              <Text style={[styles.menuText, {color: "red"}]}>Exit</Text>
+          </TouchableOpacity>
+        )}
       </Animated.View>
     </View>
   );
