@@ -24,6 +24,7 @@ const USERS = 'users' // This is a collection in Firestore
 const GROUPS = 'groups'
 const GROUPUSERS = 'group-users'
 const USERGROUPS = 'user-groups'
+const CALENDARENTRIES = 'calendar-entries'
 
 export { 
     firestore, 
@@ -38,6 +39,7 @@ export {
     addDoc,
     GROUPS,
     GROUPUSERS,
+    CALENDARENTRIES,
     serverTimestamp,
     onAuthStateChanged,
     where,
