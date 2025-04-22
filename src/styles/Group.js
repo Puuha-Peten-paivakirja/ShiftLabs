@@ -85,10 +85,6 @@ export default StyleSheet.create({
       paddingBottom: 20,
       gap: 10,
     },
-
-    
-    
-
   // Scrollviews
       scrollviewGroups: {
         width: "90%",
@@ -163,7 +159,6 @@ export default StyleSheet.create({
       width: '100%', 
       height: 200, 
     },
-
 
   // Inputs
     nameInput: {
@@ -253,6 +248,5 @@ export default StyleSheet.create({
       elevation: 5,
       gap: 5,
     },
-  
   });
   

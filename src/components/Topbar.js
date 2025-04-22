@@ -3,12 +3,12 @@ import { StyleSheet } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import React from 'react'
 
-export function Topbar({title}) {
+export function Topbar({ title, showGoBackButton}) {
   const navigation = useNavigation()
 
   return (
       <Appbar.Header style={styles.topBar} mode='center-aligned'>
-          {navigation.canGoBack() &&
+          {showGoBackButton &&
             <Appbar.BackAction onPress={() => {navigation.goBack()}} />
           }
           <Appbar.Content titleStyle={styles.titleText} title={title} />

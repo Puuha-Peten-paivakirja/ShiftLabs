@@ -3,16 +3,16 @@ import { StyleSheet, Platform } from 'react-native'
 export default StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#fff'
+  },
+  content: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
     alignItems: 'center'
-  },
-  profilePictureContainer: {
-    marginTop: 20
-  },
-  profilePicture: {
-    height: 160,
-    width: 160,
-    borderRadius: 80
   },
   editContainer: {
     marginTop: 20,
@@ -99,4 +99,27 @@ export default StyleSheet.create({
     position: 'absolute',
     right: Platform.OS === 'ios' ? 4 : 3.5
   },
+  languageContainer: {
+    flexDirection: 'row',
+    marginTop: 20,
+    width: '35%',
+  },
+  dropdown: {
+    width: '100%',
+    height: 40,
+    borderWidth: 0.8,
+    borderRadius: 4,
+  },
+  dropdownText: {
+    fontSize: 16,
+    textAlign: 'center'
+  },
+  dropdownIconLeft: {
+    position: 'relative',
+    left: 8
+  },
+  dropdownIconRight: {
+    position: 'relative',
+    right: 8
+  }
 })

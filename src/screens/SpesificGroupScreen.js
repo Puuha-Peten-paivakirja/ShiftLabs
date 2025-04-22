@@ -9,9 +9,6 @@ import { updateDoc, doc, collection, firestore, GROUPS, GROUPUSERS, USERS, query
 import { FlatList } from "react-native-gesture-handler";
 import { TextInput, Checkbox  } from "react-native-paper";
 
-
-
-
 export default function SpesificGroupScreen({ route }) {
     const navigation = useNavigation();
     const { groupId } = route.params;
@@ -21,10 +18,7 @@ export default function SpesificGroupScreen({ route }) {
     const [admin, setAdmin] = useState(false);
     const [ newName, setNewName] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
-      const [checkedUser, setCheckedUser] = useState([]);
-    
-
-
+    const [checkedUser, setCheckedUser] = useState([]);
 
  useEffect(() => {
     if (!user) return;
@@ -97,6 +91,7 @@ export default function SpesificGroupScreen({ route }) {
             console.log("Error in setting the newGroup name:", e)
         }
     }
+
     const toggleUser = (selectedUser) => {
         setCheckedUser((prev) => {
             const exists = prev.find((u) => u.id === selectedUser.id);
@@ -144,6 +139,7 @@ export default function SpesificGroupScreen({ route }) {
 
                     
                     <Text style={styles.headings}>Henkilöt:</Text>
+
                         <FlatList
                             data={groupUsers}
                             keyExtractor={(item) => item.id}
@@ -167,6 +163,7 @@ export default function SpesificGroupScreen({ route }) {
                                 </View>
 
                                 )}
+
                                 <View style={styles.userSeparator} />
                             </View> 
                             )}
@@ -242,7 +239,6 @@ export default function SpesificGroupScreen({ route }) {
                                 <Ionicons name='trash-sharp' size={30} color="darkred"/>
                                 <Text style={styles.groupDeleteText }>Poista Ryhmä</Text>
                             </TouchableOpacity>
-
 
                         </View>
 
