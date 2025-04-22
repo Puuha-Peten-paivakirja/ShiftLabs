@@ -66,5 +66,11 @@
   "return": "Takaisin",
   "groups-working-hours": "Ryhmän työtunnit",
   "members": "Jäsenet",
-  "no-working-hours": "Ryhmällä ei ole vielä luotuja työtunteja"
+  "no-working-hours": "Ryhmällä ei ole vielä luotuja työtunteja",
+  "create-event": "Luo kalenteritapahtuma",
+  "date": "Päivämäärä",
+  "start-time": "Aloitusaika",
+  "end-time": "Lopetusaika",
+  "description": "Kuvaus",
+  "save": "Tallenna"
 }

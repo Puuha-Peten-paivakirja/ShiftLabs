@@ -66,5 +66,11 @@
   "return": "Return",
   "groups-working-hours": "Working hours of the group",
   "members": "Members",
-  "no-working-hours": "No working hours yet"
+  "no-working-hours": "No working hours yet",
+  "create-event": "Create an event",
+  "date": "Date",
+  "start-time": "Start time",
+  "end-time": "End time",
+  "description": "Description",
+  "save": "Save"
 }
