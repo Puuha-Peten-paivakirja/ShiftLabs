@@ -72,5 +72,6 @@
   "start-time": "Aloitusaika",
   "end-time": "Lopetusaika",
   "description": "Kuvaus",
-  "save": "Tallenna"
+  "save": "Tallenna",
+  "edit-event": "Muokkaa tapahtumaa"
 }

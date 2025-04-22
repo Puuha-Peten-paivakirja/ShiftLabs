@@ -72,5 +72,6 @@
   "start-time": "Start time",
   "end-time": "End time",
   "description": "Description",
-  "save": "Save"
+  "save": "Save",
+  "edit-event": "Edit calendar event"
 }
