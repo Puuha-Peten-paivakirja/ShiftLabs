@@ -1,27 +1,30 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
-import { View, Text, Modal, TouchableOpacity, Animated, Easing, TextInput, Alert, Touchable, Dimensions } from "react-native";
+import { View, Text, Modal, TouchableOpacity, Animated, Easing, TextInput, FlatList, Alert, Touchable, Dimensions } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import Navbar from "../components/Navbar";
 import styles from "../styles/AddShift";
 import { ShiftTimerContext } from "../context/ShiftTimerContext";
-import TimePicker from "../components/TimePicker";
-import DatePicker from "../components/DatePicker";
-
+import ShiftGroupDropDown  from "../components/ShiftGroupDropDown";
+import AddShiftManually from "../components/AddShiftManually";
 
 const RADIUS = 45;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 const AddShiftScreen = () => {
-    const { saveShift, elapsedTime, running, paused, startShift, pauseShift, resumeShift, stopShift, setIsModalVisible, isModalVisible, openModal, formatTime, setShiftDescription, setShiftName, shiftName, shiftDescription } = useContext(ShiftTimerContext);
+    const { setBreakDuration, breakDuration, saveShift, elapsedTime, running, paused, startShift, pauseShift, resumeShift, stopShift, setIsModalVisible, isModalVisible, openModal, formatTime, setShiftDescription, setShiftName, shiftName, shiftDescription } = useContext(ShiftTimerContext);
 
     const [isRecordMode, setIsRecordMode] = useState(true);
+
+    //Shift and break duration states
+    const [duration, setDuration ] = useState("");
+
 
     const toggleMode = () => {
         setIsRecordMode(!isRecordMode);
         console.log("Mode toggled to:", isRecordMode ? "Input" : "Record");
     };
-    const animatedValue = useRef(new Animated.Value(0)).current;
 
+    const animatedValue = useRef(new Animated.Value(0)).current;
 
 useEffect(() => {
     if (running && !paused) {
@@ -40,10 +43,6 @@ useEffect(() => {
       outputRange: [CIRCUMFERENCE, 0],
     });
 
-    // Record and input modes:
-    // Record mode: User can start, pause, and stop the timer and save it. [Completed]
-    // Input mode: User can input the shiftdata and save it manually[WIP]
-
 
 
     return (
@@ -53,6 +52,8 @@ useEffect(() => {
                 <TouchableOpacity style={styles.button}onPress={toggleMode}>
                     <Text style={styles.buttonText}>{isRecordMode ? "Vaihda syöttötilaan" : "Vaihda tallennustilaan"}</Text>
                 </TouchableOpacity>
+
+                <ShiftGroupDropDown shiftName={shiftName} setShiftName={setShiftName} />
 
                 {/* Conditionally render content based on recordmode status */}
                 {isRecordMode ? (
@@ -129,27 +130,7 @@ useEffect(() => {
             ) : (
                 
                 <View style={styles.container}>
-                    {/* <TimePicker></TimePicker> */}
-                    {/* Nimi, kuvaus, aloitusaika, lopetusaika, tauko, päivämäärä */}
-                    <View style={styles.rowWrapper}>
-                    <Text style={styles.startLabel}>
-                        Aloitusaika
-                    </Text>
-                    <View style={styles.startRow}>
-                    <TouchableOpacity style={styles.button} onPress={TimePicker}>
-                        <Text style={styles.buttonText}>%time%</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.button} onPress={DatePicker}>
-                        <Text style={styles.buttonText}>%date%</Text>
-                    </TouchableOpacity>
-                    </View>
-                    </View>
-
-                    
-                    
-                    <TouchableOpacity style={styles.saveshiftbtn} onPress={stopShift}>
-                        <Text style={styles.buttonText}>Tallenna</Text>
-                    </TouchableOpacity>
+                    <AddShiftManually/>
                 </View>
             )}
             </View>
