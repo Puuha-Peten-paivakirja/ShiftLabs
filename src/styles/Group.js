@@ -179,7 +179,6 @@ export default StyleSheet.create({
       height: 200, 
     },
 
-
   // Inputs
     nameInput: {
       width: 280,

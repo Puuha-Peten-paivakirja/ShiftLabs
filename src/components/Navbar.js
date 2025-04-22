@@ -2,11 +2,16 @@ import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
+//lets import user for the name in navbar
+import { useUser } from "../context/useUser";
 import BurgerMenu from "./BurgerMenu";
+import { useTranslation } from "react-i18next";
 
 export default function Navbar() {
   const navigation = useNavigation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { t } = useTranslation()
+  const { user } = useUser()
 
   return (
     <>
@@ -14,7 +19,9 @@ export default function Navbar() {
         <TouchableOpacity onPress={() => setMenuOpen(true)}>
           <MaterialIcons name="menu" size={24} color="black" />
         </TouchableOpacity>
-        <Text style={styles.headerText}>Hei %käyttäjä%</Text>
+        <Text style={styles.headerText}>
+          {t("hello")} {user?.displayName ?? user?.email?.split('@')[0] ?? t("guest")}
+        </Text>
         <TouchableOpacity onPress={() => navigation.navigate("Settings")}>
           <MaterialIcons name="settings" size={24} color="black" />
         </TouchableOpacity>

@@ -1,12 +1,19 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Platform } from "react-native";
 
 export default StyleSheet.create({
+    item:{
+        fontsize: 18,
+        backgroundColor: "#6A4BA6",
+        color: "#fff",
+        margin: 5,
+        padding: 10,
+        height: 20,
+    },
     wrapper: {
         flex: 1,
         backgroundColor: "#fff",
     },
     container: {
-        flex: 1,
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: "#fff",
@@ -23,16 +30,19 @@ export default StyleSheet.create({
         fontWeight: "bold",
         color: "#000",
     },
-    buttonContainer: {
-        flexDirection: "row",
-        gap: 20,
-        marginTop: 20,
-    },
     button: {
         backgroundColor: "#6A4BA6",
         paddingVertical: 12,
         paddingHorizontal: 30,
         borderRadius: 25,
+        marginTop: 20,
+    },
+    saveshiftbtn: {
+        backgroundColor: "#6A4BA6",
+        paddingVertical: 12,
+        paddingHorizontal: 30,
+        borderRadius: 25,
+        marginTop: "60%",
     },
     disabled: {
         opacity: 0.5,
@@ -41,6 +51,13 @@ export default StyleSheet.create({
         color: "#fff",
         fontSize: 16,
         fontWeight: "bold",
+    },
+    //modalStyles
+    modalContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
     },
     modalBackground: {
         flex: 1,
@@ -70,5 +87,88 @@ export default StyleSheet.create({
         borderRadius: 5,
         width: "45%",
         alignItems: "center",
+    },
+    shiftDataLabel: {
+        fontSize: 18,
+        fontWeight: '600',
+        marginRight: 12,
+        marginTop: "5%",
+    },
+    shiftDataDropDown: {
+        marginTop: 20,
+        width: 200,
+        backgroundColor: '#e6e0e9',
+        borderBottomColor: 'black',
+        borderBottomWidth: 0.8,
+    },
+    shiftDataDropDownContainer: {
+        marginTop: 20,
+        position: 'relative',
+        zIndex: 9,
+    },
+    shiftDataInputRow: {
+        marginTop: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+      },
+    clearInputIcon: {
+        position: 'absolute',
+        right: Platform.OS === 'ios' ? 35 : 45
+      },
+      shiftDataInput: {
+        width: 328,
+        backgroundColor: '#e6e0e9',
+        paddingRight: 32,
+        borderBottomColor: 'black',
+        borderBottomWidth: 0.8
+      },
+    inputbutton: {
+        backgroundColor: "#6A4BA6",
+        paddingVertical: 12,
+        paddingHorizontal: 30,
+        borderRadius: 25,
+    },
+    dropdownButton: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: 10,
+        backgroundColor: "#f9f9f9",
+        borderWidth: 1,
+        borderColor: "#ccc",
+        borderRadius: 5,
+        width: "50%",
+    },
+    dropdownButtonText: {
+        fontSize: 16,
+        color: "#333",
+    },
+    dropdown: {
+        position: "absolute", // Makes the dropdown overlay the rest of the screen
+        top: "100%", // Positions the dropdown directly below the button
+        left: 0,
+        right: 0,
+        backgroundColor: "#fff",
+        borderWidth: 1,
+        borderColor: "#ccc",
+        borderRadius: 5,
+        maxHeight: 120, // Limits the dropdown height to show 3 items (assuming ~40px per item)
+        overflow: "hidden", // Ensures content doesn't overflow the dropdown
+        elevation: 5, // Adds shadow for Android
+        shadowColor: "#000", // Adds shadow for iOS
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+    },
+    dropdownItem: {
+        padding: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: "#ccc",
+    },
+    dropdownItemText: {
+        fontSize: 16,
+        color: "#333",
     },
 });

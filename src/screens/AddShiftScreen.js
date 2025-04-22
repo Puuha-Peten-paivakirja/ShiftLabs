@@ -1,196 +1,321 @@
-import React, { useState, useEffect, useRef } from "react";
-import { View, Text, Pressable, Modal } from "react-native";
+import React, { useState, useEffect, useRef, useContext } from "react";
+import { View, Text, Modal, TouchableOpacity, Animated, Easing, TextInput, FlatList, Alert, Touchable, Dimensions } from "react-native";
 import Svg, { Circle } from "react-native-svg";
-import { Animated, Easing } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import Navbar from "../components/Navbar";
 import styles from "../styles/AddShift";
-//this screen should have buttons for starting, pausing and stopping the timer
-//the timer should be displayed as a circle, that would have a stopwatch effect
-//the timer does not have a set "max" time, since users should be able to record how long they worked
-
+import { ShiftTimerContext } from "../context/ShiftTimerContext";
+import ShiftGroupDropDown  from "../components/ShiftGroupDropDown";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 const RADIUS = 45;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 const AddShiftScreen = () => {
-    const [elapsedTime, setElapsedTime] = useState(0);
-    const [running, setRunning] = useState(false);
-    const [startTime, setStartTime] = useState(null);
-    const [endTime, setEndTime] = useState(null);
-    const [shiftDuration, setShiftDuration] = useState(0);
-    const [isModalVisible, setIsModalVisible] = useState(false);
+    const { setBreakDuration, breakDuration, saveShift, elapsedTime, running, paused, startShift, pauseShift, resumeShift, stopShift, setIsModalVisible, isModalVisible, openModal, formatTime, setShiftDescription, setShiftName, shiftName, shiftDescription } = useContext(ShiftTimerContext);
+
+    const [isRecordMode, setIsRecordMode] = useState(true);
+    const [inputDropDownVisible, setInputDropDownVisible] = useState(false);
+
+    //Shift and break duration states
+    const [duration, setDuration ] = useState("");
+
+
+    const toggleMode = () => {
+        setIsRecordMode(!isRecordMode);
+        console.log("Mode toggled to:", isRecordMode ? "Input" : "Record");
+    };
+
     const animatedValue = useRef(new Animated.Value(0)).current;
 
-    useEffect(() => {
-        let interval;
-        if (running) {
-            interval = setInterval(() => {
-                setElapsedTime((prev) => prev + 1);
-            }, 1000);
-        } else {
-            clearInterval(interval);
-        }
-        return () => clearInterval(interval);
-    }, [running]);
-    
-
-    useEffect(() => {
-        if (running) {
-            animatedValue.setValue(0); // Reset animation progress
-            Animated.timing(animatedValue, {
-                toValue: 1,
-                duration: 1000,
-                easing: Easing.linear,
-                useNativeDriver: false,
-            }).start();
-        }
-    }, [elapsedTime]); // Depend on elapsedTime to restart every second
-    
-
+useEffect(() => {
+    if (running && !paused) {
+        animatedValue.setValue(0); // Reset the animation
+        Animated.timing(animatedValue, {
+          toValue: 1, // Full circle (end of timer)
+          duration: 1000, // Duration for a full circle (1 second per unit of time)
+          easing: Easing.linear,
+          useNativeDriver: false, // Make sure to use this if not using native driver
+        }).start();
+      }
+    }, [elapsedTime, running, paused]); // Re-trigger when elapsedTime changes
+  
     const strokeDashoffset = animatedValue.interpolate({
-        inputRange: [0, 1],
-        outputRange: [CIRCUMFERENCE, 0], // Decreases stroke
+      inputRange: [0, 1],
+      outputRange: [CIRCUMFERENCE, 0],
     });
 
-    const startTimer=()=>{
-        setRunning(true);
-        setStartTime(new Date());
-    };
-    
-    const stopTimer=()=>{
-        setRunning(false);
-        const currentDate = new Date();
-        setEndTime(currentDate);
-        if (startTime) {
-            const duration = (currentDate - startTime) / 1000;
-            setShiftDuration(duration);
-        }
-    };
+    // State for managing the date and time pickers
+const [isStartDatePickerVisible, setIsStartDatePickerVisible] = useState(false);
+const [isStartTimePickerVisible, setIsStartTimePickerVisible] = useState(false);
+const [selectedStartDate, setSelectedStartDate] = useState(new Date());
 
-    const endShift=()=>{
-        console.log("End shift pressed");
-        setIsModalVisible(false);
-        saveShift();
-    };
+// Show and hide handlers for the date and time pickers
+const showStartDatePicker = () => setIsStartDatePickerVisible(true);
+const hideStartDatePicker = () => setIsStartDatePickerVisible(false);
+const showStartTimePicker = () => setIsStartTimePickerVisible(true);
+const hideStartTimePicker = () => setIsStartTimePickerVisible(false);
 
-    const openModal=()=>{
-        setIsModalVisible(true);
-    };
+// Handle date selection
+const handleStartDateChange = (event, date) => {
+    if (!date) {
+        hideStartDatePicker(); // Close the picker if dismissed
+        return;
+    }
+    setSelectedStartDate(date); // Update the selected date
+    hideStartDatePicker(); // Hide the date picker
+    showStartTimePicker(); // Show the time picker
+};
 
-    const closeModal=()=>{
-        setIsModalVisible(false);
-    };
+// Handle time selection
+const handleStartTimeChange = (event, time) => {
+    if (!time) {
+        hideStartTimePicker(); // Close the picker if dismissed
+        return;
+    }
+    // Combine the selected date and time into a single Date object
+    const updatedDate = new Date(
+        selectedStartDate.getFullYear(),
+        selectedStartDate.getMonth(),
+        selectedStartDate.getDate(),
+        time.getHours(),
+        time.getMinutes()
+    );
+    setSelectedStartDate(updatedDate); // Update the selected start date with time
+    hideStartTimePicker(); // Hide the time picker
+};
 
+// Format the selected date and time for display
+const formatDateTime = (date) => {
+    if (!date) return "Valitse aika"; // Fallback text if no date is provided
+    const options = { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" };
+    return date.toLocaleString("fi-FI", options); // Format for Finnish locale
+};
 
+    // State for managing the end date and time pickers
+const [isEndDatePickerVisible, setIsEndDatePickerVisible] = useState(false);
+const [isEndTimePickerVisible, setIsEndTimePickerVisible] = useState(false);
+const [selectedEndDate, setSelectedEndDate] = useState(new Date());
 
-    //this should save the shift duration and end time and end date locally. If user is signed in, then it saves on the database too
-    const saveShift = async () => {
-        console.log("Saving shift...");
-        const formattedDuration = formatTime(elapsedTime);
-        const currentTime = new Date();
-        const shiftData = {
-            startTime: startTime ? startTime.toISOString() : currentTime.toISOString(),
-            endTime: currentTime.toISOString(),
-            duration: formattedDuration,
-            breakDuration: 0,
-            date: new Date().toISOString(),
-        };
+// Show and hide handlers for the end date and time pickers
+const showEndDatePicker = () => setIsEndDatePickerVisible(true);
+const hideEndDatePicker = () => setIsEndDatePickerVisible(false);
+const showEndTimePicker = () => setIsEndTimePickerVisible(true);
+const hideEndTimePicker = () => setIsEndTimePickerVisible(false);
 
-            try {
-                const savedShifts = await AsyncStorage.getItem('shifts');
-                const shifts = savedShifts ? JSON.parse(savedShifts) : [];
-                shifts.push(shiftData);
+// Handle end date selection
+const handleEndDateChange = (event, date) => {
+    if (!date) {
+        hideEndDatePicker(); // Close the picker if dismissed
+        return;
+    }
+    setSelectedEndDate(date); // Update the selected end date
+    hideEndDatePicker(); // Hide the date picker
+    showEndTimePicker(); // Show the time picker
+};
 
-                await AsyncStorage.setItem('shifts', JSON.stringify(shifts));
-                
-            } catch (error) {
-                console.error('Failed to save shift:', error);
-            }
-    
-            // // Example of saving to a database (Firebase or another service)
-            // if (isUserLoggedIn) {
-            //     saveToDatabase(shiftData);  // Save to database
-            // }
-    
-            console.log('Shift saved:', shiftData);
-            setRunning(false);
-            setEndTime(currentTime);
-            setElapsedTime(0);
-        }
+// Handle end time selection
+const handleEndTimeChange = (event, time) => {
+    if (!time) {
+        hideEndTimePicker(); // Close the picker if dismissed
+        return;
+    }
+    // Combine the selected date and time into a single Date object
+    const updatedDate = new Date(
+        selectedEndDate.getFullYear(),
+        selectedEndDate.getMonth(),
+        selectedEndDate.getDate(),
+        time.getHours(),
+        time.getMinutes()
+    );
+    setSelectedEndDate(updatedDate); // Update the selected end date with time
+    hideEndTimePicker(); // Hide the time picker
+};
 
-    const formatTime = (seconds) => {
-        const hrs = Math.floor(seconds / 3600);
-        const mins = Math.floor((seconds % 3600) / 60);
-        const secs = seconds % 60;
-        return `${("0" + hrs).slice(-2)}:${("0" + mins).slice(-2)}:${("0" + secs).slice(-2)}`;;
-    };
-    
     return (
         <View style={styles.wrapper}>
             <Navbar />
-            <View style={styles.container}>
-                <View style={styles.circleContainer}>
-                    <Svg height="150" width="150" viewBox="0 0 100 100">
-                        {/* Background Circle */}
-                        <Circle
-                            cx="50"
-                            cy="50"
-                            r={RADIUS}
-                            stroke="#D8C5E5"
-                            strokeWidth="4"
-                            fill="none"
-                        />
-                        {/* Animated Progress Circle */}
-                        <AnimatedCircle
-                            cx="50"
-                            cy="50"
-                            r={RADIUS}
-                            stroke="#6A4BA6"
-                            strokeWidth="4"
-                            fill="none"
-                            strokeDasharray={CIRCUMFERENCE}
-                            strokeDashoffset={strokeDashoffset}
-                        />
-                    </Svg>
-                    <Text style={styles.timerText}>{formatTime(elapsedTime)}</Text>
-                </View>
+            <View style={[styles.container, isRecordMode ? styles.recordMode : styles.inputMode]}>
+                <TouchableOpacity style={styles.button}onPress={toggleMode}>
+                    <Text style={styles.buttonText}>{isRecordMode ? "Vaihda syöttötilaan" : "Vaihda tallennustilaan"}</Text>
+                </TouchableOpacity>
 
-                {/* Buttons */}
-                <View style={styles.buttonContainer}>
-                    <Pressable style={[styles.button, running && styles.disabled]} onPress={running ? openModal: startTimer}>
-                        <Text style={styles.buttonText}>{running ? "Lopeta": "Aloita"}</Text>
-                    </Pressable>
-                    <Pressable style={[styles.button, !running && styles.disabled]} onPress={stopTimer}>
-                        <Text style={styles.buttonText}>{running ? "Tauko":"Jatka"}</Text>
-                    </Pressable>
-                    {/* Modal */}
-                    <Modal
-                        animationType="slide"
-                        transparent={true}
-                        visible={isModalVisible}
-                        onRequestClose={closeModal}
-                    >
+                <ShiftGroupDropDown shiftName={shiftName} setShiftName={setShiftName} />
 
+                {/* Conditionally render content based on recordmode status */}
+                {isRecordMode ? (
+                <>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Vuoron nimi"
+                        value={shiftName}
+                        onChangeText={setShiftName}
+                    />
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Kuvaus"
+                        value={shiftDescription}
+                        onChangeText={setShiftDescription}
+                        multiline
+                    />
+                    
+                    <View style={[styles.circleContainer, isRecordMode ? styles.recordMode : styles.inputMode]}>
+                        <Svg height="150" width="150" viewBox="0 0 100 100">
+                            <Circle cx="50" cy="50" r={RADIUS} stroke="#D8C5E5" strokeWidth="4" fill="none" />
+                            <AnimatedCircle
+                                cx="50"
+                                cy="50"
+                                r={RADIUS}
+                                stroke="#6A4BA6"
+                                strokeWidth="4"
+                                fill="none"
+                                strokeDasharray={CIRCUMFERENCE}
+                                strokeDashoffset={strokeDashoffset}
+                            />
+                        </Svg>
+                        <Text style={styles.timerText}>{formatTime(elapsedTime)}</Text>
+                    </View>
+
+                    <View style={styles.buttonContainer}>
+                        {!running && !paused ? (
+                            <TouchableOpacity style={styles.button} onPress={startShift}>
+                                <Text style={styles.buttonText}>Aloita</Text>
+                            </TouchableOpacity>
+                        ) : (
+                            <>
+                                {running && (
+                                    <TouchableOpacity style={styles.button} onPress={pauseShift}>
+                                        <Text style={styles.buttonText}>Tauko</Text>
+                                    </TouchableOpacity>
+                                )}
+                                {paused && (
+                                    <TouchableOpacity style={styles.button} onPress={resumeShift}>
+                                        <Text style={styles.buttonText}>Jatka</Text>
+                                    </TouchableOpacity>
+                                )}
+                                <TouchableOpacity style={styles.button} onPress={openModal}>
+                                    <Text style={styles.buttonText}>Lopeta</Text>
+                                </TouchableOpacity>
+                            </>
+                        )}
+                    </View>
+
+                    <Modal animationType="slide" transparent={true} visible={isModalVisible} onRequestClose={() => setIsModalVisible(false)}>
                         <View style={styles.modalContainer}>
                             <View style={styles.modalContent}>
-                                <Text style={styles.modalText}>Haluatko varmasti lopettaa vuoron?</Text>
-                                <Pressable style={styles.modalButton} onPress={endShift}>
+                                <Text style={styles.modalText}>Pysäytetäänkö, ja tallennetaanko vuoro?</Text>
+                                <TouchableOpacity style={styles.modalButton} onPress={stopShift}>
                                     <Text style={styles.modalButtonText}>Kyllä</Text>
-                                </Pressable>
-                                <Pressable style={styles.modalButton} onPress={closeModal}>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.modalButton} onPress={() => setIsModalVisible(false)}>
                                     <Text style={styles.modalButtonText}>Ei</Text>
-                                </Pressable>
+                                </TouchableOpacity>
                             </View>
                         </View>
                     </Modal>
+                </>
+            ) : (
+                
+                <View style={styles.container}>
+                    
+                    {/*Input View! */}
+                    {/* Nimi, kuvaus, aloitusaika, lopetusaika, tauko, päivämäärä */}
+
+                    <View style={styles.shiftDataInputRow}>
+            <Text style={styles.shiftDataLabel}>Aloitusaika</Text>
+            <TouchableOpacity style={styles.inputbutton} onPress={showStartDatePicker}>
+                <Text style={styles.buttonText}>{formatDateTime(selectedStartDate)}</Text>
+            </TouchableOpacity>
+        </View>
+
+        {/* Start Date Picker */}
+        {isStartDatePickerVisible && (
+            <DateTimePicker
+                value={selectedStartDate}
+                mode="date" // Show only the date picker
+                display="spinner"
+                onChange={handleStartDateChange}
+            />
+        )}
+
+        {/* Start Time Picker */}
+        {isStartTimePickerVisible && (
+            <DateTimePicker
+                value={selectedStartDate}
+                mode="time" // Show only the time picker
+                display="spinner"
+                onChange={handleStartTimeChange}
+            />
+        )}
+
+        {/* End Time Section */}
+        <View style={styles.shiftDataInputRow}>
+            <Text style={styles.shiftDataLabel}>Lopetusaika</Text>
+            <TouchableOpacity style={styles.inputbutton} onPress={showEndDatePicker}>
+                <Text style={styles.buttonText}>{formatDateTime(selectedEndDate)}</Text>
+            </TouchableOpacity>
+        </View>
+
+        {/* End Date Picker */}
+        {isEndDatePickerVisible && (
+            <DateTimePicker
+                value={selectedEndDate}
+                mode="date" // Show only the date picker
+                display="spinner"
+                onChange={handleEndDateChange}
+            />
+        )}
+
+        {/* End Time Picker */}
+        {isEndTimePickerVisible && (
+            <DateTimePicker
+                value={selectedEndDate}
+                mode="time" // Show only the time picker
+                display="spinner"
+                onChange={handleEndTimeChange}
+            />
+        )}
+
+        {/* Duration Field */}
+        <View style={styles.shiftDataInputRow}>
+            <Text style={styles.shiftDataLabel}>Kesto</Text>
+            <TextInput
+                style={styles.inputField}
+                placeholder="hh:mm"
+                value={duration}
+                onChangeText={setDuration}
+                keyboardType="numeric"
+            />
+        </View>
+
+            {/* Break Duration Field */}
+                <View style={styles.shiftDataInputRow}>
+                    <Text style={styles.shiftDataLabel}>Tauon kesto</Text>
+                    <TextInput
+                        style={styles.inputField}
+                        placeholder="hh:mm"
+                        value={breakDuration}
+                        onChangeText={setBreakDuration}
+                        keyboardType="numeric"
+                    />
                 </View>
+
+            {/* Save Button */}
+            <TouchableOpacity style={styles.button}
+            onPress={()=> {
+                console.log("Manual save triggered");
+                saveShift();
+            }}>
+                <Text style={styles.buttonText}>Tallenna</Text>
+            </TouchableOpacity>
+
+            </View>
+        
+            )}
             </View>
         </View>
     );
 };
 
-// Animated SVG Circle Component
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 export default AddShiftScreen;

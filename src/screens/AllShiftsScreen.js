@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, Pressable } from "react-native";
+import { View, Text, FlatList, TouchableOpacity } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Navbar from "../components/Navbar";
 import styles from "../styles/AllShifts";
+import { useTranslation } from "react-i18next";
 
 export default function AllShiftsScreen() {
     const [shifts, setSavedShifts] = useState([]);
+    const { t } = useTranslation();
 
     useEffect(() => {
         const fetchShifts = async () => {
@@ -47,35 +49,42 @@ export default function AllShiftsScreen() {
         }
         return "00:00:00"; // Fallback for invalid values
     };
-    
-    
-    
-    
-    
 
+    const formatTime = (timeString) => {
+        if (!timeString) return "00:00";
+        const date = new Date(timeString);
+        const hours = ("0" + date.getHours()).slice(-2);
+        const minutes = ("0" + date.getMinutes()).slice(-2);
+        return `${hours}.${minutes}`;
+    }
+    
     return (
         <View style={styles.container}>
             <Navbar />
             <View style={shifts.container}>
-            <Text style={styles.header}>Aiemmat työvuorot</Text>
+            <Text style={styles.header}>{t("previous-shifts")}</Text>
             {shifts.length === 0 ? (
-                <Text style={styles.noDataText}>Ei nauhotettuja työvuoroja</Text>
+                <Text style={styles.noDataText}>{t("no-recorded-shifts")}</Text>
             ) : (
                 <FlatList
                     data={shifts}
                     keyExtractor={(item, index) => index.toString()}
                     renderItem={({ item }) => (
                         <View style={styles.shiftItem}>
-                            <Text style={styles.shiftText}>
-                                {formatDate(item.startDate)} - {formatDate(item.endDate)}
-                            </Text>
-                            <Text>Pvm: {formatDate(item.date)}</Text>
-                            <Text>Kesto: {formatDuration(item.duration)}</Text>
-                            <Text>Tauot: {formatDuration(item.breakDuration)}</Text>
+                            {/* Shift Name */}
+                            <Text style={styles.shiftName}>{item.name|| "Undefined"}</Text>
 
-                            <Pressable onPress={() => deleteShift(item)} style={styles.deleteShiftButton}>
+                            {/* Shift Details */}
+                            <Text style={styles.shiftText}>
+                                {formatTime(item.startTime)} - {formatTime(item.endTime)}
+                            </Text>
+                            <Text>{t("shift-date")} {formatDate(item.date)}</Text>
+                            <Text>{t("shift-length")} {formatDuration(item.duration)}</Text>
+                            <Text>{t("shift-breaks")} {formatDuration(item.breakDuration)}</Text>
+
+                            <TouchableOpacity onPress={() => deleteShift(item)} style={styles.deleteShiftButton}>
                                 <Text style={styles.deleteShiftButtonText}>❌</Text>
-                            </Pressable>
+                            </TouchableOpacity>
                         </View>
                     )}
                 />

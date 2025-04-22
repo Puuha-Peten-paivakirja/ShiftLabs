@@ -7,10 +7,11 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import { CustomButton } from '../components/CustomButton'
 import { auth, sendPasswordResetEmail } from '../firebase/config.js'
 import { useNavigation } from '@react-navigation/native'
+import { useTranslation } from 'react-i18next'
 
 export default function ResetPasswordScreen() {
   const navigation = useNavigation()
-
+  const { t } = useTranslation()
   const [email, setEmail] = useState('')
   const [isDisabled, setIsDisabled] = useState(false)
   
@@ -19,7 +20,7 @@ export default function ResetPasswordScreen() {
 
     sendPasswordResetEmail(auth, email)
       .then(() => {
-        Alert.alert('Email sent', 'An email containing a password reset link has been sent to your email address. You will be now redirected to the login page.', [
+        Alert.alert(t('email-sent'), t('password-reset-email'), [
           {
             onPress: () => navigation.goBack()
           }
@@ -27,21 +28,21 @@ export default function ResetPasswordScreen() {
       })
       .catch((error) => {
         if (error.code === 'auth/invalid-email') {
-          Alert.alert('Error', 'Invalid email', [
+          Alert.alert(t('error'), t('invalid-email'), [
             {
               onPress: () => setIsDisabled(false)
             }
           ])
         }
         else if (error.code === 'auth/missing-email') {
-          Alert.alert('Error', 'Email is required', [
+          Alert.alert(t('error'), t('email-is-required'), [
             {
               onPress: () => setIsDisabled(false)
             }
           ])
         }
         else {
-          Alert.alert('Error', error.message, [
+          Alert.alert(t('error'), error.message, [
             {
               onPress: () => setIsDisabled(false)
             }
@@ -52,20 +53,20 @@ export default function ResetPasswordScreen() {
 
   return (
     <View style={styles.container}>
-      <Topbar title='Reset password' />
+      <Topbar title={t('reset-password')} showGoBackButton={true} />
       
       <View style={styles.center}>
         <View style={styles.textContent}>
-          <Text style={styles.title}>Forgot password?</Text>
-          <Text style={styles.text}>Plese enter your email address and we</Text>
-          <Text style={styles.text}>will send you a link to reset your password</Text>
+          <Text style={styles.title}>{t('forgot-your-password')}</Text>
+          <Text style={styles.text}>{t('forgot-password-text-1')}</Text>
+          <Text style={styles.text}>{t('forgot-password-text-2')}</Text>
         </View>
       </View>
 
       <View style={styles.center}>
         <TextInput
           style={styles.credentialsInput}
-          label='Email'
+          label={t('email-address')}
           value={email}
           onChangeText={text => setEmail(text)}
           keyboardType='email-address'
@@ -81,7 +82,7 @@ export default function ResetPasswordScreen() {
       <View style={styles.center}>
         <View style={styles.buttonContainer}>
           <CustomButton
-            title={'Reset'}
+            title={t('reset')}
             onPress={() => resetPassword()}
             isDisabled={isDisabled}
           />
