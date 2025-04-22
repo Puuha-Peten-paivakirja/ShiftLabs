@@ -1,6 +1,23 @@
 import { StyleSheet, Platform } from "react-native";
 
 export default StyleSheet.create({
+    modeToggleButton: {
+        backgroundColor: "#6A4BA6",
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 25,
+        alignSelf: "center", // Center the button horizontally
+        marginVertical: 10, // Add spacing below the Navbar
+    },
+    row: {
+        flexDirection: "row", // Align items horizontally
+        justifyContent: "space-between", // Space between text and button
+        alignItems: "center", // Align items vertically in the center
+        paddingVertical: 10, // Add vertical padding for spacing
+        paddingHorizontal: 15, // Add horizontal padding for spacing
+        borderBottomWidth: 1, // Optional: Add a bottom border for separation
+        borderBottomColor: "#ccc", // Optional: Border color
+    },    
     item:{
         fontsize: 18,
         backgroundColor: "#6A4BA6",
@@ -14,6 +31,7 @@ export default StyleSheet.create({
         backgroundColor: "#fff",
     },
     container: {
+        paddingTop: 20,
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: "#fff",
@@ -51,6 +69,7 @@ export default StyleSheet.create({
         color: "#fff",
         fontSize: 16,
         fontWeight: "bold",
+        textAlign: "center",
     },
     //modalStyles
     modalContainer: {
@@ -105,6 +124,14 @@ export default StyleSheet.create({
         marginTop: 20,
         position: 'relative',
         zIndex: 9,
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: "#ccc",
+        borderRadius: 5,
+        padding: 8,
+        flex: 1, // Allow the input to take up available space
+        marginLeft: 10, // Add spacing between the label and input
     },
     shiftDataInputRow: {
         marginTop: 20,

@@ -48,10 +48,11 @@ useEffect(() => {
     return (
         <View style={styles.wrapper}>
             <Navbar />
-            <View style={[styles.container, isRecordMode ? styles.recordMode : styles.inputMode]}>
-                <TouchableOpacity style={styles.button}onPress={toggleMode}>
+            <TouchableOpacity style={styles.modeToggleButton}onPress={toggleMode}>
                     <Text style={styles.buttonText}>{isRecordMode ? "Vaihda syöttötilaan" : "Vaihda tallennustilaan"}</Text>
                 </TouchableOpacity>
+            <View style={[styles.container, isRecordMode ? styles.recordMode : styles.inputMode]}>
+
 
                 <ShiftGroupDropDown shiftName={shiftName} setShiftName={setShiftName} />
 

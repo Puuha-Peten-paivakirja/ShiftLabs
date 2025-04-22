@@ -123,6 +123,11 @@ export const ShiftTimerProvider = ({ children }) => {
             if (user) {
                 console.log("User ID:", user.uid);
     
+                // Save the shift data to the user's subcollection
+                const userShiftsRef = collection(firestore, "users", user.uid, "shifts");
+                await addDoc(userShiftsRef, shiftData);
+                console.log("Shift saved to user's subcollection:", shiftData);
+    
                 // Fetch all groups and compare the shiftName with groupName
                 const groupsRef = collection(firestore, "groups");
                 const querySnapshot = await getDocs(groupsRef);
@@ -164,14 +169,8 @@ export const ShiftTimerProvider = ({ children }) => {
                     await setDoc(userHoursRef, { hours: updatedTotalHours }, { merge: true });
     
                     console.log(`Updated total hours in Firebase: ${updatedTotalHours}h`);
-    
-                    // Save the shift data to the user's shifts collection
-                    const userShiftsRef = collection(firestore, "groups", groupId, "group-users", user.uid, "shifts");
-                    await addDoc(userShiftsRef, shiftData);
-    
-                    console.log("Shift saved to Firebase:", shiftData);
                 } else {
-                    console.log("Shift name does not match any group name. Shift not saved to Firebase.");
+                    console.log("Shift name does not match any group name. Hours not updated in Firebase.");
                 }
             } else {
                 console.log("User not authenticated, shift not saved to Firebase");
