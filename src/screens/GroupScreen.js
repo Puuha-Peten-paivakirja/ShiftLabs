@@ -197,7 +197,7 @@ export default function GroupScreen() {
 
   const navigateToGroup = useCallback((groupId) => {
       console.log("Navigating to specific group:", groupId);
-      navigation.navigate('SpesificGroup', { groupId });
+      navigation.navigate('SpecificGroup', { groupId });
   }, [navigation]);
 
 

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
-import Navbar from "../components/Navbar";
+import Navbar from "../components/Navbar.js";
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useNavigation } from '@react-navigation/native';
 import styles from "../styles/Group.js";
-import { useUser } from "../context/useUser";
+import { useUser } from "../context/useUser.js";
 import { addDoc, updateDoc, doc, collection, firestore, GROUPS, GROUPUSERS, serverTimestamp, USERS, query, where, getDocs, USERGROUPS, onSnapshot, deleteDoc } from "../firebase/config.js";
 import { FlatList } from "react-native-gesture-handler";
 import { TextInput  } from "react-native-paper";
@@ -12,7 +12,7 @@ import { TextInput  } from "react-native-paper";
 
 
 
-export default function SpesificGroupScreen({ route }) {
+export default function SpecificGroupScreen({ route }) {
     const navigation = useNavigation();
     const { groupId } = route.params;
     const { user } = useUser()
