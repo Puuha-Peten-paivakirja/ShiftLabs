@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback  } from "react";
-import { View, Image, Text,TouchableOpacity, Modal  } from "react-native";
+import { View, Image, Text,TouchableOpacity, Modal, ActivityIndicator  } from "react-native";
 import Navbar from "../components/Navbar";
 import { TextInput, Checkbox  } from "react-native-paper";
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -27,10 +27,12 @@ export default function GroupScreen() {
   const [checkedUsers, setCheckedUsers] = useState([]);
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(true)
 
 
 
   useEffect(() => {
+    setIsLoading(true)
     // Only proceed if user is logged in
     if (!user) return;
     // Queruy to get groups that user is part of
@@ -58,6 +60,7 @@ export default function GroupScreen() {
     // Update the filtered users list (used for searching)
     setFilteredUsers(usersList);
     });
+    setIsLoading(false)
 
 
     // Cleanup listener when component is unmounted or user changes
@@ -206,6 +209,13 @@ export default function GroupScreen() {
     <View style={styles.container}>
       <Navbar />
 
+      {isLoading ?(
+        <View style={{flex:1, alignItems: 'center',justifyContent:'center'}}>
+          <ActivityIndicator size="large" color="#00ff00" />
+        </View>
+
+      ):(
+      <View style={{flex:1,}}>
       {user ? (
       <View style={{flex:1, alignItems: 'center',}}>
         <Text style={[styles.headings, {marginTop: 20}]}>Omat ryhmät:</Text>
@@ -341,6 +351,8 @@ export default function GroupScreen() {
           />
         </View>
       )}
+    </View>
+    )}
       
     </View>
   );

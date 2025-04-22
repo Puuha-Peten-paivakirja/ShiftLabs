@@ -85,6 +85,17 @@ export default StyleSheet.create({
       paddingBottom: 20,
       gap: 10,
     },
+    modalViewDelete:{
+      margin: 20,
+      borderRadius: 20,
+      height: '40%',
+      width: '80%',
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: 'black',
+      elevation: 20,
+      backgroundColor: '#e6e0e9', 
+    },
 
     
     
@@ -100,8 +111,12 @@ export default StyleSheet.create({
         marginBottom: 20,
       },
       scrollviewGroupsUsers:{
-        maxHeight: 150,
+        maxHeight: 200,
         width: "73%",
+      },
+      scrollviewGroupsUsersChange: {
+        maxHeight: 300,
+        width: '73%',
       },
 
   // Text
@@ -237,7 +252,7 @@ export default StyleSheet.create({
       borderRadius: 20,
       padding: 10,
       elevation: 2,
-      backgroundColor: 'transparent',
+      backgroundColor: '#e6e0e9',
 
     },
     floatingButton: {
@@ -252,6 +267,36 @@ export default StyleSheet.create({
       borderRadius: 30,
       elevation: 5,
       gap: 5,
+    },
+    groupDeleteModalButton: {
+      backgroundColor: '#d8bcfc',
+      borderRadius: 15,
+      paddingVertical: 10,
+      paddingHorizontal: 15,
+      marginTop: 10,
+      marginBottom: 10,
+      flexDirection: "row",
+      justifyContent: 'center',
+      alignItems: 'center', 
+      width: 280,
+      gap: 5,
+
+    },
+    backButton: {
+      flexDirection: 'row', 
+      alignItems: 'center', 
+      gap: 5 ,
+      paddingLeft: 5, 
+      paddingTop: 10, 
+      paddingBottom: 15
+    },
+    settingsButton:{
+      flexDirection: 'row', 
+      alignItems: 'center', 
+      gap: 5, 
+      paddingRight:10, 
+      paddingTop: 10, 
+      paddingBottom: 15
     },
   
   });
