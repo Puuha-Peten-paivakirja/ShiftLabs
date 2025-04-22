@@ -60,5 +60,8 @@
   "calendar": "Calendar",
   "add-shift": "Add shift",
   "all-shifts": "All shifts",
-  "hello": "Hello"
+  "hello": "Hello",
+  "calendar-language": "en",
+  "date-format": "M/D"
+
 }

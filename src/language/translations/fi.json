@@ -60,5 +60,7 @@
   "calendar": "Kalenteri",
   "add-shift": "Lisää työvuoro",
   "all-shifts": "Kaikki työvuorot",
-  "hello": "Hei"
+  "hello": "Hei",
+  "calendar-language": "fi",
+  "date-format": "D.M"
 }
