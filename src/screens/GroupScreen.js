@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback  } from "react";
-import { View, Image, Text,TouchableOpacity, Modal, ActivityIndicator  } from "react-native";
+import { View, Image, Text,TouchableOpacity, Modal, ActivityIndicator, Alert } from "react-native";
 import Navbar from "../components/Navbar";
 import { TextInput, Checkbox  } from "react-native-paper";
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -9,6 +9,7 @@ import { FlatList, ScrollView } from "react-native-gesture-handler";
 import filter from "lodash.filter";
 import { useNavigation } from '@react-navigation/native';
 import styles from "../styles/Group.js";
+import { useTranslation } from "react-i18next";
 
 
 
@@ -16,6 +17,7 @@ export default function GroupScreen() {
 
   // Get the current authenticated user from the custom useUser hook
   const { user } = useUser()
+  const { t } = useTranslation();
   const [listOfUsers, setUsersList] = useState([]);
   const [newGroup, setNewGroup] = useState({
     groupName: '',
@@ -107,8 +109,8 @@ export default function GroupScreen() {
 
       if(docSnap.exists()) { 
         const userData = docSnap.data();
-        return { firstName: userData.firstName, lastName: userData.lastName }
         console.log("kauttaja haettu onnistuneesti")
+        return { firstName: userData.firstName, lastName: userData.lastName }
       } else {
           console.log("Käyttäjää ei löytynyt.");
       }
@@ -191,7 +193,7 @@ export default function GroupScreen() {
       }
       else{
         console.log("Group name empty")
-        alert("Ryhmän nimi ei voi olla tyhjä!")
+        Alert.alert(t("missing-group-name-alert"), t("missing-group-name-message"))
       }
     }
     else{
@@ -218,7 +220,7 @@ export default function GroupScreen() {
       <View style={{flex:1,}}>
       {user ? (
       <View style={{flex:1, alignItems: 'center',}}>
-        <Text style={[styles.headings, {marginTop: 20}]}>Omat ryhmät:</Text>
+        <Text style={[styles.headings, {marginTop: 20}]}>{t("my-groups")}</Text>
 
         {joinedGroups.length > 0 ? (
           <ScrollView style={styles.scrollviewGroups}>
@@ -238,7 +240,7 @@ export default function GroupScreen() {
             }
           </ScrollView>):(
             <View >
-              <Text style={{fontSize: 18}}>Luo tai liity ryhmään nähdäksesi ne</Text>
+              <Text style={{fontSize: 18}}>{t("create-or-join-group")}</Text>
             </View>
           )}
 
@@ -247,7 +249,7 @@ export default function GroupScreen() {
             style={styles.floatingButton}
             onPress={()=>setModalVisible(true)}>
               <Ionicons name='create-outline' size={30} />
-              <Text style={styles.createButtonText}>Uusi Ryhmä</Text>
+              <Text style={styles.createButtonText}>{t("new-group")}</Text>
           </TouchableOpacity>
           
           
@@ -261,12 +263,12 @@ export default function GroupScreen() {
             <View style={styles.modalCreateContainer}>
               <View style={styles.modalCreateView}>
                   <View style={styles.modalTextView}>
-                    <Text style={styles.headings}>Luo uusi ryhmä:</Text>
+                    <Text style={styles.headings}>{t("create-new-group")}</Text>
                   </View>
                   <View style={styles.nameInputHalf}>
                     <TextInput
                       style={styles.nameInput}
-                      placeholder="Ryhmän nimi..."
+                      placeholder={t("group-name")}
                       value={newGroup.groupName}
                       maxLength={25}
                       onChangeText={text => setNewGroup({...newGroup, groupName:text})}
@@ -285,7 +287,7 @@ export default function GroupScreen() {
                       style={styles.nameInput}
                       multiline
                       maxLength={50}
-                      placeholder="Ryhmän kuvaus..."
+                      placeholder={t("group-description")}
                       value={newGroup.groupDesc}
                       onChangeText={text => setNewGroup({...newGroup, groupDesc:text})}
                       numberOfLines={3}
@@ -300,7 +302,7 @@ export default function GroupScreen() {
 
                   <View style={styles.serachContainer}>
                     <TextInput 
-                      placeholder="Etsi henkilöitä..." 
+                      placeholder={t("search-for-people")}
                       autoCapitalize="none" 
                       autoCorrect={false}
                       value={searchQuery}
@@ -332,10 +334,10 @@ export default function GroupScreen() {
                     <TouchableOpacity
                         style={styles.createGroupButton}
                         onPress={() => setModalVisible(!modalVisible)}>
-                        <Text style={styles.createButtonText}>Peruuta</Text>
+                        <Text style={styles.createButtonText}>{t("cancel")}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.createGroupButton} onPress={() => {save(); setModalVisible(!modalVisible)}}>
-                      <Text style={styles.createButtonText}>Luo</Text>
+                      <Text style={styles.createButtonText}>{t("create")}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -345,7 +347,7 @@ export default function GroupScreen() {
       </View>
     ) :(
       <View style={styles.loginContainer}>
-        <Text style={styles.loginMessage}>Kirjaudu sisään käyttääksesi ryhmiä!</Text>
+        <Text style={styles.loginMessage}>{t("sign-in-to-access-groups")}</Text>
         <Image 
           source={require('../../assets/login-image.png')}
           style={styles.image}

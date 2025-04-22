@@ -84,5 +84,16 @@
   "delete-group": "Poista ryhmä",
   "are-you-sure": "Oletko täysin varma?",
   "delete-group-message": "Ryhmän poistaminen on lopullista eikä sitä voi palauttaa enää myöhemmin",
-  "i-am-sure-delete-group": "Olen varma, poista ryhmä"
+  "i-am-sure-delete-group": "Olen varma, poista ryhmä",
+  "missing-group-name-alert": "Aseta nimi",
+  "missing-group-name-message": "Ryhmän nimi ei voi olla tyhjä!",
+  "my-groups": "Omat ryhmät:",
+  "create-or-join-group": "Luo tai liity ryhmään nähdäksesi ne",
+  "new-group": "Uusi ryhmä",
+  "create-new-group": "Luo uusi ryhmä:",
+  "group-name": "Ryhmän nimi...",
+  "group-description": "Ryhmän kuvaus...",
+  "search-for-people": "Etsi henkilöitä...",
+  "create": "Luo",
+  "sign-in-to-access-groups": "Kirjaudu sisään käyttääksesi ryhmiä!"
 }
