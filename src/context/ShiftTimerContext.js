@@ -94,50 +94,55 @@ export const ShiftTimerProvider = ({ children }) => {
 
 
     
-    const saveShift = async () => {
+    const saveShift = async (manualShiftData = null) => {
         console.log("Saving shift...");
-        const formattedDuration = formatTime(elapsedTime);
-        const formattedBreakDuration = formatTime(elapsedBreak);
+    
+        // Use manualShiftData if provided, otherwise fall back to context state
+        const formattedDuration = manualShiftData?.duration || formatTime(elapsedTime);
+        const formattedBreakDuration = manualShiftData?.breakDuration || formatTime(elapsedBreak);
         const currentTime = new Date();
         const shiftData = {
-            // project: "Project Name", // Replace with actual project name when implemented
-            name: shiftName,
-            description: shiftDescription,
-            startTime: startTime ? startTime.toISOString() : currentTime.toISOString(),
-            endTime: currentTime.toISOString(),
+            name: manualShiftData?.name || shiftName,
+            description: manualShiftData?.description || shiftDescription,
+            startTime: manualShiftData?.startTime || (startTime ? startTime.toISOString() : currentTime.toISOString()),
+            endTime: manualShiftData?.endTime || currentTime.toISOString(),
             duration: formattedDuration,
             breakDuration: formattedBreakDuration,
             date: new Date().toISOString(),
         };
-
-            try {
-                const savedShifts = await AsyncStorage.getItem('shifts');
-                const shifts = savedShifts ? JSON.parse(savedShifts) : [];
-                shifts.push(shiftData);
-
-                await AsyncStorage.setItem('shifts', JSON.stringify(shifts));
-                
-                //sync to Firebase if current user is authenticated
-                
-                if (user) {
-                    console.log('User ID:', user.uid);
-
-                    const userShiftsRef = collection(firestore, USERS, user.uid, 'shifts');
-                    console.log('User shifts reference:', userShiftsRef);
-
-                    await addDoc(userShiftsRef, shiftData);
-                    console.log('Shift saved to Firebase:');
-                } else {
-                    console.log('User not authenticated, shift not saved to Firebase');
-                }
-            } catch (error) {
-                console.error('Failed to save shift:', error);
+    
+        try {
+            const savedShifts = await AsyncStorage.getItem("shifts");
+            const shifts = savedShifts ? JSON.parse(savedShifts) : [];
+            shifts.push(shiftData);
+    
+            await AsyncStorage.setItem("shifts", JSON.stringify(shifts));
+    
+            // Sync to Firebase if the user is authenticated
+            if (user) {
+                console.log("User ID:", user.uid);
+    
+                const userShiftsRef = collection(firestore, USERS, user.uid, "shifts");
+                console.log("User shifts reference:", userShiftsRef);
+    
+                await addDoc(userShiftsRef, shiftData);
+                console.log("Shift saved to Firebase:", shiftData);
+            } else {
+                console.log("User not authenticated, shift not saved to Firebase");
             }
-            console.log('Shift saved:', shiftData);
-            setRunning(false);
-            setEndTime(currentTime);
-            setElapsedTime(0);
+        } catch (error) {
+            console.error("Failed to save shift:", error);
         }
+    
+        console.log("Shift saved:", shiftData);
+    
+        // Reset context state if this is not a manual save
+        if (!manualShiftData) {
+            setRunning(false);
+            setElapsedTime(0);
+            setElapsedBreak(0);
+        }
+    };
 
 
     const startShift = async () => {
