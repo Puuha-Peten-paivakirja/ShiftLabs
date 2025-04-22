@@ -95,5 +95,10 @@
   "group-description": "Ryhmän kuvaus...",
   "search-for-people": "Etsi henkilöitä...",
   "create": "Luo",
-  "sign-in-to-access-groups": "Kirjaudu sisään käyttääksesi ryhmiä!"
+  "sign-in-to-access-groups": "Kirjaudu sisään käyttääksesi ryhmiä!",
+  "previous-shifts": "Aiemmat työvuorot",
+  "no-recorded-shifts": "Ei nauhotettuja työvuoroja",
+  "shift-date": "Pvm:",
+  "shift-length": "Kesto:",
+  "shift-breaks": "Tauot:"
 }

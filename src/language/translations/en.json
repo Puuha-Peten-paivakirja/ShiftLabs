@@ -95,5 +95,10 @@
   "group-description": "Group description...",
   "search-for-people": "Search for people...",
   "create": "Create",
-  "sign-in-to-access-groups": "Sign in to access groups!"
+  "sign-in-to-access-groups": "Sign in to access groups!",
+  "previous-shifts": "Previous shifts",
+  "no-recorded-shifts": "No recorded shifts",
+  "shift-date": "Date:",
+  "shift-length": "Length:",
+  "shift-breaks": "Breaks:"
 }
