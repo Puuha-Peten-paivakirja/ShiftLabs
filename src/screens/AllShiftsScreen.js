@@ -75,7 +75,7 @@ export default function AllShiftsScreen() {
 
     const parseTime = (timeString) => {
         const [hours, minutes, seconds] = timeString.split(":").map(Number);
-        return hours + minutes / 60 + (seconds || 0) / 3600; // Convert to hours
+        return hours // Convert to hours
     };
 
     const deleteShift = async (destroyShift) => {
@@ -114,6 +114,8 @@ export default function AllShiftsScreen() {
                 if (hoursDoc.exists()) {
                     const currentHours = hoursDoc.data().hours || 0;
                     const shiftDurationHours = parseTime(destroyShift.duration);
+                    console.log("Current hours:", currentHours);
+                    console.log("Shift duration in hours:", shiftDurationHours);
                     const updatedHours = currentHours - shiftDurationHours;
 
                     await setDoc(hoursDocRef, { hours: updatedHours });

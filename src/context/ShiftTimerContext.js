@@ -62,6 +62,7 @@ export const ShiftTimerProvider = ({ children }) => {
     const [shiftDescription, setShiftDescription] = useState("");
     const {user} = useUser();
     const [groups, setGroups] = useState([]);
+    const [groupId, setGroupId] = useState(null);
 
     useEffect(() => {
         if (running && !paused) {
@@ -128,14 +129,16 @@ export const ShiftTimerProvider = ({ children }) => {
             const formattedBreakDuration = manualShiftData?.breakDuration || formatTime(elapsedBreak);
             const currentTime = new Date();
 
-            // Determine the groupId
-            const groupId = manualShiftData?.groupId || (groups.length > 0 ? groups[0].id : null);
+            // Use the groupId from the context state
+            if (!groupId) {
+                console.warn("No groupId found. Hours will not be updated.");
+            }
 
             const shiftData = {
                 id: shiftId, // Add the unique ID
                 name: manualShiftData?.name || shiftName,
                 description: manualShiftData?.description || shiftDescription,
-                groupId: groupId, // Use the fetched groupId or null
+                groupId: groupId, // Use the groupId from the context state
                 startTime: manualShiftData?.startTime || (startTime ? startTime.toISOString() : currentTime.toISOString()),
                 endTime: manualShiftData?.endTime || currentTime.toISOString(),
                 duration: formattedDuration,
@@ -152,8 +155,6 @@ export const ShiftTimerProvider = ({ children }) => {
             await AsyncStorage.setItem("shifts", JSON.stringify(shifts));
             console.log("Shift saved to AsyncStorage");
 
-            
-
             // Sync to Firebase if the user is authenticated
             if (user) {
                 console.log("User ID:", user.uid);
@@ -169,18 +170,18 @@ export const ShiftTimerProvider = ({ children }) => {
                     // Check if the hours document already exists
                     const hoursDocSnapshot = await getDoc(hoursDocRef);
 
-                    const durationInSeconds = parseTime(formattedDuration); // Convert duration to seconds
+                    const durationInHours = parseTime(formattedDuration); // Convert duration to hours
 
                     if (hoursDocSnapshot.exists()) {
                         // Update the existing hours document
                         const existingHours = hoursDocSnapshot.data().hours || 0; // Ensure it's a number
-                        const updatedHours = existingHours + durationInSeconds;
+                        const updatedHours = existingHours + durationInHours;
                         await setDoc(hoursDocRef, { hours: updatedHours });
-                        console.log("Updated hours in Firebase subcollection:", updatedHours);
+                        console.log(`Updated hours for groupId ${groupId} in Firebase subcollection:`, updatedHours);
                     } else {
                         // Create a new hours document
-                        await setDoc(hoursDocRef, { hours: durationInSeconds });
-                        console.log("Hours saved to Firebase subcollection:", durationInSeconds);
+                        await setDoc(hoursDocRef, { hours: durationInHours });
+                        console.log(`Hours saved for groupId ${groupId} in Firebase subcollection:`, durationInHours);
                     }
                 } else {
                     console.warn("No groupId found. Hours not saved to Firebase.");
@@ -188,6 +189,8 @@ export const ShiftTimerProvider = ({ children }) => {
             }
         } catch (error) {
             console.error("Failed to save shift:", error);
+        } finally {
+            setGroupId(null); // Reset groupId after saving
         }
     };
 
@@ -281,7 +284,7 @@ export const ShiftTimerProvider = ({ children }) => {
 
     return (
         <ShiftTimerContext.Provider value={{
-            elapsedTime, elapsedBreak, running, paused, shiftDescription, shiftName, isModalVisible, saveShift, startShift, pauseShift, resumeShift, stopShift, formatTime, openModal, setShiftDescription, setShiftName, setIsModalVisible, 
+            setGroupId, elapsedTime, elapsedBreak, running, paused, shiftDescription, shiftName, isModalVisible, saveShift, startShift, pauseShift, resumeShift, stopShift, formatTime, openModal, setShiftDescription, setShiftName, setIsModalVisible, 
         }}>
             {children}
         </ShiftTimerContext.Provider>
