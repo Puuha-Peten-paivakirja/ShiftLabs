@@ -414,10 +414,40 @@ export default function SettingsScreen() {
     await deleteDoc(userDocRef)
   }
 
+  const isUserAdmin = async () => {
+    const isAdmin = []
+
+    await Promise.all(joinedGroups.map(async (joinedGroupId) => {
+      const groupUsersDocRef = doc(firestore, GROUPS, joinedGroupId, GROUPUSERS, user.uid)
+      const groupUsersDoc = await getDoc(groupUsersDocRef)
+
+      if (groupUsersDoc.data().role == 'admin') {
+        isAdmin.push(true)
+      }
+      else {
+        isAdmin.push(false)
+      }
+    }))
+    
+    return isAdmin
+  }
+
   const userDeleteAccount = async () => {
     setIsDisabled(true)
 
     try {
+      const isAdmin = await isUserAdmin()
+
+      if (isAdmin.includes(true)) {
+        Alert.alert(t('error'), t('user-is-admin'), [
+          {
+            onPress: () => setIsDisabled(false)
+          }
+        ])
+
+        return
+      }
+
       const credential = EmailAuthProvider.credential(user.email, userInfo.currentPassword)
       await reauthenticateWithCredential(user, credential)
       navigateToWelcomeScreen()

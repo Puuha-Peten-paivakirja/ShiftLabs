@@ -105,5 +105,6 @@
   "delete-account": "Delete account",
   "error-while-deleting-account": "Error while deleting account",
   "account-deleted": "Accound deleted",
-  "account-deleted-successfully": "Deleted account and all the data associated with it."
+  "account-deleted-successfully": "Deleted account and all the data associated with it.",
+  "user-is-admin": "You are an admin in at least one group. Make another user an admin before deleting your account."
 }

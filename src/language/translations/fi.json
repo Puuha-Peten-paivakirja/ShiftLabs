@@ -105,5 +105,6 @@
   "delete-account": "Poista käyttäjä",
   "error-while-deleting-account": "Käyttäjän poistamisessa tapahtui virhe",
   "account-deleted": "Käyttäjä poistettu",
-  "account-deleted-successfully": "Käyttäjä ja siihen liittyvä data poistettu."
+  "account-deleted-successfully": "Käyttäjä ja siihen liittyvä data poistettu.",
+  "user-is-admin": "Olet admin ainakin yhdessä ryhmässä. Tee toisesta käyttäjästä admin ennen käyttäjätilin poistoa."
 }
