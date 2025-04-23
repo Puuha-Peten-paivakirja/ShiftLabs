@@ -1,14 +1,16 @@
-import React, { useState, useCallback } from "react";
-import { View, Text, TouchableOpacity, Modal, Alert, ActivityIndicator } from "react-native";
+import React, { useState,useEffect, useCallback } from "react";
+import { View, Text, TouchableOpacity, Modal, Alert, ActivityIndicator,ScrollView, Keyboard, TouchableWithoutFeedback } from "react-native";
 import Navbar from "../components/Navbar";
 import { useNavigation } from '@react-navigation/native';
 import styles from "../styles/Group.js";
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { TextInput, Checkbox } from "react-native-paper";
 import { FlatList } from "react-native-gesture-handler";
-import { updateDoc, doc, collection, firestore, GROUPS, GROUPUSERS, USERS, HOURS, query, getDocs, USERGROUPS, onSnapshot, deleteDoc, SHIFTS } from "../firebase/config.js";
+import { updateDoc, doc, collection, firestore,setDoc, GROUPS, GROUPUSERS, USERS, HOURS, query, getDocs,getDoc,serverTimestamp, USERGROUPS, onSnapshot, deleteDoc, SHIFTS } from "../firebase/config.js";
 import { useTranslation } from "react-i18next";
 import { useUser } from "../context/useUser";
+import  { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+
 
 
 
@@ -22,14 +24,104 @@ export default function SpesificGroupScreen({ route }) {
     const {groupUsersAndHours, groupId } = route.params;
     const [isSaving, setIsSaving] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
-    
-    
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filteredUsers, setFilteredUsers] = useState([]);
+    const [checkedUsers, setCheckedUsers] = useState([]);    
     const [selectedUser, setSelectedUser] = useState(null);
+    const [listOfUsers, setUsersList] = useState([]);
+
+
+    useEffect(() => {
+        // Get all users for user adding
+        const usersQuery = query(collection(firestore, USERS));
+        const unsubscribe = onSnapshot(usersQuery, (querySnapshot) => {
+            const usersList = querySnapshot.docs.map((doc) => ({
+                id: doc.id,
+                firstName: doc.data().firstName,
+                lastName: doc.data().lastName,
+            })).filter((u) => 
+                u.id !== user.uid && // Exclude logged-in user
+                !groupUsersAndHours.some(g => g.id === u.id)); // Exclude logged-in user
+    
+            setUsersList(usersList);
+            setFilteredUsers(usersList);
+
+
+        });
+    
+        return () => unsubscribe();
+    }, [user ]);
+
+    const handleSearch = (query) => {
+        setSearchQuery(query)
+            const formattedQuery = query.toLowerCase()
+            const filteredData = filter(listOfUsers, (user) => {
+              return contains (user, formattedQuery);
+            })
+            setFilteredUsers(filteredData)
+        }
+    const contains = ({firstName, lastName}, query) =>  {
+        const firstNameMatch = firstName.toLowerCase().includes(query);
+        const lastNameMatch = lastName.toLowerCase().includes(query);  
+        return firstNameMatch || lastNameMatch;
+        }
+
+    const toggleUsers = (selectedUsers) => {
+        setCheckedUsers(prev => {
+            const exists = prev.find(u => u.id === selectedUsers.id);
+            return exists
+                ? prev.filter(u => u.id !== selectedUsers.id)
+                : [...prev, { id: selectedUsers.id, firstName: selectedUsers.firstName, lastName: selectedUsers.lastName, email: selectedUsers.email }];
+        });
+    };
+    
+    const handleAddUsers = async () => {
+        try {
+            const groupDoc = await getDoc(doc(firestore, GROUPS, groupId));
+            const groupName = groupDoc.data().groupName
+            const groupDesc = groupDoc.data().description
+
+            await Promise.all(checkedUsers.map(member =>
+                addUserToGroup(groupId, member.id, member, "member")
+            ));
+
+            await Promise.all(checkedUsers.map(member =>
+                addGroupToUser(member.id, groupId, groupName, groupDesc)
+            ));
+            Alert.alert("Success", "Users added to group!");
+            setCheckedUsers([]);
+            navigation.navigate('SpecificGroup', { groupId });
+            
+        } catch (error) {
+            console.error("Error adding users:", error);
+            Alert.alert("Error", "Failed to add users.");
+        }
+    };
+    const addUserToGroup = async (groupId, userId, userInfo, role) => {
+      const { firstName, lastName } = userInfo;
+      await setDoc(doc(firestore, GROUPS, groupId, GROUPUSERS, userId), {
+        firstName,
+        lastName,
+        joined: serverTimestamp(),
+        role
+      });
+    };
+
+    const addGroupToUser = async (userId, groupId, groupName, groupDesc) => {
+        await setDoc(doc(firestore, USERS, userId, USERGROUPS, groupId), {
+            groupId,
+            groupName,
+            groupDesc,
+            joined: serverTimestamp()
+          });
+    };
+
 
     // change the group name
     const newGroupName = async () => {
         if(!newName){
             console.log("New name empty")
+            Alert.alert(t("missing-group-name-alert"), t("missing-group-name-message"));
             return;
         }
             try{
@@ -64,7 +156,7 @@ export default function SpesificGroupScreen({ route }) {
         const changeAdmin = async () => {
             if (!selectedUser){
                 console.log("No selected user");
-                Alert.alert("Valitse vähintään yksi käyttäjä jatkaaksesi");
+                Alert.alert(t('no-new-admin'), t('no-new-admin-message'))
                 return false;
             }
             setIsSaving(true);
@@ -170,15 +262,52 @@ export default function SpesificGroupScreen({ route }) {
 
 
 return (
-    <View style={styles.container}>
+    <KeyboardAwareScrollView style={styles.container}>
         <Navbar />
         <TouchableOpacity  
             style={styles.backButton}
-            onPress={() => {navigation.navigate('Group')}}>
+            onPress={() => {navigation.navigate('SpecificGroup', { groupId })}}>
             <Ionicons name='arrow-back-outline' size={25} />
             <Text style={{fontSize:15, fontWeight: 'bold'}} >{t('return')}</Text>
         </TouchableOpacity>
-        <View style={{flex:1, alignItems: 'center',justifyContent: 'center', }}>
+
+        <View style={{flex:1, alignItems: 'center' }}>
+            <Text style={styles.headings}>{t('add-users')}</Text>
+
+
+            <View style={styles.serachContainer}>
+                <TextInput 
+                    placeholder={t("search-for-people")}
+                    autoCapitalize="none" 
+                    autoCorrect={false}
+                    value={searchQuery}
+                    onChangeText={(query) => handleSearch(query)}
+                />
+            </View>
+
+            <ScrollView style={styles.scrollviewUser}>
+                {filteredUsers.map((item) => (
+                    <View key={item.id}>
+                    <View style={styles.userViewItem}>
+                        <Text style={styles.userText}>
+                        {item.firstName} {item.lastName}
+                        </Text>
+                        <Checkbox
+                        status={checkedUsers.find(u => u.id === item.id) ? 'checked' : 'unchecked'}
+                        onPress={() => toggleUsers(item)}
+                        />
+                    </View>
+                    <View style={styles.userSeparator} />
+                    </View>
+                ))}
+                </ScrollView>
+
+            <TouchableOpacity
+                onPress={handleAddUsers}
+                style={{ padding: 10, backgroundColor: '#68548c', borderRadius: 10, marginVertical: 10 }}
+            >
+                <Text style={{ color: '#fff', textAlign: 'center' }}>{t('add-users-button')}</Text>
+            </TouchableOpacity>
 
             <Text style={styles.headings}>{t('settings')}</Text>
             <View style={styles.nameInputHalf}>
@@ -322,7 +451,7 @@ return (
 
 
         </View>
-
-    </View>
-
-)}
+    </KeyboardAwareScrollView>
+        
+    );
+}

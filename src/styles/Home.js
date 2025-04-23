@@ -4,7 +4,7 @@ import { StyleSheet } from "react-native";
 export default StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FAF5FF",
+    backgroundColor: "#ffffff",
   },
   profileContainer: {
     flex: 1,
@@ -47,15 +47,13 @@ export default StyleSheet.create({
   floatingButton: {
     position: "absolute",
     bottom: 40,
-    right: 20,
+    right: 30,
     backgroundColor: "#E6D6FF",
-    width: 50,
-    height: 50,
+    width: 100,
+    height: 100,
     borderRadius: 25,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowOffset: { width: 0, height: 2 },
+    elevation: 5,
   },
 });

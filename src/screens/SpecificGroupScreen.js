@@ -5,7 +5,7 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 import { useNavigation } from '@react-navigation/native';
 import styles from "../styles/Group.js";
 import { useUser } from "../context/useUser";
-import { doc, collection, firestore, GROUPS, GROUPUSERS, USERS, HOURS, query, getDocs, USERGROUPS, onSnapshot, deleteDoc } from "../firebase/config.js";
+import { doc, collection, firestore, GROUPS, GROUPUSERS, USERS, HOURS, query, getDocs, USERGROUPS, onSnapshot, deleteDoc, SHIFTS } from "../firebase/config.js";
 import { FlatList } from "react-native-gesture-handler";
 import CircularSegments from '../components/GroupTimeCircle.js'
 import { useTranslation } from 'react-i18next'
@@ -23,6 +23,7 @@ export default function SpecificGroupScreen({ route }) {
 
  useEffect(() => {
     if (!user) return;
+    // Get userdata and users hours from database
     const q = query(collection(firestore,GROUPS,groupId, GROUPUSERS))
         const unsubscribe = onSnapshot(q, async(querySnapshot) => {
             try {
@@ -31,7 +32,7 @@ export default function SpecificGroupScreen({ route }) {
                     const userData = doc.data();
                     const userId = doc.id;
           
-                    // Fetch from subcollection 'hours'
+                    
                     const hoursRef = collection(
                         firestore,
                         GROUPS,
@@ -40,16 +41,17 @@ export default function SpecificGroupScreen({ route }) {
                         userId,
                         HOURS
                       );
-            
+                    // Fetch from subcollection 'hours'
                     const hoursSnapshot = await getDocs(hoursRef);
           
+                    // Save the hours from users subcollection 'hours'
                     let hours = null;
                     if (hoursSnapshot.docs.length > 0) {
                         const firstDocData = hoursSnapshot.docs[0].data();
 
                         hours = firstDocData.hours || null;
                     }
-
+                    // Returns the user data and users hours
                     return {
                       id: userId,
                       firstName: userData.firstName,
@@ -59,7 +61,9 @@ export default function SpecificGroupScreen({ route }) {
                     };
                   })
                 );
-
+            
+            // Sorter to get user as first in list
+            // This is done to make the view look nicer
             const sortedGroupUsers = tempGroupUsers.sort((a, b) => {
                 if (a.role === 'admin' && b.role !== 'admin') {
                     return -1; // 'admin' comes first
@@ -70,9 +74,10 @@ export default function SpecificGroupScreen({ route }) {
             });
             setGroupUsersAndHours(sortedGroupUsers);
             
-
+            // Find the corresponding info to the current user from groups user Info
             const findCurrentUserStatus = sortedGroupUsers.find(person => person.id === user.uid);
     
+            // If current user is groups admin it puts setAdmin = true
             if (findCurrentUserStatus) {
                 if (findCurrentUserStatus.role === 'admin') {
                     setAdmin(true);
@@ -98,11 +103,34 @@ export default function SpecificGroupScreen({ route }) {
         
         }
  },[groupId, user])
-    
+
+    // Remove member from group    
     const removeMember = async (id) => {
         try{
+            // Remove hours of the user
+            const hoursSnapshot = await getDocs(collection(firestore, GROUPS, groupId, GROUPUSERS, id, HOURS));
+            const deleteHoursPromises = hoursSnapshot.docs.map(doc => deleteDoc(doc.ref));
+            await Promise.all(deleteHoursPromises)
+            console.log('Hours with group deleted from user')
+            // Remove user from Group
             await deleteDoc(doc(firestore,GROUPS,groupId, GROUPUSERS, id ));
+            console.log("User removed from group")
+            // Remove group from members 'user-Groups' subcollection
             await deleteDoc(doc(firestore,USERS, id, USERGROUPS, groupId))
+            console.log("Group removed from user")
+            // Delete the matching SHIFTS documents in 'USERS/{userId}/SHIFTS' where 'groupId' = groupId
+            const shiftsSnapshot = await getDocs(collection(firestore, USERS, id, SHIFTS));
+            
+            const deleteShiftsPromises = shiftsSnapshot.docs.map(async (shiftDoc) => {
+                const shiftData = shiftDoc.data();
+                if (shiftData.groupId === groupId) {
+                    return deleteDoc(shiftDoc.ref); // Delete the shift document
+                }
+            });
+            await Promise.all(deleteShiftsPromises); // Wait for all SHIFTS deletions
+            console.log("All users group shifts removed")
+
+            console.log("member removed succesfully")
         }catch(e){
             console.log("Error while removing user from group: ", e)
         }
@@ -138,7 +166,10 @@ export default function SpecificGroupScreen({ route }) {
 
                     <View style={{flex:1, alignItems: 'center',}}>
                         <Text style={styles.headings}>{t('groups-working-hours')}</Text>
-                        <CircularSegments data={groupUsersAndHours} />
+                        <CircularSegments 
+                            data={groupUsersAndHours}
+                            message={t("no-working-hours")}
+                            />
 
                         
 

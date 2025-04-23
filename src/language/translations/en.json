@@ -98,6 +98,15 @@
   "sign-in-to-access-groups": "Sign in to access groups!",
   "previous-shifts": "Previous shifts",
   "no-recorded-shifts": "No recorded shifts",
+  "shift-date": "Date:",
+  "shift-length": "Length:",
+  "shift-breaks": "Breaks:",
+  "creating-group": "Saving...",
+  "user-has-no-hours": "Add shifts to see them here",
+  "no-new-admin": "No user selected",
+  "no-new-admin-message": "Select one user to continue",
+  "add-users": "Add people to group",
+  "add-users-button": "Add people"
   "delete-account": "Delete account",
   "error-while-deleting-account": "Error while deleting account",
   "account-deleted": "Accound deleted",
@@ -129,4 +138,5 @@
   "no-group": "No group",
   "no-selected-group": "No selected group",
   "select-time": "Select time"
+
 }
