@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { View, Text, TouchableOpacity, FlatList } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { collection, getDocs } from "firebase/firestore";
 import { firestore } from "../firebase/config";
+import { ShiftTimerContext } from "../context/ShiftTimerContext";
 import styles from "../styles/AddShift";
-import { TextInput } from "react-native-paper";
 import { useUser } from "../context/useUser";
 import { useTranslation } from "react-i18next"; // Import useTranslation
+
 
 const ShiftGroupDropDown = ({ shiftName, setShiftName }) => {
     const [inputDropDownVisible, setInputDropDownVisible] = useState(false);
     const [groupOptions, setGroupOptions] = useState([]);
+    const {setGroupId} = useContext(ShiftTimerContext); // Added context for groupId
     const { user } = useUser();
     const { t } = useTranslation(); // Initialize translation function
 
@@ -18,16 +20,20 @@ const ShiftGroupDropDown = ({ shiftName, setShiftName }) => {
         setInputDropDownVisible(!inputDropDownVisible);
     };
 
-    const selectGroupName = (name) => {
+    const selectGroupName = (name, id) => {
         // Use a more robust way to handle "no group" logic
+        console.log("Selected group name:", name, id);
         setShiftName(name === "" ? "" : name); // Treat empty string as "no group"
+        setGroupId(id); // Set the groupId in context
         setInputDropDownVisible(false);
     };
+
 
     const fetchUserGroups = async () => {
         try {
             if (user) {
                 console.log("Fetching groups for user:", user.uid);
+                console.log("Found groups", groupOptions);
                 const userGroupsRef = collection(firestore, "users", user.uid, "user-groups");
                 const querySnapshot = await getDocs(userGroupsRef);
                 const groups = querySnapshot.docs.map((doc) => ({
@@ -53,28 +59,26 @@ const ShiftGroupDropDown = ({ shiftName, setShiftName }) => {
     return (
         <View style={styles.shiftDataDropDownContainer}>
             <TouchableOpacity style={styles.dropdownButton} onPress={toggleDropdown}>
-                {/* Localize "no group" here */}
-                <Text style={styles.dropdownButtonText}>{shiftName || t("no-group")}</Text>
+                <Text style={styles.dropdownButtonText}>{shiftName ? String(shiftName) : t("no-group")}</Text>
                 <Ionicons name={inputDropDownVisible ? "chevron-up" : "chevron-down"} size={20} />
             </TouchableOpacity>
 
             {inputDropDownVisible && (
-                <View style={styles.dropdown}>
+                <View style={[styles.dropdown, { maxHeight: 200 }]}>
                     <FlatList
                         data={groupOptions}
                         keyExtractor={(item) => item.id}
                         renderItem={({ item }) => (
                             <TouchableOpacity
                                 style={styles.dropdownItem}
-                                onPress={() => selectGroupName(item.groupName)}
+                                onPress={() => selectGroupName(item.groupName, item.id)}
                             >
-                                {/* Localize "no group" here */}
                                 <Text style={styles.dropdownItemText}>
-                                    {item.groupName || t("no-group")}
+                                    {item.groupName ? String(item.groupName) : t("no-group")}
                                 </Text>
                             </TouchableOpacity>
                         )}
-                        showsVerticalScrollIndicator={false}
+                        showsVerticalScrollIndicator={true}
                     />
                 </View>
             )}
