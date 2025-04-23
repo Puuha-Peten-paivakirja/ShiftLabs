@@ -6,7 +6,7 @@ import styles from "../styles/AllShifts";
 import { useTranslation } from "react-i18next";
 import { useUser } from "../context/useUser";
 import { firestore } from "../firebase/config";
-import { collection, deleteDoc, doc, getDocs, } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDocs, getDoc, setDoc } from "firebase/firestore";
 
 export default function AllShiftsScreen() {
     const [shifts, setSavedShifts] = useState([]);
@@ -73,6 +73,11 @@ export default function AllShiftsScreen() {
         fetchShifts();
     }, [user]);
 
+    const parseTime = (timeString) => {
+        const [hours, minutes, seconds] = timeString.split(":").map(Number);
+        return hours + minutes / 60 + (seconds || 0) / 3600; // Convert to hours
+    };
+
     const deleteShift = async (destroyShift) => {
         console.log("Deleting shift:", destroyShift);
         try {
@@ -99,6 +104,24 @@ export default function AllShiftsScreen() {
             }
 
             setGroupedShifts(updatedGrouped);
+
+            //update hours in FireBase
+            if (destroyShift.groupId) {
+                const hoursDocRef = doc(firestore, "groups", destroyShift.groupId, "group-users", user.uid, "hours", "hours");
+
+                //fetch the current hours
+                const hoursDoc = await getDoc(hoursDocRef);
+                if (hoursDoc.exists()) {
+                    const currentHours = hoursDoc.data().hours || 0;
+                    const shiftDurationHours = parseTime(destroyShift.duration);
+                    const updatedHours = currentHours - shiftDurationHours;
+
+                    await setDoc(hoursDocRef, { hours: updatedHours });
+                    console.log("Updated hours in Firebase:", updatedHours);
+                } else {
+                    console.error("Hours document does not exist in Firebase.");
+                }
+            }
 
             await AsyncStorage.setItem("shifts", JSON.stringify(updatedShifts));
             console.log("Shift deleted locally:", destroyShift.id);
@@ -147,7 +170,7 @@ export default function AllShiftsScreen() {
             <View style={styles.container}>
                 <Text style={styles.header}> {t('previous-shifts')}</Text>
                 {Object.keys(groupedShifts).length === 0 ? (
-                    <Text style={styles.noDataText}>{t('no-recorded-shifts')}Ei nauhotettuja työvuoroja</Text>
+                    <Text style={styles.noDataText}>{t('no-recorded-shifts')}</Text>
                 ) : selectedShiftName ? (
                     // Show entries for the selected shift
                     <View>

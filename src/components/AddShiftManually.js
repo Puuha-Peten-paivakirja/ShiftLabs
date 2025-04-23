@@ -169,9 +169,9 @@ const AddShiftManually = () => {
     };
 
     const data = [
-        { label: "start-time", value: formatDateTime(selectedStartDate), onPress: showStartDatePicker }, // Use plain keys
-        { label: "end-time", value: formatDateTime(selectedEndDate), onPress: showEndDatePicker }, // Use plain keys
-        { label: "break", value: `${Math.floor(breakDuration / 60)}h ${breakDuration % 60}m`, onPress: showBreakPicker }, // Use plain keys
+        { label: "start-time",placeholder:"time", value: formatDateTime(selectedStartDate), onPress: showStartDatePicker }, // Use plain keys
+        { label: "end-time",placeholder:"endtime", value: formatDateTime(selectedEndDate), onPress: showEndDatePicker }, // Use plain keys
+        { label: "break",placeholder:"break", value: `${Math.floor(breakDuration / 60)}h ${breakDuration % 60}m`, onPress: showBreakPicker }, // Use plain keys
         { label: "shift-duration", value: totalDuration }, // Use plain keys
     ];
 
@@ -247,12 +247,12 @@ const AddShiftManually = () => {
                         ) : (
                             <View style={{ width: 220, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                                 <Text style={styles.input}>{item.value || ""}</Text>
-                                {(item.label === "Start Time" || item.label === "End Time") && (
+                                {(item.placeholder === "time" || item.placeholder === "endtime") && (
                                     <TouchableOpacity onPress={item.onPress}>
                                         <Ionicons name="create-outline" size={25} style={styles.inputIcon} />
                                     </TouchableOpacity>
                                 )}
-                                {item.label === "Break" && (
+                                {item.placeholder === "break" && (
                                     <TouchableOpacity onPress={item.onPress}>
                                         <Ionicons name="add-outline" size={25} style={styles.inputIcon} />
                                     </TouchableOpacity>
