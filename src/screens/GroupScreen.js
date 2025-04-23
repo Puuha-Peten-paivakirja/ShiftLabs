@@ -56,7 +56,6 @@ export default function GroupScreen() {
         id: doc.id,
         firstName: doc.data().firstName,
         lastName: doc.data().lastName,
-        email: doc.data().email,
     })).filter((u) => u.id !== user.uid);// Exclude the logged-in user from the list
     // Update users list
     setUsersList(usersList);

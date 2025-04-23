@@ -20,7 +20,7 @@ const generateRandomColor = (index) => {
   return colors[index % colors.length]; // Repeats the color if more than the length of the color array
 };
 
-const CircularSegments = ({ data }) => {
+const CircularSegments = ({ data ,message}) => {
   const { t } = useTranslation()
 
   // Filter out null, undefined, or NaN hours
@@ -38,7 +38,7 @@ const CircularSegments = ({ data }) => {
             strokeWidth={10}
           />
         </Svg>
-        <Text>{t("no-working-hours")}</Text>
+        <Text>{message}</Text>
       </View>
     );
   }

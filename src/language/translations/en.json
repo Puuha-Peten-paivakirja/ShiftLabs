@@ -101,5 +101,11 @@
   "shift-date": "Date:",
   "shift-length": "Length:",
   "shift-breaks": "Breaks:",
-  "creating-group": "Saving..."
+  "creating-group": "Saving...",
+  "user-has-no-hours": "Add shifts to see them here",
+  "no-new-admin": "No user selected",
+  "no-new-admin-message": "Select one user to continue",
+  "add-users": "Add people to group",
+  "add-users-button": "Add people"
+
 }

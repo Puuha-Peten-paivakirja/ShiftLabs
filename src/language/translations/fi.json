@@ -101,5 +101,10 @@
   "shift-date": "Pvm:",
   "shift-length": "Kesto:",
   "shift-breaks": "Tauot:",
-  "creating-group":"Tallennetaan..."
+  "creating-group":"Tallennetaan...",
+  "user-has-no-hours": "Lisää tunteja nähdäksesi ne tässä",
+  "no-new-admin": "Käyttäjää ei valittu",
+  "no-new-admin-message": "Valitse yksi käyttäjä jatkaaksesi",
+  "add-users": "Lisää ryhmään henkilöitä",
+  "add-users-button": "Lisää henkilöt"
 }

@@ -205,6 +205,8 @@ export default StyleSheet.create({
       backgroundColor: '#e6e0e9', 
       borderBottomColor: 'black',
       borderBottomWidth: 0.8,
+      paddingRight: 30
+
     },
     nameInputHalf: {
       flexDirection: 'row',
