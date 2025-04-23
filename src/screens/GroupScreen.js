@@ -29,7 +29,7 @@ export default function GroupScreen() {
   const [checkedUsers, setCheckedUsers] = useState([]);
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
 
@@ -37,6 +37,7 @@ export default function GroupScreen() {
   useEffect(() => {
     // Only proceed if user is logged in
     if (!user) return;
+    setIsLoading(true)
     // Queruy to get groups that user is part of
     const q = query(collection(firestore,USERS,user.uid, USERGROUPS))
     // Listen for changes to the user's groups in real-time
