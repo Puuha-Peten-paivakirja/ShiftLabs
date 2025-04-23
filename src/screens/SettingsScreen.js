@@ -419,11 +419,11 @@ export default function SettingsScreen() {
       await Promise.all([
         deleteCalendarEntries(),
         deleteShiftEntries(),
-        deleteUserGroupsEntries(),
         deleteHoursFromGroupUsers(),
         deleteShiftsFromGroupUsers(),
         deleteUserFromGroupUsers()
       ])
+      await deleteUserGroupsEntries()
       await deleteUser(user)
       setUserInfo({...userInfo, currentPassword: ''})
       Alert.alert(t('account-deleted'), t('account-deleted-successfully'), [
