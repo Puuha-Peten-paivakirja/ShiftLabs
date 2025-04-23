@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, TouchableOpacity, Alert } from 'react-native'
+import { View, Text, TouchableOpacity, Alert, TouchableWithoutFeedback, Keyboard } from 'react-native'
 import Navbar from '../components/Navbar'
 import Feather from '@expo/vector-icons/Feather'
 import { TextInput } from 'react-native-paper'
@@ -491,306 +491,308 @@ export default function SettingsScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <Navbar />
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <View style={styles.container}>
+        <Navbar />
 
-      <View style={styles.content}>
-        {user && editingName &&
-          <View style={styles.editContainer}>
-            <Text style={styles.textStyle}>{t('name')}:</Text>
-            <View style={styles.editNameRow}>
-              <View style={styles.editNameHalf}>
-                <TextInput 
-                  style={styles.nameInput}
-                  label={t('first-name')}
-                  value={editInfo.firstName}
-                  onChangeText={text => setEditInfo({...editInfo, firstName: text})}
-                  numberOfLines={1}
-                  autoCorrect={false}
-                />
-                <TouchableOpacity style={styles.clearNameIcon} onPress={() => setEditInfo({...editInfo, firstName: ''})}>
-                  <Ionicons name='close-circle' size={20} />
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.editNameHalf}>
-              <TextInput 
-                  style={styles.nameInput}
-                  label={t('last-name')}
-                  value={editInfo.lastName}
-                  onChangeText={text => setEditInfo({...editInfo, lastName: text})}
-                  numberOfLines={1}
-                  autoCorrect={false}
-                />
-                <TouchableOpacity style={styles.clearNameIcon} onPress={() => setEditInfo({...editInfo, lastName: ''})}>
-                  <Ionicons name='close-circle' size={20} />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            <View style={styles.confirmAndCancel}>
-              <TouchableOpacity
-                style={styles.confirmButton}
-                activeOpacity={0.75}
-                onPress={() => updateName()}
-                disabled={isDisabled}
-              >
-                <Text style={styles.buttonText}>{t('confirm')}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.cancelButton}
-                activeOpacity={0.75}
-                onPress={() => cancelEdit()}
-                disabled={isDisabled}
-              >
-                <Text style={styles.buttonText}>{t('cancel')}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        }
-
-        {user && !editingName &&
-          <View style={styles.notEditingContainer}>
-            <View style={styles.textContainer}>
+        <View style={styles.content}>
+          {user && editingName &&
+            <View style={styles.editContainer}>
               <Text style={styles.textStyle}>{t('name')}:</Text>
-              <Text style={styles.textStyle} numberOfLines={1}>{userInfo.firstName} {userInfo.lastName}</Text>
-            </View>
-            <TouchableOpacity style={styles.editIcon} onPress={() => startNameEdit()}>
-              <Feather name='edit' size={20} />
-            </TouchableOpacity>
-          </View>
-        }
-        
-        {user && editingEmail &&
-          <View style={styles.editContainer}>
-            <Text style={styles.textStyle}>{t('email-address')}:</Text>
+              <View style={styles.editNameRow}>
+                <View style={styles.editNameHalf}>
+                  <TextInput 
+                    style={styles.nameInput}
+                    label={t('first-name')}
+                    value={editInfo.firstName}
+                    onChangeText={text => setEditInfo({...editInfo, firstName: text})}
+                    numberOfLines={1}
+                    autoCorrect={false}
+                  />
+                  <TouchableOpacity style={styles.clearNameIcon} onPress={() => setEditInfo({...editInfo, firstName: ''})}>
+                    <Ionicons name='close-circle' size={20} />
+                  </TouchableOpacity>
+                </View>
 
-            <View style={styles.editRow}>
-              <TextInput
-                style={styles.input}
-                label={t('current-email-address')}
-                value={userInfo.currentEmail}
-                numberOfLines={1}
-                disabled={true}
-              />
-            </View>
+                <View style={styles.editNameHalf}>
+                <TextInput 
+                    style={styles.nameInput}
+                    label={t('last-name')}
+                    value={editInfo.lastName}
+                    onChangeText={text => setEditInfo({...editInfo, lastName: text})}
+                    numberOfLines={1}
+                    autoCorrect={false}
+                  />
+                  <TouchableOpacity style={styles.clearNameIcon} onPress={() => setEditInfo({...editInfo, lastName: ''})}>
+                    <Ionicons name='close-circle' size={20} />
+                  </TouchableOpacity>
+                </View>
+              </View>
 
-            <View style={styles.editRow}>
-              <TextInput
-                style={styles.input}
-                label={t('new-email-address')}
-                value={editInfo.newEmail}
-                onChangeText={text => setEditInfo({...editInfo, newEmail: text})}
-                keyboardType='email-address'
-                numberOfLines={1}
-                autoCapitalize='none'
-                autoCorrect={false}
-              />
-              <TouchableOpacity style={styles.clearIcon} onPress={() => setEditInfo({...editInfo, newEmail: ''})}>
-                <Ionicons name='close-circle' size={20} />
+              <View style={styles.confirmAndCancel}>
+                <TouchableOpacity
+                  style={styles.confirmButton}
+                  activeOpacity={0.75}
+                  onPress={() => updateName()}
+                  disabled={isDisabled}
+                >
+                  <Text style={styles.buttonText}>{t('confirm')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  activeOpacity={0.75}
+                  onPress={() => cancelEdit()}
+                  disabled={isDisabled}
+                >
+                  <Text style={styles.buttonText}>{t('cancel')}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          }
+
+          {user && !editingName &&
+            <View style={styles.notEditingContainer}>
+              <View style={styles.textContainer}>
+                <Text style={styles.textStyle}>{t('name')}:</Text>
+                <Text style={styles.textStyle} numberOfLines={1}>{userInfo.firstName} {userInfo.lastName}</Text>
+              </View>
+              <TouchableOpacity style={styles.editIcon} onPress={() => startNameEdit()}>
+                <Feather name='edit' size={20} />
               </TouchableOpacity>
             </View>
-
-            <View style={styles.editRow}>
-              <TextInput
-                style={styles.input}
-                label={t('password')}
-                value={userInfo.currentPassword}
-                onChangeText={text => setUserInfo({...userInfo, currentPassword: text})}
-                secureTextEntry={true}
-                numberOfLines={1}
-                autoCapitalize='none'
-                autoCorrect={false}
-              />
-              <TouchableOpacity style={styles.clearIcon} onPress={() => setUserInfo({...userInfo, currentPassword: ''})}>
-                <Ionicons name='close-circle' size={20} />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.confirmAndCancel}>
-              <TouchableOpacity 
-                style={styles.confirmButton} 
-                activeOpacity={0.75}
-                onPress={() => updateUserEmail()}
-                disabled={isDisabled}
-              >
-                <Text style={styles.buttonText}>{t('confirm')}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.cancelButton}
-                activeOpacity={0.75}
-                onPress={() => cancelEdit()}
-                disabled={isDisabled}
-              >
-                <Text style={styles.buttonText}>{t('cancel')}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        }
-
-        {user && !editingEmail &&
-          <View style={styles.notEditingContainer}>
-            <View style={styles.textContainer}>
+          }
+          
+          {user && editingEmail &&
+            <View style={styles.editContainer}>
               <Text style={styles.textStyle}>{t('email-address')}:</Text>
-              <Text style={styles.textStyle} numberOfLines={1}>{userInfo.currentEmail}</Text>
+
+              <View style={styles.editRow}>
+                <TextInput
+                  style={styles.input}
+                  label={t('current-email-address')}
+                  value={userInfo.currentEmail}
+                  numberOfLines={1}
+                  disabled={true}
+                />
+              </View>
+
+              <View style={styles.editRow}>
+                <TextInput
+                  style={styles.input}
+                  label={t('new-email-address')}
+                  value={editInfo.newEmail}
+                  onChangeText={text => setEditInfo({...editInfo, newEmail: text})}
+                  keyboardType='email-address'
+                  numberOfLines={1}
+                  autoCapitalize='none'
+                  autoCorrect={false}
+                />
+                <TouchableOpacity style={styles.clearIcon} onPress={() => setEditInfo({...editInfo, newEmail: ''})}>
+                  <Ionicons name='close-circle' size={20} />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.editRow}>
+                <TextInput
+                  style={styles.input}
+                  label={t('password')}
+                  value={userInfo.currentPassword}
+                  onChangeText={text => setUserInfo({...userInfo, currentPassword: text})}
+                  secureTextEntry={true}
+                  numberOfLines={1}
+                  autoCapitalize='none'
+                  autoCorrect={false}
+                />
+                <TouchableOpacity style={styles.clearIcon} onPress={() => setUserInfo({...userInfo, currentPassword: ''})}>
+                  <Ionicons name='close-circle' size={20} />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.confirmAndCancel}>
+                <TouchableOpacity 
+                  style={styles.confirmButton} 
+                  activeOpacity={0.75}
+                  onPress={() => updateUserEmail()}
+                  disabled={isDisabled}
+                >
+                  <Text style={styles.buttonText}>{t('confirm')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  activeOpacity={0.75}
+                  onPress={() => cancelEdit()}
+                  disabled={isDisabled}
+                >
+                  <Text style={styles.buttonText}>{t('cancel')}</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-            <TouchableOpacity style={styles.editIcon} onPress={() => startEmailEdit()}>
-              <Feather name='edit' size={20} />
-            </TouchableOpacity>
-          </View>
-        }
+          }
 
-        {user && editingPassword &&
-          <View style={styles.editContainer}>
-            <Text style={styles.textStyle}>{t('change-password')}:</Text>
-
-            <View style={styles.editRow}>
-              <TextInput
-                style={styles.input}
-                label={t('current-password')}
-                value={userInfo.currentPassword}
-                onChangeText={text => setUserInfo({...userInfo, currentPassword: text})}
-                secureTextEntry={true}
-                numberOfLines={1}
-                autoCapitalize='none'
-                autoCorrect={false}
-              />
-              <TouchableOpacity style={styles.clearIcon} onPress={() => setUserInfo({...userInfo, currentPassword: ''})}>
-                <Ionicons name='close-circle' size={20} />
+          {user && !editingEmail &&
+            <View style={styles.notEditingContainer}>
+              <View style={styles.textContainer}>
+                <Text style={styles.textStyle}>{t('email-address')}:</Text>
+                <Text style={styles.textStyle} numberOfLines={1}>{userInfo.currentEmail}</Text>
+              </View>
+              <TouchableOpacity style={styles.editIcon} onPress={() => startEmailEdit()}>
+                <Feather name='edit' size={20} />
               </TouchableOpacity>
             </View>
+          }
 
-            <View style={styles.editRow}>
-              <TextInput
-                style={styles.input}
-                label={t('new-password')}
-                value={editInfo.newPassword}
-                onChangeText={text => setEditInfo({...editInfo, newPassword: text})}
-                secureTextEntry={true}
-                numberOfLines={1}
-                autoCapitalize='none'
-                autoCorrect={false}
-              />
-              <TouchableOpacity style={styles.clearIcon} onPress={() => setEditInfo({...editInfo, newPassword: ''})}>
-                <Ionicons name='close-circle' size={20} />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.editRow}>
-              <TextInput
-                style={styles.input}
-                label={t('confirm-new-password')}
-                value={editInfo.confirmedNewPassword}
-                onChangeText={text => setEditInfo({...editInfo, confirmedNewPassword: text})}
-                secureTextEntry={true}
-                numberOfLines={1}
-                autoCapitalize='none'
-                autoCorrect={false}
-              />
-              <TouchableOpacity style={styles.clearIcon} onPress={() => setEditInfo({...editInfo, confirmedNewPassword: ''})}>
-                <Ionicons name='close-circle' size={20} />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.confirmAndCancel}>
-              <TouchableOpacity
-                style={styles.confirmButton}
-                activeOpacity={0.75}
-                onPress={() => updateUserPassword()}
-                disabled={isDisabled}
-              >
-                <Text style={styles.buttonText}>{t('confirm')}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.cancelButton}
-                activeOpacity={0.75}
-                onPress={() => cancelEdit()}
-                disabled={isDisabled}
-              >
-                <Text style={styles.buttonText}>{t('cancel')}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        }
-
-        {user && !editingPassword &&
-          <View style={styles.notEditingContainer}>
-            <View style={styles.textContainer}>
+          {user && editingPassword &&
+            <View style={styles.editContainer}>
               <Text style={styles.textStyle}>{t('change-password')}:</Text>
-              <Text style={styles.textStyle} numberOfLines={1}>* * * * * * * *</Text>
-            </View>
-            <TouchableOpacity style={styles.editIcon} onPress={() => startPasswordEdit()}>
-              <Feather name='edit' size={20} />
-            </TouchableOpacity>
-          </View>
-        }
 
-        <View style={styles.languageContainer}>
-          <Dropdown
-            style={styles.dropdown}
-            data={languageOptions}
-            labelField='label'
-            valueField='value'
-            value={i18n.language}
-            onChange={item => changeAppLanguage(item.value)}
-            selectedTextStyle={styles.dropdownText}
-            renderLeftIcon={() => (
-              <MaterialIcons name='language' size={20} style={styles.dropdownIconLeft} />
-            )}
-            renderRightIcon={() => (
-              <Entypo name='chevron-right' size={20} style={styles.dropdownIconRight} />
-            )}
-          />
+              <View style={styles.editRow}>
+                <TextInput
+                  style={styles.input}
+                  label={t('current-password')}
+                  value={userInfo.currentPassword}
+                  onChangeText={text => setUserInfo({...userInfo, currentPassword: text})}
+                  secureTextEntry={true}
+                  numberOfLines={1}
+                  autoCapitalize='none'
+                  autoCorrect={false}
+                />
+                <TouchableOpacity style={styles.clearIcon} onPress={() => setUserInfo({...userInfo, currentPassword: ''})}>
+                  <Ionicons name='close-circle' size={20} />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.editRow}>
+                <TextInput
+                  style={styles.input}
+                  label={t('new-password')}
+                  value={editInfo.newPassword}
+                  onChangeText={text => setEditInfo({...editInfo, newPassword: text})}
+                  secureTextEntry={true}
+                  numberOfLines={1}
+                  autoCapitalize='none'
+                  autoCorrect={false}
+                />
+                <TouchableOpacity style={styles.clearIcon} onPress={() => setEditInfo({...editInfo, newPassword: ''})}>
+                  <Ionicons name='close-circle' size={20} />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.editRow}>
+                <TextInput
+                  style={styles.input}
+                  label={t('confirm-new-password')}
+                  value={editInfo.confirmedNewPassword}
+                  onChangeText={text => setEditInfo({...editInfo, confirmedNewPassword: text})}
+                  secureTextEntry={true}
+                  numberOfLines={1}
+                  autoCapitalize='none'
+                  autoCorrect={false}
+                />
+                <TouchableOpacity style={styles.clearIcon} onPress={() => setEditInfo({...editInfo, confirmedNewPassword: ''})}>
+                  <Ionicons name='close-circle' size={20} />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.confirmAndCancel}>
+                <TouchableOpacity
+                  style={styles.confirmButton}
+                  activeOpacity={0.75}
+                  onPress={() => updateUserPassword()}
+                  disabled={isDisabled}
+                >
+                  <Text style={styles.buttonText}>{t('confirm')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  activeOpacity={0.75}
+                  onPress={() => cancelEdit()}
+                  disabled={isDisabled}
+                >
+                  <Text style={styles.buttonText}>{t('cancel')}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          }
+
+          {user && !editingPassword &&
+            <View style={styles.notEditingContainer}>
+              <View style={styles.textContainer}>
+                <Text style={styles.textStyle}>{t('change-password')}:</Text>
+                <Text style={styles.textStyle} numberOfLines={1}>* * * * * * * *</Text>
+              </View>
+              <TouchableOpacity style={styles.editIcon} onPress={() => startPasswordEdit()}>
+                <Feather name='edit' size={20} />
+              </TouchableOpacity>
+            </View>
+          }
+
+          <View style={styles.languageContainer}>
+            <Dropdown
+              style={styles.dropdown}
+              data={languageOptions}
+              labelField='label'
+              valueField='value'
+              value={i18n.language}
+              onChange={item => changeAppLanguage(item.value)}
+              selectedTextStyle={styles.dropdownText}
+              renderLeftIcon={() => (
+                <MaterialIcons name='language' size={20} style={styles.dropdownIconLeft} />
+              )}
+              renderRightIcon={() => (
+                <Entypo name='chevron-right' size={20} style={styles.dropdownIconRight} />
+              )}
+            />
+          </View>
+          
+          {user && deletingAccount &&
+            <View style={styles.editContainer}>
+              <Text style={styles.textStyle}>{t('delete-account')}:</Text>
+              <View style={styles.editRow}>
+                <TextInput
+                  style={styles.input}
+                  label={t('password')}
+                  value={userInfo.currentPassword}
+                  onChangeText={text => setUserInfo({...userInfo, currentPassword: text})}
+                  secureTextEntry={true}
+                  numberOfLines={1}
+                  autoCapitalize='none'
+                  autoCorrect={false}
+                />
+                <TouchableOpacity style={styles.clearIcon} onPress={() => setUserInfo({...userInfo, currentPassword: ''})}>
+                  <Ionicons name='close-circle' size={20} />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.confirmAndCancel}>
+                <TouchableOpacity
+                  style={styles.confirmButton}
+                  activeOpacity={0.75}
+                  onPress={() => userDeleteAccount()}
+                  disabled={isDisabled}
+                >
+                  <Text style={styles.buttonText}>{t('confirm')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  activeOpacity={0.75}
+                  onPress={() => cancelEdit()}
+                  disabled={isDisabled}
+                >
+                  <Text style={styles.buttonText}>{t('cancel')}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          }
+
+          {user && !deletingAccount &&
+            <View style={styles.notEditingContainer}>
+              <TouchableOpacity style={styles.deleteAccount} onPress={() => startDeletingAccount()}>
+                <Text style={styles.textStyle}>{t('delete-account')}</Text>
+              </TouchableOpacity>
+            </View>
+          }
         </View>
-        
-        {user && deletingAccount &&
-          <View style={styles.editContainer}>
-            <Text style={styles.textStyle}>{t('delete-account')}:</Text>
-            <View style={styles.editRow}>
-              <TextInput
-                style={styles.input}
-                label={t('password')}
-                value={userInfo.currentPassword}
-                onChangeText={text => setUserInfo({...userInfo, currentPassword: text})}
-                secureTextEntry={true}
-                numberOfLines={1}
-                autoCapitalize='none'
-                autoCorrect={false}
-              />
-              <TouchableOpacity style={styles.clearIcon} onPress={() => setUserInfo({...userInfo, currentPassword: ''})}>
-                <Ionicons name='close-circle' size={20} />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.confirmAndCancel}>
-              <TouchableOpacity
-                style={styles.confirmButton}
-                activeOpacity={0.75}
-                onPress={() => userDeleteAccount()}
-                disabled={isDisabled}
-              >
-                <Text style={styles.buttonText}>{t('confirm')}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.cancelButton}
-                activeOpacity={0.75}
-                onPress={() => cancelEdit()}
-                disabled={isDisabled}
-              >
-                <Text style={styles.buttonText}>{t('cancel')}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        }
-
-        {user && !deletingAccount &&
-          <View style={styles.notEditingContainer}>
-            <TouchableOpacity style={styles.deleteAccount} onPress={() => startDeletingAccount()}>
-              <Text style={styles.textStyle}>{t('delete-account')}</Text>
-            </TouchableOpacity>
-          </View>
-        }
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   )
 }

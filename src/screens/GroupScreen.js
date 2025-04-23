@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback  } from "react";
-import { View, Image, Text,TouchableOpacity, Modal, ActivityIndicator, Alert } from "react-native";
+import { View, Image, Text,TouchableOpacity, Modal, ActivityIndicator, Alert, TouchableWithoutFeedback, Keyboard } from "react-native";
 import Navbar from "../components/Navbar";
 import { TextInput, Checkbox  } from "react-native-paper";
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -217,178 +217,180 @@ const addGroupToUser = async (userId, groupId, group) => {
   }, [user]);
 
   return (
-    <View style={styles.container}>
-      <Navbar />
+      <View style={styles.container}>
+        <Navbar />
 
-      {isLoading ?(
-        <View style={{flex:1, alignItems: 'center',justifyContent:'center'}}>
-          <ActivityIndicator size="large" color="#4B3F72" />
-        </View>
+        {isLoading ?(
+          <View style={{flex:1, alignItems: 'center',justifyContent:'center'}}>
+            <ActivityIndicator size="large" color="#4B3F72" />
+          </View>
 
-      ):(
-      <View style={{flex:1,}}>
-      {user ? (
-      <View style={{flex:1, alignItems: 'center',}}>
-        <Text style={[styles.headings, {marginTop: 20}]}>{t("my-groups")}</Text>
+        ):(
+        <View style={{flex:1,}}>
+        {user ? (
+        <View style={{flex:1, alignItems: 'center',}}>
+          <Text style={[styles.headings, {marginTop: 20}]}>{t("my-groups")}</Text>
 
-        {joinedGroups.length > 0 ? (
-          <ScrollView style={styles.scrollviewGroups}>
-          {
-              joinedGroups.map((joinedGroup)=>(
-                <View key={joinedGroup.id} style={styles.groupViewItem}>
-                  <Text style={styles.groupNameText}>{joinedGroup.groupName}</Text>
-                  
-                  <Text
-                    style={[styles.groupDescText, { textAlign: 'center' }]}
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                  >
-                    {joinedGroup.groupDesc || '-'}
-                  </Text>
-
-                  <TouchableOpacity 
-                    style={styles.groupInfoButton} 
-                    onPress={() => navigateToGroup(joinedGroup.id)}
-                  >
-                    <Ionicons name='add-outline' size={30} />
-                  </TouchableOpacity>
-                </View>
-              ))
-            }
-          </ScrollView>):(
-            <View >
-              <Text style={{fontSize: 18}}>{t("create-or-join-group")}</Text>
-            </View>
-          )}
-
-        {/*------------------------------------*/}
-          <TouchableOpacity
-            style={styles.floatingButton}
-            onPress={()=>setModalVisible(true)}>
-              <Ionicons name='create-outline' size={30} />
-              <Text style={styles.createButtonText}>{t("new-group")}</Text>
-          </TouchableOpacity>
-          
-          
-          <Modal
-            animationType="fade"
-            transparent={true}
-            visible={modalVisible}
-            onRequestClose={() => {
-                setModalVisible(!modalVisible);
-            }}>
-            <View style={styles.modalCreateContainer}>
-              <View style={styles.modalCreateView}>
-                  <View style={styles.modalTextView}>
-                    <Text style={styles.headings}>{t("create-new-group")}</Text>
-                  </View>
-                  <View style={styles.nameInputHalf}>
-                    <TextInput
-                      style={styles.nameInput}
-                      placeholder={t("group-name")}
-                      value={newGroup.groupName}
-                      maxLength={25}
-                      onChangeText={text => setNewGroup({...newGroup, groupName:text})}
+          {joinedGroups.length > 0 ? (
+            <ScrollView style={styles.scrollviewGroups}>
+            {
+                joinedGroups.map((joinedGroup)=>(
+                  <View key={joinedGroup.id} style={styles.groupViewItem}>
+                    <Text style={styles.groupNameText}>{joinedGroup.groupName}</Text>
+                    
+                    <Text
+                      style={[styles.groupDescText, { textAlign: 'center' }]}
                       numberOfLines={1}
-                    />
-                    <TouchableOpacity 
-                      style={styles.clearNameIcon} 
-                      onPress={() => setNewGroup({...newGroup, groupName:''})}
+                      ellipsizeMode="tail"
                     >
-                      <Ionicons name='close-circle' size={20} />
-                    </TouchableOpacity>
-                  </View> 
+                      {joinedGroup.groupDesc || '-'}
+                    </Text>
 
-                  <View style={styles.nameInputHalf}>
-                    <TextInput
-                      style={styles.nameInput}
-                      multiline
-                      maxLength={50}
-                      placeholder={t("group-description")}
-                      value={newGroup.groupDesc}
-                      onChangeText={text => setNewGroup({...newGroup, groupDesc:text})}
-                      numberOfLines={3}
-                    />
                     <TouchableOpacity 
-                      style={styles.clearNameIcon} 
-                      onPress={() => setNewGroup({...newGroup, groupDesc:''})}
+                      style={styles.groupInfoButton} 
+                      onPress={() => navigateToGroup(joinedGroup.id)}
                     >
-                      <Ionicons name='close-circle' size={20} />
-                    </TouchableOpacity>
-                  </View> 
-
-                  <View style={styles.serachContainer}>
-                    <TextInput 
-                      placeholder={t("search-for-people")}
-                      autoCapitalize="none" 
-                      autoCorrect={false}
-                      value={searchQuery}
-                      onChangeText={(query) => handleSearch(query)}
-                    />
-                  </View>
-
-    
-                  <FlatList
-                      data={filteredUsers}
-                      keyExtractor={(item) => item.id}
-                      style={styles.scrollviewUser}
-                      renderItem={({ item }) => (
-                      <View>
-                        <View style={styles.userViewItem}>
-                          <Text style={styles.userText}>{item.firstName} {item.lastName}</Text>
-                          <Checkbox
-                            style={styles.checkbox}
-                            status={checkedUsers.find(u => u.id === item.id) ? 'checked' : 'unchecked'}
-                            onPress={() => toggleUser(item)}
-                            />
-                          </View>
-                        <View style={styles.userSeparator} />
-                      </View>
-                    )}
-                  />
-                  
-                  <View style={styles.modalButtonView}>
-                    <TouchableOpacity
-                        style={styles.createGroupButton}
-                        onPress={() => setModalVisible(!modalVisible)}>
-                        <Text style={styles.createButtonText}>{t("cancel")}</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity 
-                      style={styles.createGroupButton} 
-                      disabled={isSaving}
-                      onPress={async () => {
-                        const wasSaved = await save();
-                        if (wasSaved) {
-                          setModalVisible(false);
-                        }
-                      }}>
-                      <Text style={styles.createButtonText}>{t("create")}</Text>
+                      <Ionicons name='add-outline' size={30} />
                     </TouchableOpacity>
                   </View>
-                  {isSaving && (
-                    <View style={styles.loadingOverlay}>
-                      <ActivityIndicator size="large" color="#fff" />
-                      <Text style={{ color: "#fff", marginTop: 10 }}>{t("creating-group")}</Text>
-                    </View>
-                  )}
-                </View>
+                ))
+              }
+            </ScrollView>):(
+              <View >
+                <Text style={{fontSize: 18}}>{t("create-or-join-group")}</Text>
               </View>
-          </Modal>
+            )}
 
-      </View>
-    ) :(
-      <View style={styles.loginContainer}>
-        <Text style={styles.loginMessage}>{t("sign-in-to-access-groups")}</Text>
-        <Image 
-          source={require('../../assets/login-image.png')}
-          style={styles.image}
-          />
+          {/*------------------------------------*/}
+            <TouchableOpacity
+              style={styles.floatingButton}
+              onPress={()=>setModalVisible(true)}>
+                <Ionicons name='create-outline' size={30} />
+                <Text style={styles.createButtonText}>{t("new-group")}</Text>
+            </TouchableOpacity>
+            
+            
+            <Modal
+              animationType="fade"
+              transparent={true}
+              visible={modalVisible}
+              onRequestClose={() => {
+                  setModalVisible(!modalVisible);
+              }}>
+                <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+                <View style={styles.modalCreateContainer}>
+                  <View style={styles.modalCreateView}>
+                      <View style={styles.modalTextView}>
+                        <Text style={styles.headings}>{t("create-new-group")}</Text>
+                      </View>
+                      <View style={styles.nameInputHalf}>
+                        <TextInput
+                          style={styles.nameInput}
+                          placeholder={t("group-name")}
+                          value={newGroup.groupName}
+                          maxLength={25}
+                          onChangeText={text => setNewGroup({...newGroup, groupName:text})}
+                          numberOfLines={1}
+                        />
+                        <TouchableOpacity 
+                          style={styles.clearNameIcon} 
+                          onPress={() => setNewGroup({...newGroup, groupName:''})}
+                        >
+                          <Ionicons name='close-circle' size={20} />
+                        </TouchableOpacity>
+                      </View> 
+
+                      <View style={styles.nameInputHalf}>
+                        <TextInput
+                          style={styles.nameInput}
+                          multiline
+                          maxLength={50}
+                          placeholder={t("group-description")}
+                          value={newGroup.groupDesc}
+                          onChangeText={text => setNewGroup({...newGroup, groupDesc:text})}
+                          numberOfLines={3}
+                        />
+                        <TouchableOpacity 
+                          style={styles.clearNameIcon} 
+                          onPress={() => setNewGroup({...newGroup, groupDesc:''})}
+                        >
+                          <Ionicons name='close-circle' size={20} />
+                        </TouchableOpacity>
+                      </View> 
+
+                      <View style={styles.serachContainer}>
+                        <TextInput 
+                          placeholder={t("search-for-people")}
+                          autoCapitalize="none" 
+                          autoCorrect={false}
+                          value={searchQuery}
+                          onChangeText={(query) => handleSearch(query)}
+                        />
+                      </View>
+
+        
+                      <FlatList
+                          data={filteredUsers}
+                          keyExtractor={(item) => item.id}
+                          style={styles.scrollviewUser}
+                          renderItem={({ item }) => (
+                          <View>
+                            <View style={styles.userViewItem}>
+                              <Text style={styles.userText}>{item.firstName} {item.lastName}</Text>
+                              <Checkbox
+                                style={styles.checkbox}
+                                status={checkedUsers.find(u => u.id === item.id) ? 'checked' : 'unchecked'}
+                                onPress={() => toggleUser(item)}
+                                />
+                              </View>
+                            <View style={styles.userSeparator} />
+                          </View>
+                        )}
+                      />
+                      
+                      <View style={styles.modalButtonView}>
+                        <TouchableOpacity
+                            style={styles.createGroupButton}
+                            onPress={() => setModalVisible(!modalVisible)}>
+                            <Text style={styles.createButtonText}>{t("cancel")}</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity 
+                          style={styles.createGroupButton} 
+                          disabled={isSaving}
+                          onPress={async () => {
+                            const wasSaved = await save();
+                            if (wasSaved) {
+                              setModalVisible(false);
+                            }
+                          }}>
+                          <Text style={styles.createButtonText}>{t("create")}</Text>
+                        </TouchableOpacity>
+                      </View>
+                      {isSaving && (
+                        <View style={styles.loadingOverlay}>
+                          <ActivityIndicator size="large" color="#fff" />
+                          <Text style={{ color: "#fff", marginTop: 10 }}>{t("creating-group")}</Text>
+                        </View>
+                      )}
+                    </View>
+                  </View>
+                </TouchableWithoutFeedback>
+            </Modal>
+
         </View>
+      ) :(
+        <View style={styles.loginContainer}>
+          <Text style={styles.loginMessage}>{t("sign-in-to-access-groups")}</Text>
+          <Image 
+            source={require('../../assets/login-image.png')}
+            style={styles.image}
+            />
+          </View>
+        )}
+      </View>
       )}
-    </View>
-    )}
-      
-    </View>
+        
+      </View>
   );
 }
