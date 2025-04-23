@@ -10,7 +10,7 @@ import { FlatList } from "react-native-gesture-handler";
 import CircularSegments from '../components/GroupTimeCircle.js'
 import { useTranslation } from 'react-i18next'
 
-export default function SpesificGroupScreen({ route }) {
+export default function SpecificGroupScreen({ route }) {
     const navigation = useNavigation();
     const { groupId } = route.params;
     const { user } = useUser()

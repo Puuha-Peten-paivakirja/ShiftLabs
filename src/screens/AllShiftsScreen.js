@@ -1,34 +1,117 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, TouchableOpacity } from "react-native";
+import React, { useState, useEffect, use } from "react";
+import { View, Text, FlatList, TouchableOpacity,} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Navbar from "../components/Navbar";
 import styles from "../styles/AllShifts";
 import { useTranslation } from "react-i18next";
+import { useUser } from "../context/useUser";
+import { firestore } from "../firebase/config";
+import { collection, deleteDoc, doc, getDocs, } from "firebase/firestore";
 
 export default function AllShiftsScreen() {
     const [shifts, setSavedShifts] = useState([]);
+    const [groupedShifts, setGroupedShifts] = useState({});
+    const [selectedShiftName, setSelectedShiftName] = useState(null);
+    const { user } = useUser();
     const { t } = useTranslation();
 
     useEffect(() => {
         const fetchShifts = async () => {
             try {
+                // Fetch shifts from AsyncStorage
                 const savedShifts = await AsyncStorage.getItem("shifts");
-                if (savedShifts) {
-                    setSavedShifts(JSON.parse(savedShifts));
+                const parsedShifts = savedShifts ? JSON.parse(savedShifts) : [];
+
+                // Fetch shifts from Firebase
+                let firebaseShifts = [];
+                if (user) {
+                    const userShiftsRef = collection(firestore, "users", user.uid, "shifts");
+                    const querySnapshot = await getDocs(userShiftsRef);
+                    firebaseShifts = querySnapshot.docs.map((doc) => ({
+                        id: doc.id,
+                        ...doc.data(),
+                    }));
+                    console.log("Fetched shifts from Firebase:", firebaseShifts);
                 }
+
+                // Merge local and Firebase shifts, avoiding duplicates
+                const allShifts = [...parsedShifts];
+                firebaseShifts.forEach((firebaseShift) => {
+                    if (!allShifts.some((shift) => shift.id === firebaseShift.id)) {
+                        allShifts.push(firebaseShift);
+                    }
+                });
+
+                // Group shifts by name
+                const grouped = allShifts.reduce((acc, shift) => {
+                    const name = shift.name || "Omat työvuorot";
+                    if (!acc[name]) acc[name] = [];
+                    acc[name].push(shift);
+                    return acc;
+                }, {});
+
+                // Ensure "Omat työvuorot" is always present, even if empty
+                if (!grouped["Omat työvuorot"]) {
+                    grouped["Omat työvuorot"] = [];
+                }
+
+                // Sort groups alphabetically (special characters first)
+                const sortedGrouped = Object.keys(grouped)
+                    .sort((a, b) => a.localeCompare(b))
+                    .reduce((acc, key) => {
+                        acc[key] = grouped[key];
+                        return acc;
+                    }, {});
+
+                setGroupedShifts(sortedGrouped);
+                setSavedShifts(allShifts);
             } catch (error) {
                 console.error("Error loading shifts:", error);
             }
         };
 
         fetchShifts();
-    }, []);
+    }, [user]);
 
     const deleteShift = async (destroyShift) => {
+        console.log("Deleting shift:", destroyShift);
         try {
-            const updatedShifts = shifts.filter((shift) => shift !== destroyShift);
+            // Remove the shift locally
+            const updatedShifts = shifts.filter((shift) => shift.id !== destroyShift.id);
             setSavedShifts(updatedShifts);
+
+            // Update grouped shifts
+            const updatedGrouped = { ...groupedShifts };
+            const groupName = destroyShift.name || "Omat työvuorot";
+
+            if (updatedGrouped[groupName]) {
+                updatedGrouped[groupName] = updatedGrouped[groupName].filter((shift) => shift.id !== destroyShift.id);
+                if (updatedGrouped[groupName].length === 0) {
+                    delete updatedGrouped[groupName];
+
+                    // Reset selectedShiftName if the deleted group was selected
+                    if (selectedShiftName === groupName) {
+                        setSelectedShiftName(null);
+                    }
+                }
+            } else {
+                console.warn(`Group "${groupName}" does not exist in groupedShifts.`);
+            }
+
+            setGroupedShifts(updatedGrouped);
+
             await AsyncStorage.setItem("shifts", JSON.stringify(updatedShifts));
+            console.log("Shift deleted locally:", destroyShift.id);
+
+            // Remove the shift from Firebase
+            if (user && destroyShift.id) {
+                const userShiftsRef = collection(firestore, "users", user.uid, "shifts");
+                const shiftDocRef = doc(userShiftsRef, destroyShift.id);
+                await deleteDoc(shiftDocRef);
+                console.log("Shift deleted from Firebase:", destroyShift.id);
+            } else {
+                console.error("Shift ID is undefined or user is not authenticated.");
+            }
         } catch (error) {
             console.error("Error deleting shift:", error);
         }
@@ -56,39 +139,60 @@ export default function AllShiftsScreen() {
         const hours = ("0" + date.getHours()).slice(-2);
         const minutes = ("0" + date.getMinutes()).slice(-2);
         return `${hours}.${minutes}`;
-    }
-    
+    };
+
     return (
         <View style={styles.container}>
             <Navbar />
-            <View style={shifts.container}>
-            <Text style={styles.header}>{t("previous-shifts")}</Text>
-            {shifts.length === 0 ? (
-                <Text style={styles.noDataText}>{t("no-recorded-shifts")}</Text>
-            ) : (
-                <FlatList
-                    data={shifts}
-                    keyExtractor={(item, index) => index.toString()}
-                    renderItem={({ item }) => (
-                        <View style={styles.shiftItem}>
-                            {/* Shift Name */}
-                            <Text style={styles.shiftName}>{item.name|| "Undefined"}</Text>
-
-                            {/* Shift Details */}
-                            <Text style={styles.shiftText}>
-                                {formatTime(item.startTime)} - {formatTime(item.endTime)}
-                            </Text>
-                            <Text>{t("shift-date")} {formatDate(item.date)}</Text>
-                            <Text>{t("shift-length")} {formatDuration(item.duration)}</Text>
-                            <Text>{t("shift-breaks")} {formatDuration(item.breakDuration)}</Text>
-
-                            <TouchableOpacity onPress={() => deleteShift(item)} style={styles.deleteShiftButton}>
-                                <Text style={styles.deleteShiftButtonText}>❌</Text>
+            <View style={styles.container}>
+                <Text style={styles.header}>Aiemmat työvuorot</Text>
+                {Object.keys(groupedShifts).length === 0 ? (
+                    <Text style={styles.noDataText}>Ei nauhotettuja työvuoroja</Text>
+                ) : selectedShiftName ? (
+                    // Show entries for the selected shift
+                    <View>
+                        <TouchableOpacity onPress={() => setSelectedShiftName(null)} style={styles.backButton}>
+                            <Text style={styles.backButtonText}>← Takaisin</Text>
+                        </TouchableOpacity>
+                        <FlatList
+                            data={groupedShifts[selectedShiftName].sort(
+                                (a, b) => new Date(b.startTime) - new Date(a.startTime)
+                            )}
+                            keyExtractor={(item, index) => index.toString()}
+                            renderItem={({ item }) => (
+                                <View style={styles.shiftItem}>
+                                    <Text style={styles.shiftText}>
+                                        {formatTime(item.startTime)} - {formatTime(item.endTime)}
+                                    </Text>
+                                    <Text>Pvm: {formatDate(item.date)}</Text>
+                                    <Text>Kesto: {formatDuration(item.duration)}</Text>
+                                    <Text>Tauot: {formatDuration(item.breakDuration)}</Text>
+                                    <Text>Kuvaus: {item.description || "Ei kuvausta"}</Text>
+                                    <TouchableOpacity
+                                        onPress={() => deleteShift(item)}
+                                        style={styles.deleteShiftButton}
+                                    >
+                                        <Text style={styles.deleteShiftButtonText}>❌</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+                        />
+                    </View>
+                ) : (
+                    // Show grouped shifts by name
+                    <FlatList
+                        data={Object.keys(groupedShifts)}
+                        keyExtractor={(item, index) => index.toString()}
+                        renderItem={({ item }) => (
+                            <TouchableOpacity onPress={() => setSelectedShiftName(item)} style={styles.shiftGroup}>
+                                <Text style={styles.shiftGroupName}>{item}</Text>
+                                <Text style={styles.shiftGroupCount}>
+                                    {groupedShifts[item].length} työvuoroa
+                                </Text>
                             </TouchableOpacity>
-                        </View>
-                    )}
-                />
-            )}
+                        )}
+                    />
+                )}
             </View>
         </View>
     );

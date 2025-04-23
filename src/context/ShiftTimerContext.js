@@ -7,19 +7,22 @@ import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 import { useAuth } from "../hooks/useAuth";
 import { firestore, USERS} from "../firebase/config";
-import { addDoc, collection } from "firebase/firestore";
+import { doc, addDoc, collection, getDocs, setDoc, getDoc } from "firebase/firestore";
+import { useUser } from "./useUser";
+import uuid from "react-native-uuid"
+
 
 const BACKGROUND_TIMER_TASK = "BACKGROUND_TIMER_TASK";
 
 
-// Ensure notification handler is set
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-  }),
-});
+// // Ensure notification handler is set
+// Notifications.setNotificationHandler({
+//   handleNotification: async () => ({
+//     shouldShowAlert: true,
+//     shouldPlaySound: false,
+//     shouldSetBadge: false,
+//   }),
+// });
 
 TaskManager.defineTask(BACKGROUND_TIMER_TASK, async () => {
     console.log("Background task executed");
@@ -30,14 +33,14 @@ TaskManager.defineTask(BACKGROUND_TIMER_TASK, async () => {
         const elapsed = Math.floor((new Date() - startTime) / 1000);
         await AsyncStorage.setItem("elapsedTime", elapsed.toString());
 
-        // Send a notification when running in the background
-        await Notifications.scheduleNotificationAsync({
-            content: {
-                title: "Shift Still Running",
-                body: `Elapsed time: ${elapsed} seconds`,
-            },
-            trigger: { seconds: 5 },
-        });
+        // // Send a notification when running in the background
+        // await Notifications.scheduleNotificationAsync({
+        //     content: {
+        //         title: "Shift Still Running",
+        //         body: `Elapsed time: ${elapsed} seconds`,
+        //     },
+        //     trigger: { seconds: 5 },
+        // });
 
         return BackgroundFetch.Result.NewData;
     }
@@ -57,7 +60,8 @@ export const ShiftTimerProvider = ({ children }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [shiftName, setShiftName] = useState("");
     const [shiftDescription, setShiftDescription] = useState("");
-    const {user} = useAuth();
+    const {user} = useUser();
+    const [groups, setGroups] = useState([]);
 
     useEffect(() => {
         if (running && !paused) {
@@ -89,55 +93,103 @@ export const ShiftTimerProvider = ({ children }) => {
     useEffect(() => {
         if (!user || !user.groups) {
             setShiftName("");
-    }
+        }
     }, [user]);
 
-
-    
-    const saveShift = async () => {
-        console.log("Saving shift...");
-        const formattedDuration = formatTime(elapsedTime);
-        const formattedBreakDuration = formatTime(elapsedBreak);
-        const currentTime = new Date();
-        const shiftData = {
-            // project: "Project Name", // Replace with actual project name when implemented
-            name: shiftName,
-            description: shiftDescription,
-            startTime: startTime ? startTime.toISOString() : currentTime.toISOString(),
-            endTime: currentTime.toISOString(),
-            duration: formattedDuration,
-            breakDuration: formattedBreakDuration,
-            date: new Date().toISOString(),
-        };
-
+    useEffect(() => {
+        const fetchGroups = async () => {
             try {
-                const savedShifts = await AsyncStorage.getItem('shifts');
-                const shifts = savedShifts ? JSON.parse(savedShifts) : [];
-                shifts.push(shiftData);
-
-                await AsyncStorage.setItem('shifts', JSON.stringify(shifts));
-                
-                //sync to Firebase if current user is authenticated
-                
                 if (user) {
-                    console.log('User ID:', user.uid);
-
-                    const userShiftsRef = collection(firestore, USERS, user.uid, 'shifts');
-                    console.log('User shifts reference:', userShiftsRef);
-
-                    await addDoc(userShiftsRef, shiftData);
-                    console.log('Shift saved to Firebase:');
-                } else {
-                    console.log('User not authenticated, shift not saved to Firebase');
+                    const userGroupsRef = collection(firestore, "users", user.uid, "user-groups");
+                    const querySnapshot = await getDocs(userGroupsRef);
+                    const fetchedGroups = querySnapshot.docs.map((doc) => ({
+                        id: doc.id,
+                        ...doc.data(),
+                    }));
+                    setGroups(fetchedGroups);
+                    console.log("Fetched groups:", fetchedGroups);
                 }
             } catch (error) {
-                console.error('Failed to save shift:', error);
+                console.error("Failed to fetch groups:", error);
             }
-            console.log('Shift saved:', shiftData);
-            setRunning(false);
-            setEndTime(currentTime);
-            setElapsedTime(0);
+        };
+
+        fetchGroups();
+    }, [user]);
+    
+    const saveShift = async (manualShiftData = null) => {
+        console.log("Saving shift...");
+
+        try {
+            const shiftId = uuid.v4(); // Generate a unique ID
+            console.log("Generated UUID:", shiftId);
+
+            const formattedDuration = manualShiftData?.duration || formatTime(elapsedTime);
+            const formattedBreakDuration = manualShiftData?.breakDuration || formatTime(elapsedBreak);
+            const currentTime = new Date();
+
+            // Determine the groupId
+            const groupId = manualShiftData?.groupId || (groups.length > 0 ? groups[0].id : null);
+
+            const shiftData = {
+                id: shiftId, // Add the unique ID
+                name: manualShiftData?.name || shiftName,
+                description: manualShiftData?.description || shiftDescription,
+                groupId: groupId, // Use the fetched groupId or null
+                startTime: manualShiftData?.startTime || (startTime ? startTime.toISOString() : currentTime.toISOString()),
+                endTime: manualShiftData?.endTime || currentTime.toISOString(),
+                duration: formattedDuration,
+                breakDuration: formattedBreakDuration,
+                date: new Date().toISOString(),
+            };
+
+            console.log("Shift data to save:", shiftData);
+
+            // Save the shift data to AsyncStorage
+            const savedShifts = await AsyncStorage.getItem("shifts");
+            const shifts = savedShifts ? JSON.parse(savedShifts) : [];
+            shifts.push(shiftData);
+            await AsyncStorage.setItem("shifts", JSON.stringify(shifts));
+            console.log("Shift saved to AsyncStorage");
+
+            
+
+            // Sync to Firebase if the user is authenticated
+            if (user) {
+                console.log("User ID:", user.uid);
+
+                const userShiftsRef = collection(firestore, "users", user.uid, "shifts");
+                await setDoc(doc(userShiftsRef, shiftId), shiftData); // Use shiftId as the document ID
+                console.log("Shift saved to Firebase:", shiftData);
+
+                // Save hours to the subcollection in groups/groupId/group-users/userId/hours
+                if (groupId) {
+                    const hoursDocRef = doc(firestore, "groups", groupId, "group-users", user.uid, "hours", "hours");
+
+                    // Check if the hours document already exists
+                    const hoursDocSnapshot = await getDoc(hoursDocRef);
+
+                    const durationInSeconds = parseTime(formattedDuration); // Convert duration to seconds
+
+                    if (hoursDocSnapshot.exists()) {
+                        // Update the existing hours document
+                        const existingHours = hoursDocSnapshot.data().hours || 0; // Ensure it's a number
+                        const updatedHours = existingHours + durationInSeconds;
+                        await setDoc(hoursDocRef, { hours: updatedHours });
+                        console.log("Updated hours in Firebase subcollection:", updatedHours);
+                    } else {
+                        // Create a new hours document
+                        await setDoc(hoursDocRef, { hours: durationInSeconds });
+                        console.log("Hours saved to Firebase subcollection:", durationInSeconds);
+                    }
+                } else {
+                    console.warn("No groupId found. Hours not saved to Firebase.");
+                }
+            }
+        } catch (error) {
+            console.error("Failed to save shift:", error);
         }
+    };
 
 
     const startShift = async () => {
@@ -149,17 +201,17 @@ export const ShiftTimerProvider = ({ children }) => {
     
         await AsyncStorage.setItem("shiftStartTime", now.toISOString());
     
-        // Request notification permission
-        const { status } = await Notifications.requestPermissionsAsync();
-        if (status === "granted") {
-            await Notifications.scheduleNotificationAsync({
-                content: {
-                    title: "Shift Running",
-                    body: "Your shift is still running in the background.",
-                },
-                trigger: { seconds: 900 }, // 15 minutes
-            });
-        }
+        // // Request notification permission
+        // const { status } = await Notifications.requestPermissionsAsync();
+        // if (status === "granted") {
+        //     await Notifications.scheduleNotificationAsync({
+        //         content: {
+        //             title: "Shift Running",
+        //             body: "Your shift is still running in the background.",
+        //         },
+        //         trigger: { seconds: 900 }, // 15 minutes
+        //     });
+        // }
 
         // Check if task is already registered
         const isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_TIMER_TASK);
@@ -218,6 +270,12 @@ export const ShiftTimerProvider = ({ children }) => {
         const mins = Math.floor((seconds % 3600) / 60);
         const secs = seconds % 60;
         return `${("0" + hrs).slice(-2)}:${("0" + mins).slice(-2)}:${("0" + secs).slice(-2)}`;
+    };
+
+    const parseTime = (timeString) => {
+        const [hours, minutes, seconds] = timeString.split(":").map(Number);
+        //return only the hours
+        return hours;
     };
     
 

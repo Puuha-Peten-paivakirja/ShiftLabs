@@ -213,9 +213,8 @@ const addGroupToUser = async (userId, groupId, group) => {
 // Navigation to groups info
   const navigateToGroup = useCallback((groupId) => {
       console.log("Navigating to specific group:", groupId);
-      navigation.navigate('SpesificGroup', { groupId });
+      navigation.navigate('SpecificGroup', { groupId });
   }, [user]);
-
 
   return (
     <View style={styles.container}>
