@@ -6,7 +6,7 @@ import { TextInput } from 'react-native-paper'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import { useUser } from '../context/useUser'
-import { firestore, USERS, doc, updateDoc, onSnapshot, getDocs, collection, GROUPS, EmailAuthProvider, reauthenticateWithCredential, updatePassword, GROUPUSERS, verifyBeforeUpdateEmail, getDoc, deleteUser } from '../firebase/config.js'
+import { firestore, USERS, doc, updateDoc, onSnapshot, getDocs, collection, GROUPS, EmailAuthProvider, reauthenticateWithCredential, updatePassword, GROUPUSERS, verifyBeforeUpdateEmail, getDoc, deleteUser, CALENDARENTRIES, deleteDoc, SHIFTS } from '../firebase/config.js'
 import isStrongPassword from 'validator/lib/isStrongPassword'
 import styles from '../styles/Settings.js'
 import isEmail from 'validator/lib/isEmail'
@@ -344,12 +344,39 @@ export default function SettingsScreen() {
     )
   }
 
+  const deleteCalendarEntries = async () => {
+    const calendarEntriesRef = collection(firestore, USERS, user.uid, CALENDARENTRIES)
+    const allCalendarEntries = await getDocs(calendarEntriesRef)
+    const calendarEntriesIds = allCalendarEntries.docs.map((doc) => doc.id)
+
+    await Promise.all(calendarEntriesIds.map(async (calendarEntriesId) => {
+      const calendarEntriesDocRef = doc(firestore, USERS, user.uid, CALENDARENTRIES, calendarEntriesId)
+      const document = await getDoc(calendarEntriesDocRef)
+
+      await deleteDoc(document)
+    }))
+  }
+
+  const deleteShiftEntries = async () => {
+    const shiftsRef = collection(firestore, USERS, user.uid, SHIFTS)
+    const allShifts = await getDocs(shiftsRef)
+    const shiftsIds = allShifts.docs.map((doc) => doc.id)
+
+    await Promise.all(shiftsIds.map(async (shiftId) => {
+      const shiftsDocRef = doc(firestore, USERS, user.uid, CALENDARENTRIES, shiftId)
+      const document = await getDoc(shiftsDocRef)
+
+      await deleteDoc(document)
+    }))
+  }
+
   const userDeleteAccount = async () => {
     setIsDisabled(true)
 
     try {
       const credential = EmailAuthProvider.credential(user.email, userInfo.currentPassword)
       await reauthenticateWithCredential(user, credential)
+      await Promise.all([deleteCalendarEntries(), deleteShiftEntries()])
       await deleteUser(user)
       setUserInfo({...userInfo, currentPassword: ''})
       Alert.alert(t('account-deleted'), t('account-deleted-successfully'), [
