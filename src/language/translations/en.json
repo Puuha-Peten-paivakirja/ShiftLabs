@@ -40,7 +40,7 @@
   "error-while-changing-name": "Error while changing name",
   "name-changed": "Name changed",
   "name-changed-successfully": "Name changed successfully",
-  "email-change-email": "A verification email has been sent. Plese verify your new email address to complete this change. After completing the change, please sign in with the new email address in order to use it.",
+  "email-change-email": "A verification email has been sent. Please verify your new email address to complete this change. After completing the change, please sign in with the new email address in order to use it.",
   "error-while-changing-email": "Error while changing email address",
   "confirm": "Confirm",
   "cancel": "Cancel",
