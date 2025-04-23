@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { View, TouchableOpacity, Text, Alert } from 'react-native'
+import { View, TouchableOpacity, Text, Alert, TouchableWithoutFeedback, Keyboard } from 'react-native'
 import { TextInput } from 'react-native-paper'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import styles from '../styles/SignIn.js'
@@ -54,60 +54,62 @@ export default function SignInScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <Topbar title={t('sign-in')} showGoBackButton={true} />
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <View style={styles.container}>
+        <Topbar title={t('sign-in')} showGoBackButton={true} />
 
-      <View style={styles.contentContainer}>
-        <View>
-          <View style={styles.upperEmpty}></View>
-          <View style={styles.credentialsInputRow}>
-            <TextInput
-              style={styles.credentialsInput}
-              label={t('email-address')}
-              value={userInfo.email}
-              onChangeText={text => setUserInfo({...userInfo, email: text})}
-              keyboardType='email-address'
-              numberOfLines={1}
-              autoCapitalize='none'
-              autoCorrect={false}
-            />
-            <TouchableOpacity style={styles.clearCredentialsIcon} onPress={() => setUserInfo({...userInfo, email: ''})}>
-              <Ionicons name='close-circle' size={20} />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.credentialsInputRow}>
-            <TextInput
-              style={styles.credentialsInput}
-              label={t('password')}
-              value={userInfo.password}
-              onChangeText={text => setUserInfo({...userInfo, password: text})}
-              secureTextEntry={true}
-              numberOfLines={1}
-              autoCapitalize='none'
-              autoCorrect={false}
-            />
-            <TouchableOpacity style={styles.clearCredentialsIcon} onPress={() => setUserInfo({...userInfo, password: ''})}>
-              <Ionicons name='close-circle' size={20} />
-            </TouchableOpacity>
-          </View>
-          <View style={styles.lowerEmpty}></View>
-        </View>
-
-        <View style={styles.bottomContainer}>
-          <CustomButton
-            title={t('sign-in')}
-            onPress={() => signIn()}
-            isDisabled={isDisabled}
-          />
-            <View style={styles.bottomText}>
-              <Text style={styles.signInText}>{t('forgot-your-password')}</Text>
-              <TouchableOpacity activeOpacity={0.75} onPress={() => navigation.navigate('ResetPassword')}>
-                <Text style={styles.signInTextLink}>{t('reset-password')}</Text>
+        <View style={styles.contentContainer}>
+          <View>
+            <View style={styles.upperEmpty}></View>
+            <View style={styles.credentialsInputRow}>
+              <TextInput
+                style={styles.credentialsInput}
+                label={t('email-address')}
+                value={userInfo.email}
+                onChangeText={text => setUserInfo({...userInfo, email: text})}
+                keyboardType='email-address'
+                numberOfLines={1}
+                autoCapitalize='none'
+                autoCorrect={false}
+              />
+              <TouchableOpacity style={styles.clearCredentialsIcon} onPress={() => setUserInfo({...userInfo, email: ''})}>
+                <Ionicons name='close-circle' size={20} />
               </TouchableOpacity>
             </View>
+
+            <View style={styles.credentialsInputRow}>
+              <TextInput
+                style={styles.credentialsInput}
+                label={t('password')}
+                value={userInfo.password}
+                onChangeText={text => setUserInfo({...userInfo, password: text})}
+                secureTextEntry={true}
+                numberOfLines={1}
+                autoCapitalize='none'
+                autoCorrect={false}
+              />
+              <TouchableOpacity style={styles.clearCredentialsIcon} onPress={() => setUserInfo({...userInfo, password: ''})}>
+                <Ionicons name='close-circle' size={20} />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.lowerEmpty}></View>
+          </View>
+
+          <View style={styles.bottomContainer}>
+            <CustomButton
+              title={t('sign-in')}
+              onPress={() => signIn()}
+              isDisabled={isDisabled}
+            />
+              <View style={styles.bottomText}>
+                <Text style={styles.signInText}>{t('forgot-your-password')}</Text>
+                <TouchableOpacity activeOpacity={0.75} onPress={() => navigation.navigate('ResetPassword')}>
+                  <Text style={styles.signInTextLink}>{t('reset-password')}</Text>
+                </TouchableOpacity>
+              </View>
+          </View>
         </View>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   )
 }

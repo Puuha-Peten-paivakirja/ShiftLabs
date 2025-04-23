@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { View, Text, Alert, TouchableOpacity } from 'react-native'
+import { View, Text, Alert, TouchableOpacity, TouchableWithoutFeedback, Keyboard } from 'react-native'
 import { Topbar } from '../components/Topbar.js'
 import styles from '../styles/ResetPassword.js'
 import { TextInput } from 'react-native-paper'
@@ -52,42 +52,44 @@ export default function ResetPasswordScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <Topbar title={t('reset-password')} showGoBackButton={true} />
-      
-      <View style={styles.center}>
-        <View style={styles.textContent}>
-          <Text style={styles.title}>{t('forgot-your-password')}</Text>
-          <Text style={styles.text}>{t('forgot-password-text-1')}</Text>
-          <Text style={styles.text}>{t('forgot-password-text-2')}</Text>
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <View style={styles.container}>
+        <Topbar title={t('reset-password')} showGoBackButton={true} />
+        
+        <View style={styles.center}>
+          <View style={styles.textContent}>
+            <Text style={styles.title}>{t('forgot-your-password')}</Text>
+            <Text style={styles.text}>{t('forgot-password-text-1')}</Text>
+            <Text style={styles.text}>{t('forgot-password-text-2')}</Text>
+          </View>
         </View>
-      </View>
 
-      <View style={styles.center}>
-        <TextInput
-          style={styles.credentialsInput}
-          label={t('email-address')}
-          value={email}
-          onChangeText={text => setEmail(text)}
-          keyboardType='email-address'
-          numberOfLines={1}
-          autoCapitalize='none'
-          autoCorrect={false}
-        />
-        <TouchableOpacity style={styles.clearCredentialsIcon} onPress={() => setEmail('')}>
-          <Ionicons name='close-circle' size={20} />
-        </TouchableOpacity>
-      </View>
-      
-      <View style={styles.center}>
-        <View style={styles.buttonContainer}>
-          <CustomButton
-            title={t('reset')}
-            onPress={() => resetPassword()}
-            isDisabled={isDisabled}
+        <View style={styles.center}>
+          <TextInput
+            style={styles.credentialsInput}
+            label={t('email-address')}
+            value={email}
+            onChangeText={text => setEmail(text)}
+            keyboardType='email-address'
+            numberOfLines={1}
+            autoCapitalize='none'
+            autoCorrect={false}
           />
+          <TouchableOpacity style={styles.clearCredentialsIcon} onPress={() => setEmail('')}>
+            <Ionicons name='close-circle' size={20} />
+          </TouchableOpacity>
+        </View>
+        
+        <View style={styles.center}>
+          <View style={styles.buttonContainer}>
+            <CustomButton
+              title={t('reset')}
+              onPress={() => resetPassword()}
+              isDisabled={isDisabled}
+            />
+          </View>
         </View>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   )
 }

@@ -10,9 +10,7 @@ import { updateDoc, doc, collection, firestore,setDoc, GROUPS, GROUPUSERS, USERS
 import { useTranslation } from "react-i18next";
 import { useUser } from "../context/useUser";
 import  { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-
-
-
+import filter from "lodash.filter";
 
 export default function SpesificGroupScreen({ route }) {
     const { t } = useTranslation();
