@@ -1,6 +1,6 @@
 import react, { useEffect, useState } from "react";
 import moment from 'moment/min/moment-with-locales';
-import { View, Text } from "react-native";
+import { View, Text, TouchableWithoutFeedback, Keyboard, Platform } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Ionicons from '@expo/vector-icons/Ionicons'
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -170,74 +170,76 @@ export default function SingleCalendarEvent({ route }) {
   } 
 
     return (
-      <View style={styles.container}>
-        <Topbar title={t('edit-event')} />
-        <View style={styles.pageContent}>
-          <View style={styles.textInputContainer}>
-            <TextInput 
-              label={t('date')}
-              style={styles.textInput}
-              placeholder="DD.MM.YYYY"
-              value={date}
-              onChangeText={text => setDate(text)}
-              keyboardType='decimal-pad'
-            />
-          </View>
-          <View style={styles.textInputContainer}>
-            <TextInput 
-              label={t('start-time')}
-              style={styles.textInput}
-              value={startTime}
-              onChangeText={text => setStartTime(text)}
-              placeholder="hh.mm"
-              keyboardType='decimal-pad'
-            />
-          </View>
-          <View style={styles.textInputContainer}>
-            <TextInput 
-              label={t('end-time')}
-              style={styles.textInput}
-              value={endTime}
-              onChangeText={text => setEndTime(text)}
-              placeholder="hh.mm"
-              keyboardType='decimal-pad'
-            />
-          </View>
-          <View style={styles.textInputContainer}>
-            <TextInput 
-              label={t('description')}
-              style={styles.textInput}
-              value={note}
-              onChangeText={text => setNote(text)}
-              multiline={true}
-            />
-          </View>
-          <View style={styles.buttonContainer}>
-            <Button 
-              style={styles.cancelButton}
-              onPress={() => navigation.goBack()}
-            >
-              {t('cancel')}
-            </Button>
+      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+        <View style={styles.container}>
+          <Topbar title={t('edit-event')} />
+          <View style={styles.pageContent}>
+            <View style={styles.textInputContainer}>
+              <TextInput 
+                label={t('date')}
+                style={styles.textInput}
+                placeholder="DD.MM.YYYY"
+                value={date}
+                onChangeText={text => setDate(text)}
+                keyboardType={Platform.OS === 'ios' ? 'numbers-and-punctuation' : 'decimal-pad'}
+              />
+            </View>
+            <View style={styles.textInputContainer}>
+              <TextInput 
+                label={t('start-time')}
+                style={styles.textInput}
+                value={startTime}
+                onChangeText={text => setStartTime(text)}
+                placeholder="hh.mm"
+                keyboardType={Platform.OS === 'ios' ? 'numbers-and-punctuation' : 'decimal-pad'}
+              />
+            </View>
+            <View style={styles.textInputContainer}>
+              <TextInput 
+                label={t('end-time')}
+                style={styles.textInput}
+                value={endTime}
+                onChangeText={text => setEndTime(text)}
+                placeholder="hh.mm"
+                keyboardType={Platform.OS === 'ios' ? 'numbers-and-punctuation' : 'decimal-pad'}
+              />
+            </View>
+            <View style={styles.textInputContainer}>
+              <TextInput 
+                label={t('description')}
+                style={styles.textInput}
+                value={note}
+                onChangeText={text => setNote(text)}
+                multiline={true}
+              />
+            </View>
+            <View style={styles.buttonContainer}>
+              <Button 
+                style={styles.cancelButton}
+                onPress={() => navigation.goBack()}
+              >
+                {t('cancel')}
+              </Button>
 
-            <Button 
-              style={styles.deleteButton}
-              onPress={deleteInformation}
-              labelStyle={{color: "white"}}
-            >
-              <Ionicons name="trash-outline" size={20} />
-            </Button>
+              <Button 
+                style={styles.deleteButton}
+                onPress={deleteInformation}
+                labelStyle={{color: "white"}}
+              >
+                <Ionicons name="trash-outline" size={20} />
+              </Button>
 
-            <Button 
-              style={styles.saveButton}
-              onPress={saveInformation}
-              labelStyle={{color: "white"}}
-            >
-              {t('save')}
-            </Button>
+              <Button 
+                style={styles.saveButton}
+                onPress={saveInformation}
+                labelStyle={{color: "white"}}
+              >
+                {t('save')}
+              </Button>
+            </View>
+            
           </View>
-          
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     );
 }

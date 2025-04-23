@@ -1,6 +1,6 @@
 import react, { useEffect, useState } from "react";
 import moment from 'moment/min/moment-with-locales';
-import { View, Text } from "react-native";
+import { View, Text, TouchableWithoutFeedback, Keyboard, Platform } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Ionicons from '@expo/vector-icons/Ionicons'
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -135,66 +135,68 @@ export default function AddCalendarEvent({ route }) {
   }
 
     return (
-      <View style={styles.container}>
-        <Topbar title={t('create-event')} />
-        <View style={styles.pageContent}>
-          <View style={styles.textInputContainer}>
-            <TextInput 
-              label={t('date')}
-              placeholder="DD.MM.YYYY"
-              value={date}
-              onChangeText={text => setDate(text)}
-              style={styles.textInput}
-              keyboardType='decimal-pad'
-            />
-          </View>
-          <View style={styles.textInputContainer}>
-            <TextInput 
-              label={t('start-time')}
-              placeholder="hh.mm"
-              value={startTime}
-              onChangeText={text => setStartTime(text)}
-              style={styles.textInput}
-              keyboardType='decimal-pad'
-            />
-          </View>
-          <View style={styles.textInputContainer}>
-            <TextInput 
-              label={t('end-time')}
-              placeholder="hh.mm"
-              value={endTime}
-              onChangeText={text => setEndTime(text)}
-              style={styles.textInput}
-              keyboardType='decimal-pad'
-            />
-          </View>
-          <View style={styles.textInputContainer}>
-            <TextInput 
-              label={t('description')}
-              style={styles.textInput}
-              value={note}
-              onChangeText={text => setNote(text)}
-              multiline={true}
-            />
-          </View>
-          <View style={styles.buttonContainer}>
-            <Button 
-              style={styles.cancelButton}
-              onPress={() => navigation.goBack()}
-            >
-              {t('cancel')}
-            </Button>
+      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+        <View style={styles.container}>
+          <Topbar title={t('create-event')} />
+          <View style={styles.pageContent}>
+            <View style={styles.textInputContainer}>
+              <TextInput 
+                label={t('date')}
+                placeholder="DD.MM.YYYY"
+                value={date}
+                onChangeText={text => setDate(text)}
+                style={styles.textInput}
+                keyboardType={Platform.OS === 'ios' ? 'numbers-and-punctuation' : 'decimal-pad'}
+              />
+            </View>
+            <View style={styles.textInputContainer}>
+              <TextInput 
+                label={t('start-time')}
+                placeholder="hh.mm"
+                value={startTime}
+                onChangeText={text => setStartTime(text)}
+                style={styles.textInput}
+                keyboardType={Platform.OS === 'ios' ? 'numbers-and-punctuation' : 'decimal-pad'}
+              />
+            </View>
+            <View style={styles.textInputContainer}>
+              <TextInput 
+                label={t('end-time')}
+                placeholder="hh.mm"
+                value={endTime}
+                onChangeText={text => setEndTime(text)}
+                style={styles.textInput}
+                keyboardType={Platform.OS === 'ios' ? 'numbers-and-punctuation' : 'decimal-pad'}
+              />
+            </View>
+            <View style={styles.textInputContainer}>
+              <TextInput 
+                label={t('description')}
+                style={styles.textInput}
+                value={note}
+                onChangeText={text => setNote(text)}
+                multiline={true}
+              />
+            </View>
+            <View style={styles.buttonContainer}>
+              <Button 
+                style={styles.cancelButton}
+                onPress={() => navigation.goBack()}
+              >
+                {t('cancel')}
+              </Button>
 
-            <Button 
-              style={styles.saveButton}
-              onPress={saveInformation}
-              labelStyle={{color: "white"}}
-            >
-              {t('save')}
-            </Button>
+              <Button 
+                style={styles.saveButton}
+                onPress={saveInformation}
+                labelStyle={{color: "white"}}
+              >
+                {t('save')}
+              </Button>
+            </View>
+            
           </View>
-          
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     );
 }
