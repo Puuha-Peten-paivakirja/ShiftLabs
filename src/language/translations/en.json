@@ -99,15 +99,30 @@
   "previous-shifts": "Previous shifts",
   "no-recorded-shifts": "No recorded shifts",
   "shift-date": "Date:",
-  "shift-duration": "Length:",
+  "duration": "Length:",
   "shift-breaks": "Breaks:",
+  "break": "Break",
   "creating-group": "Saving...",
   "shift-description": "Description",
   "shift-return": "← Return",
   "local-shifts": "My shifts",
   "shifts": "Shifts",
   "default-shift-name": "My shifts",
-  "no-description": "No description"
+  "no-description": "No description",
+  "timer": "Timer",
+  "actions": "Actions",
+  "switch-to-input-mode": "Switch to Input Mode",
+  "switch-to-record-mode": "Switch to Record Mode",
+  "description-placeholder": "Description",
+  "start": "Start",
+  "pause": "Pause",
+  "resume": "Resume",
+  "stop": "Stop",
+  "stop-and-save-shift": "Stop and save the shift?",
+  "yes": "Yes",
+  "no": "No",
+  "no-group": "No group",
+  "no-selected-group": "No selected group"
 
 
 }

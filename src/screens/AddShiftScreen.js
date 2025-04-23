@@ -6,11 +6,13 @@ import styles from "../styles/AddShift";
 import { ShiftTimerContext } from "../context/ShiftTimerContext";
 import ShiftGroupDropDown from "../components/ShiftGroupDropDown";
 import AddShiftManually from "../components/AddShiftManually";
+import { useTranslation } from "react-i18next";
 
 const RADIUS = 45;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 const AddShiftScreen = () => {
+    const { t } = useTranslation();
     const { setShiftName, setShiftDescription, shiftName, shiftDescription, elapsedTime, running, paused, startShift, pauseShift, resumeShift, stopShift, isModalVisible, setIsModalVisible, formatTime } = useContext(ShiftTimerContext);
 
     const [isRecordMode, setIsRecordMode] = useState(true);
@@ -22,11 +24,11 @@ const AddShiftScreen = () => {
 
     const recordModeData = [
         {
-            label: "Ajastin",
+            label: "timer", // Use plain keys instead of localized strings
             type: "timer",
         },
         {
-            label: "Toiminnot",
+            label: "actions", // Use plain keys instead of localized strings
             type: "actions",
         },
     ];
@@ -38,24 +40,22 @@ const AddShiftScreen = () => {
             {/* Mode Toggle Button */}
             <TouchableOpacity style={styles.modeToggleButton} onPress={toggleMode}>
                 <Text style={styles.buttonText}>
-                    {isRecordMode ? "Vaihda syöttötilaan" : "Vaihda tallennustilaan"}
+                    {isRecordMode ? t("switch-to-input-mode") : t("switch-to-record-mode")}
                 </Text>
             </TouchableOpacity>
 
-
             <View style={[styles.container, isRecordMode ? styles.recordMode : styles.inputMode]}>
-            <View style={styles.inputGroup}>
-            <ShiftGroupDropDown shiftName={shiftName} setShiftName={setShiftName} />
+                <View style={styles.inputGroup}>
+                    <ShiftGroupDropDown shiftName={shiftName} setShiftName={setShiftName} />
                     {/* Grouped TextInput Fields */}
-
-                        <TextInput
-                            style={styles.manualInput}
-                            value={shiftDescription}
-                            onChangeText={setShiftDescription}
-                            placeholder="Kuvaus"
-                            multiline={true}
-                        />
-                    </View>
+                    <TextInput
+                        style={styles.manualInput}
+                        value={shiftDescription}
+                        onChangeText={setShiftDescription}
+                        placeholder={t("description-placeholder")}
+                        multiline={true}
+                    />
+                </View>
                 {/* FlatList for Record Mode */}
                 {isRecordMode && (
                     <FlatList
@@ -63,7 +63,8 @@ const AddShiftScreen = () => {
                         keyExtractor={(item, index) => index.toString()}
                         renderItem={({ item }) => (
                             <View style={styles.row}>
-                                <Text style={styles.label}>{item.label}</Text>
+                                {/* Localize the label here */}
+                                <Text style={styles.label}>{t(item.label)}</Text>
                                 {item.type === "input" ? (
                                     <TextInput
                                         style={styles.input}
@@ -93,22 +94,22 @@ const AddShiftScreen = () => {
                                     <View style={styles.buttonContainer}>
                                         {!running && !paused ? (
                                             <TouchableOpacity style={styles.button} onPress={startShift}>
-                                                <Text style={styles.buttonText}>Aloita</Text>
+                                                <Text style={styles.buttonText}>{t("start")}</Text>
                                             </TouchableOpacity>
                                         ) : (
                                             <>
                                                 {running && (
                                                     <TouchableOpacity style={styles.button} onPress={pauseShift}>
-                                                        <Text style={styles.buttonText}>Tauko</Text>
+                                                        <Text style={styles.buttonText}>{t("pause")}</Text>
                                                     </TouchableOpacity>
                                                 )}
                                                 {paused && (
                                                     <TouchableOpacity style={styles.button} onPress={resumeShift}>
-                                                        <Text style={styles.buttonText}>Jatka</Text>
+                                                        <Text style={styles.buttonText}>{t("resume")}</Text>
                                                     </TouchableOpacity>
                                                 )}
                                                 <TouchableOpacity style={styles.button} onPress={stopShift}>
-                                                    <Text style={styles.buttonText}>Lopeta</Text>
+                                                    <Text style={styles.buttonText}>{t("stop")}</Text>
                                                 </TouchableOpacity>
                                             </>
                                         )}
@@ -137,12 +138,12 @@ const AddShiftScreen = () => {
                 >
                     <View style={styles.modalContainer}>
                         <View style={styles.modalContent}>
-                            <Text style={styles.modalText}>Pysäytetäänkö, ja tallennetaanko vuoro?</Text>
+                            <Text style={styles.modalText}>{t("stop-and-save-shift")}</Text>
                             <TouchableOpacity style={styles.modalButton} onPress={stopShift}>
-                                <Text style={styles.modalButtonText}>Kyllä</Text>
+                                <Text style={styles.modalButtonText}>{t("yes")}</Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.modalButton} onPress={() => setIsModalVisible(false)}>
-                                <Text style={styles.modalButtonText}>Ei</Text>
+                                <Text style={styles.modalButtonText}>{t("no")}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
