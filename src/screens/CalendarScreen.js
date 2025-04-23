@@ -9,12 +9,14 @@ import Navbar from "../components/Navbar";
 import styles from '../styles/Calendar'
 import { query, addDoc, collection, firestore, serverTimestamp, auth, USERS, CALENDARENTRIES } from "../firebase/config.js";
 import { onSnapshot, orderBy } from 'firebase/firestore';
+import { useTranslation } from 'react-i18next';
 
 export default function CalendarScreen() {
   //Defaultprops-error tulee itse kirjastosta
   //Tämän saa pois, jos poistaa react-native-weekly-calendar-kirjaston indes.js-tiedoston lopusta koko Weeklycalendar.defaultprops-osan.
   //Koodi on tehty niin, että kirjasto toimii vaikka tämän poistaa.
 
+  const { t } = useTranslation()
   const navigation = useNavigation()
   const [localEvents, setLocalEvents] = useState([])
   const [firebaseEvents, setFirebaseEvents] = useState([])
@@ -77,10 +79,10 @@ export default function CalendarScreen() {
         startWeekday = {7}
         titleFormat = {undefined}
         weekdayFormat = 'ddd'
-        locale = 'fi'
+        locale = {t("calendar-language")}
         events = {localEvents.concat(firebaseEvents)}
         renderEvent={(event, j) => {
-          moment.locale('fi')
+          moment.locale(t("calendar-language"))
           let startTime = moment(event.start).format('LT').toString()
           let endTime = moment(event.end).format('LT').toString()
           return (
@@ -115,7 +117,7 @@ export default function CalendarScreen() {
         renderDay={(eventViews, weekdayToAdd, i) => (
           <View key={i.toString()} style={styles.day}>
             <View style={styles.dayLabel}>
-              <Text style={styles.monthDateText}>{weekdayToAdd.format('D.M').toString()}</Text>
+              <Text style={styles.monthDateText}>{weekdayToAdd.format(t("date-format")).toString()}</Text>
               <Text style={styles.dayText}>{weekdayToAdd.format('ddd').toString()}</Text>
             </View>
             <View style={[styles.allEvents, eventViews.length === 0 ? { width: '100%', backgroundColor: '#f8ecf4' } : {}]}>

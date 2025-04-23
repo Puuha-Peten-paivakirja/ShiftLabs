@@ -15,6 +15,7 @@ import SpesificGroupScreen from '../screens/SpesificGroupScreen.js'
 import CalendarScreen from '../screens/CalendarScreen.js'
 import SingleCalendarEvent from '../screens/SingleCalendarEvent.js'
 import AddCalendarEvent from '../screens/AddCalendarEvent.js'
+import GroupSettingsScreen from '../screens/GroupSettingsScreen.js'
 
 const Stack = createStackNavigator()
 
@@ -38,6 +39,8 @@ export default function MainNavigator() {
         <Stack.Screen name="Calendar" component={CalendarScreen} />
         <Stack.Screen name="SingleCalendarEvent" component={SingleCalendarEvent} />
         <Stack.Screen name="AddCalendarEvent" component={AddCalendarEvent} />
+        <Stack.Screen name='GroupSettingsScreen' component={GroupSettingsScreen}/>
+
       </Stack.Navigator>
     </NavigationContainer>
   )

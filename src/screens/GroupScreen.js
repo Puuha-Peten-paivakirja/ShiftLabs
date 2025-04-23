@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback  } from "react";
-import { View, Image, Text,TouchableOpacity, Modal  } from "react-native";
+import { View, Image, Text,TouchableOpacity, Modal, ActivityIndicator, Alert } from "react-native";
 import Navbar from "../components/Navbar";
 import { TextInput, Checkbox  } from "react-native-paper";
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -9,6 +9,7 @@ import { FlatList, ScrollView } from "react-native-gesture-handler";
 import filter from "lodash.filter";
 import { useNavigation } from '@react-navigation/native';
 import styles from "../styles/Group.js";
+import { useTranslation } from "react-i18next";
 
 
 
@@ -16,6 +17,7 @@ export default function GroupScreen() {
 
   // Get the current authenticated user from the custom useUser hook
   const { user } = useUser()
+  const { t } = useTranslation();
   const [listOfUsers, setUsersList] = useState([]);
   const [newGroup, setNewGroup] = useState({
     groupName: '',
@@ -27,6 +29,8 @@ export default function GroupScreen() {
   const [checkedUsers, setCheckedUsers] = useState([]);
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
 
 
@@ -40,6 +44,7 @@ export default function GroupScreen() {
         const tempGroups = querySnapshot.docs.map((doc) => ({
           id: doc.data().groupId,
           groupName: doc.data().groupName, 
+          groupDesc: doc.data().groupDesc,
         }))
         // Update the groups that user is joined into a list
         setJoinedGroups(tempGroups)
@@ -57,6 +62,9 @@ export default function GroupScreen() {
     setUsersList(usersList);
     // Update the filtered users list (used for searching)
     setFilteredUsers(usersList);
+    // Set loading to false to show page
+    setIsLoading(false)
+
     });
 
 
@@ -94,128 +102,150 @@ export default function GroupScreen() {
       }
     });
   };
+
+  // Creates new group to firebase
+  const createGroup = async (group) => {
+    const docRef = await addDoc(collection(firestore, GROUPS), {
+      groupName: group.groupName,
+      description: group.groupDesc,
+      created: serverTimestamp()
+    });
+    console.log('New group saved');
+    return docRef;
+  };
   
+  // Query to find the maching user info to current user
   const getUserName = async () => {
+    // User does not contain users first or last name
+    // Fetches the info maching the current user from User collection
     try {
-      // Query to find the maching user info
       const docRef = doc(firestore, USERS, user.uid);
       const docSnap = await getDoc(docRef);
-
-
       if(docSnap.exists()) { 
         const userData = docSnap.data();
+        console.log("User fetched succesfully")
         return { firstName: userData.firstName, lastName: userData.lastName }
-        console.log("kauttaja haettu onnistuneesti")
       } else {
-          console.log("Käyttäjää ei löytynyt.");
+          console.log("User was not found");
       }
   } catch (error) {
-      console.error("Virhe käyttäjän hakemisessa:", error);
+      console.error("Error finding the user:", error);
   }
+};
+
+// Adds user into the group's "GroupUser" subcollection
+const addUserToGroup = async (groupId, userId, userInfo, role) => {
+  const { firstName, lastName } = userInfo;
+  await setDoc(doc(firestore, GROUPS, groupId, GROUPUSERS, userId), {
+    firstName,
+    lastName,
+    joined: serverTimestamp(),
+    role
+  });
+  console.log(`${role} added to group`);
+};
+
+// Add group info to the user's "UserGroups" subcollection
+const addGroupToUser = async (userId, groupId, group) => {
+  // This is a shortcut reference to the group for quicker lookups
+  // It avoids needing to query the entire Groups/GroupUsers structure
+  await setDoc(doc(firestore, USERS, userId, USERGROUPS, groupId), {
+    groupId,
+    groupName: group.groupName,
+    groupDesc: group.groupDesc,
+    joined: serverTimestamp()
+  });
+  console.log("Group added to user subcollection");
 };
 
 
   const save = async () => {
     // Only proceed if user is logged in
-    if (user !== null) {
-      if(newGroup.groupName !== ''){
+    if (user === null) {
+      console.log("You must log in first");
+      return;
+    }
+  
+    // Groups name can not be empty
+    if (newGroup.groupName === '') {
+      console.log("Group name empty");
+      Alert.alert(t("missing-group-name-alert"), t("missing-group-name-message"));
+      return false;
+    }
+    // Start the saving animation
+    setIsSaving(true);
+
         try{
           // Create a new group document in the "Groups" collection
-          const docRef = await addDoc(collection(firestore, GROUPS),{
-            groupName: newGroup.groupName,
-            description: newGroup.groupDesc,
-            created: serverTimestamp()
-          })
+          const docRef = await createGroup(newGroup);
           // Reset the new group
           setNewGroup({ groupDesc:'', groupName:''})
-          console.log('New group saved')
+
+
           // Fetch full name of the current user using email
           const userName = await getUserName();
-          
           // Add the current user to the group's "GroupUsers" subcollection as an admin
-          await setDoc(doc(firestore, GROUPS, docRef.id, GROUPUSERS, user.uid ), {
-            firstName: userName.firstName,
-            lastName: userName.lastName,
-            joined: serverTimestamp(),
-            role: "admin",
-          })
-          console.log('Admin added to gruop')
-            // Add group info to the user's "UserGroups" subcollection
-            // This is a shortcut reference to the group for quicker lookups
-            // It avoids needing to query the entire Groups/GroupUsers structure
-          await setDoc(doc(firestore, USERS, user.uid, USERGROUPS, docRef.id), {
-            groupId: docRef.id,
-            groupName: newGroup.groupName,
-            groupDesc: newGroup.groupDesc,
-            joined: serverTimestamp(),
-          });
-          console.log("Group added to user subcollection");
+          await addUserToGroup(docRef.id, user.uid, userName, "admin");
+          // Add the group to current user
+          await addGroupToUser(user.uid, docRef.id, newGroup);
 
           // Add all selected users to "GroupUsers" as members
-          
           // Map to get all users into "GroupUsers"
-          const addMembers = checkedUsers.map((member) => {
-              const { firstName, lastName, id} = member;
-              return setDoc(doc(firestore, GROUPS, docRef.id, GROUPUSERS, id), {
-                firstName,
-                lastName,
-                joined: serverTimestamp(),
-                role: "member",
-              })
-            })
-            await Promise.all(addMembers)
-            console.log("All members added!");
+          await Promise.all(checkedUsers.map(member => addUserToGroup(docRef.id, member.id, member, "member")));
+
 
           // Add group info to all selected users
-          const addGroupsToUsers = checkedUsers.map((member) => {
-              const { id } = member;
-              return setDoc(doc(firestore, USERS, id, USERGROUPS, docRef.id),{
-                groupId: docRef.id,
-                groupName: newGroup.groupName,
-                groupDesc: newGroup.groupDesc,
-                joined: serverTimestamp(),
-              })
-          })
-          await Promise.all(addGroupsToUsers)
-          console.log("Group added to all members")
-          setCheckedUsers([''])
+          await Promise.all(checkedUsers.map(member => addGroupToUser(member.id, docRef.id, newGroup)));
 
-
+          // Reset the togglet users
+          setCheckedUsers([])
+          console.log("Group and members successfully added!");
+          setIsSaving(false);
+          return true;
 
         }catch (error) {
           console.log("Error saving group or adding user:", error)
+          setIsSaving(false);
+          return false;
         }
-      }
-      else{
-        console.log("Group name empty")
-        alert("Ryhmän nimi ei voi olla tyhjä!")
-      }
-    }
-    else{
-      console.log("You must log in first")
-    }
   }
-
+  
+// Navigation to groups info
   const navigateToGroup = useCallback((groupId) => {
       console.log("Navigating to specific group:", groupId);
       navigation.navigate('SpesificGroup', { groupId });
-  }, [navigation]);
+  }, [user]);
 
 
   return (
     <View style={styles.container}>
       <Navbar />
 
+      {isLoading ?(
+        <View style={{flex:1, alignItems: 'center',justifyContent:'center'}}>
+          <ActivityIndicator size="large" color="#4B3F72" />
+        </View>
+
+      ):(
+      <View style={{flex:1,}}>
       {user ? (
       <View style={{flex:1, alignItems: 'center',}}>
-        <Text style={[styles.headings, {marginTop: 20}]}>Omat ryhmät:</Text>
+        <Text style={[styles.headings, {marginTop: 20}]}>{t("my-groups")}</Text>
 
         {joinedGroups.length > 0 ? (
           <ScrollView style={styles.scrollviewGroups}>
           {
               joinedGroups.map((joinedGroup)=>(
                 <View key={joinedGroup.id} style={styles.groupViewItem}>
-                  <Text style={styles.groupText}>{joinedGroup.groupName}</Text>
+                  <Text style={styles.groupNameText}>{joinedGroup.groupName}</Text>
+                  
+                  <Text
+                    style={[styles.groupDescText, { textAlign: 'center' }]}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {joinedGroup.groupDesc || '-'}
+                  </Text>
 
                   <TouchableOpacity 
                     style={styles.groupInfoButton} 
@@ -228,7 +258,7 @@ export default function GroupScreen() {
             }
           </ScrollView>):(
             <View >
-              <Text style={{fontSize: 18}}>Luo tai liity ryhmään nähdäksesi ne</Text>
+              <Text style={{fontSize: 18}}>{t("create-or-join-group")}</Text>
             </View>
           )}
 
@@ -237,7 +267,7 @@ export default function GroupScreen() {
             style={styles.floatingButton}
             onPress={()=>setModalVisible(true)}>
               <Ionicons name='create-outline' size={30} />
-              <Text style={styles.createButtonText}>Uusi Ryhmä</Text>
+              <Text style={styles.createButtonText}>{t("new-group")}</Text>
           </TouchableOpacity>
           
           
@@ -251,12 +281,12 @@ export default function GroupScreen() {
             <View style={styles.modalCreateContainer}>
               <View style={styles.modalCreateView}>
                   <View style={styles.modalTextView}>
-                    <Text style={styles.headings}>Luo uusi ryhmä:</Text>
+                    <Text style={styles.headings}>{t("create-new-group")}</Text>
                   </View>
                   <View style={styles.nameInputHalf}>
                     <TextInput
                       style={styles.nameInput}
-                      placeholder="Ryhmän nimi..."
+                      placeholder={t("group-name")}
                       value={newGroup.groupName}
                       maxLength={25}
                       onChangeText={text => setNewGroup({...newGroup, groupName:text})}
@@ -275,7 +305,7 @@ export default function GroupScreen() {
                       style={styles.nameInput}
                       multiline
                       maxLength={50}
-                      placeholder="Ryhmän kuvaus..."
+                      placeholder={t("group-description")}
                       value={newGroup.groupDesc}
                       onChangeText={text => setNewGroup({...newGroup, groupDesc:text})}
                       numberOfLines={3}
@@ -290,7 +320,7 @@ export default function GroupScreen() {
 
                   <View style={styles.serachContainer}>
                     <TextInput 
-                      placeholder="Etsi henkilöitä..." 
+                      placeholder={t("search-for-people")}
                       autoCapitalize="none" 
                       autoCorrect={false}
                       value={searchQuery}
@@ -322,12 +352,27 @@ export default function GroupScreen() {
                     <TouchableOpacity
                         style={styles.createGroupButton}
                         onPress={() => setModalVisible(!modalVisible)}>
-                        <Text style={styles.createButtonText}>Peruuta</Text>
+                        <Text style={styles.createButtonText}>{t("cancel")}</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.createGroupButton} onPress={() => {save(); setModalVisible(!modalVisible)}}>
-                      <Text style={styles.createButtonText}>Luo</Text>
+
+                    <TouchableOpacity 
+                      style={styles.createGroupButton} 
+                      disabled={isSaving}
+                      onPress={async () => {
+                        const wasSaved = await save();
+                        if (wasSaved) {
+                          setModalVisible(false);
+                        }
+                      }}>
+                      <Text style={styles.createButtonText}>{t("create")}</Text>
                     </TouchableOpacity>
                   </View>
+                  {isSaving && (
+                    <View style={styles.loadingOverlay}>
+                      <ActivityIndicator size="large" color="#fff" />
+                      <Text style={{ color: "#fff", marginTop: 10 }}>{t("creating-group")}</Text>
+                    </View>
+                  )}
                 </View>
               </View>
           </Modal>
@@ -335,13 +380,15 @@ export default function GroupScreen() {
       </View>
     ) :(
       <View style={styles.loginContainer}>
-        <Text style={styles.loginMessage}>Kirjaudu sisään käyttääksesi ryhmiä!</Text>
+        <Text style={styles.loginMessage}>{t("sign-in-to-access-groups")}</Text>
         <Image 
           source={require('../../assets/login-image.png')}
           style={styles.image}
           />
         </View>
       )}
+    </View>
+    )}
       
     </View>
   );

@@ -3,9 +3,11 @@ import { View, Text, FlatList, TouchableOpacity } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Navbar from "../components/Navbar";
 import styles from "../styles/AllShifts";
+import { useTranslation } from "react-i18next";
 
 export default function AllShiftsScreen() {
     const [shifts, setSavedShifts] = useState([]);
+    const { t } = useTranslation();
 
     useEffect(() => {
         const fetchShifts = async () => {
@@ -60,9 +62,9 @@ export default function AllShiftsScreen() {
         <View style={styles.container}>
             <Navbar />
             <View style={shifts.container}>
-            <Text style={styles.header}>Aiemmat työvuorot</Text>
+            <Text style={styles.header}>{t("previous-shifts")}</Text>
             {shifts.length === 0 ? (
-                <Text style={styles.noDataText}>Ei nauhotettuja työvuoroja</Text>
+                <Text style={styles.noDataText}>{t("no-recorded-shifts")}</Text>
             ) : (
                 <FlatList
                     data={shifts}
@@ -76,9 +78,9 @@ export default function AllShiftsScreen() {
                             <Text style={styles.shiftText}>
                                 {formatTime(item.startTime)} - {formatTime(item.endTime)}
                             </Text>
-                            <Text>Pvm: {formatDate(item.date)}</Text>
-                            <Text>Kesto: {formatDuration(item.duration)}</Text>
-                            <Text>Tauot: {formatDuration(item.breakDuration)}</Text>
+                            <Text>{t("shift-date")} {formatDate(item.date)}</Text>
+                            <Text>{t("shift-length")} {formatDuration(item.duration)}</Text>
+                            <Text>{t("shift-breaks")} {formatDuration(item.breakDuration)}</Text>
 
                             <TouchableOpacity onPress={() => deleteShift(item)} style={styles.deleteShiftButton}>
                                 <Text style={styles.deleteShiftButtonText}>❌</Text>

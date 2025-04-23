@@ -1,35 +1,66 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, Modal, } from "react-native";
+import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import Navbar from "../components/Navbar";
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useNavigation } from '@react-navigation/native';
 import styles from "../styles/Group.js";
 import { useUser } from "../context/useUser";
-import { updateDoc, doc, collection, firestore, GROUPS, GROUPUSERS, USERS, query, getDocs, USERGROUPS, onSnapshot, deleteDoc } from "../firebase/config.js";
+import { doc, collection, firestore, GROUPS, GROUPUSERS, USERS, HOURS, query, getDocs, USERGROUPS, onSnapshot, deleteDoc } from "../firebase/config.js";
 import { FlatList } from "react-native-gesture-handler";
-import { TextInput, Checkbox  } from "react-native-paper";
+import CircularSegments from '../components/GroupTimeCircle.js'
+import { useTranslation } from 'react-i18next'
 
 export default function SpesificGroupScreen({ route }) {
     const navigation = useNavigation();
     const { groupId } = route.params;
     const { user } = useUser()
-    const [ groupUsers, setGroupUsers ] = useState([]);
-    const [ userHours, setUserHours ] = useState([]);
+    const [ groupUsersAndHours, setGroupUsersAndHours ] = useState([]);
     const [admin, setAdmin] = useState(false);
-    const [ newName, setNewName] = useState('');
-    const [modalVisible, setModalVisible] = useState(false);
-    const [checkedUser, setCheckedUser] = useState([]);
+    const { t } = useTranslation()
+    const [isLoading, setIsLoading] = useState(true)
+    
+
+
 
  useEffect(() => {
     if (!user) return;
     const q = query(collection(firestore,GROUPS,groupId, GROUPUSERS))
-        const unsubscribe = onSnapshot(q,(querySnapshot) => {
-            const tempGroupUsers = querySnapshot.docs.map((doc) => ({
-                id: doc.id,
-                firstName: doc.data().firstName,
-                lastName: doc.data().lastName,
-                role: doc.data().role,
-            }))
+        const unsubscribe = onSnapshot(q, async(querySnapshot) => {
+            try {
+                const tempGroupUsers = await Promise.all(
+                  querySnapshot.docs.map(async (doc) => {
+                    const userData = doc.data();
+                    const userId = doc.id;
+          
+                    // Fetch from subcollection 'hours'
+                    const hoursRef = collection(
+                        firestore,
+                        GROUPS,
+                        groupId,
+                        GROUPUSERS,
+                        userId,
+                        HOURS
+                      );
+            
+                    const hoursSnapshot = await getDocs(hoursRef);
+          
+                    let hours = null;
+                    if (hoursSnapshot.docs.length > 0) {
+                        const firstDocData = hoursSnapshot.docs[0].data();
+
+                        hours = firstDocData.hours || null;
+                    }
+
+                    return {
+                      id: userId,
+                      firstName: userData.firstName,
+                      lastName: userData.lastName,
+                      role: userData.role,
+                      hours: hours,
+                    };
+                  })
+                );
+
             const sortedGroupUsers = tempGroupUsers.sort((a, b) => {
                 if (a.role === 'admin' && b.role !== 'admin') {
                     return -1; // 'admin' comes first
@@ -38,20 +69,26 @@ export default function SpesificGroupScreen({ route }) {
                 }
                 return 0; // Keep the order unchanged for non-admin users
             });
-            setGroupUsers(sortedGroupUsers);
+            setGroupUsersAndHours(sortedGroupUsers);
+            
 
             const findCurrentUserStatus = sortedGroupUsers.find(person => person.id === user.uid);
     
             if (findCurrentUserStatus) {
                 if (findCurrentUserStatus.role === 'admin') {
                     setAdmin(true);
+                    setIsLoading(false)
                     console.log("User is admin");
                 } else {
                     console.log("User is member");
+                    setIsLoading(false)
                 }
             } else {
                 console.log("User not found in group");
             }  
+            }catch(e) {
+                console.log('Error fetching groups users and their hours: ', e)
+            }
     
     
     })
@@ -61,7 +98,7 @@ export default function SpesificGroupScreen({ route }) {
         unsubscribe()
         
         }
- },[])
+ },[groupId, user])
     
     const removeMember = async (id) => {
         try{
@@ -72,180 +109,79 @@ export default function SpesificGroupScreen({ route }) {
         }
     }
 
-    const newGroupName = async () => {
-        try{
-            await updateDoc(doc(firestore,GROUPS,groupId),{
-                groupName:newName,
-            })
-            const userUpdateGroup = groupUsers.map(async (user) => {
-                const { id } = user
-                const userRef = doc(firestore, USERS, id, USERGROUPS, groupId)
-                await updateDoc(userRef, { groupName: newName})
-            })
-            await Promise.all(userUpdateGroup);
-            console.log("Group Name changed succheesefully")
-            setNewName('')
-            alert("SuccCheeseFull")
-            
-        }catch(e){
-            console.log("Error in setting the newGroup name:", e)
-        }
-    }
-
-    const toggleUser = (selectedUser) => {
-        setCheckedUser((prev) => {
-            const exists = prev.find((u) => u.id === selectedUser.id);
-            if (exists) {
-            return prev.filter((u) => u.id !== selectedUser.id);
-            } else {
-            return [...prev, { id: selectedUser.id, firstName: selectedUser.firstName, lastName: selectedUser.lastName, email: selectedUser.email }];
-            }
-        });
-    };
-
-    const changeAdmin = async () => {
-        try{
-
-        }catch(e){
-            console.log(e)
-        }
-    }
-    const deleteGroup = async () => {
-        try{
-
-        }catch(e){
-            console.log(e)
-        }
-
-    }
+    
     return (
         <View style={styles.container}>
             <Navbar />
-                
-                <TouchableOpacity  
-                    style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
-                    onPress={() => {navigation.navigate('Group')}}>
-                    <Ionicons name='arrow-back-outline' size={25} />
-                    <Text style={{fontSize:15, fontWeight: 'bold'}} >Takaisin</Text>
-                </TouchableOpacity>
+            {isLoading ?(
+                    <View style={{flex:1, alignItems: 'center',justifyContent:'center'}}>
+                      <ActivityIndicator size="large" color="#4B3F72" />
+                    </View>
+            
+                  ):(
+                <View style={{flex: 1}}>
+                <View style={{flexDirection: 'row',justifyContent: 'space-between', width: '100%' }}>
+                    <TouchableOpacity  
+                        style={styles.backButton}
+                        onPress={() => {navigation.navigate('Group')}}>
+                        <Ionicons name='arrow-back-outline' size={25} />
+                        <Text style={{fontSize:15, fontWeight: 'bold'}} >{t('return')}</Text>
+                    </TouchableOpacity>
+
+                    {admin === true &&(
+                    <TouchableOpacity  
+                        style={styles.settingsButton}
+                        onPress={() => {navigation.navigate('GroupSettingsScreen', {groupUsersAndHours, groupId})}}>
+                        <Ionicons name='settings-outline' size={30} />
+                    </TouchableOpacity>
+                    )}
+                </View>
 
                 <View style={{flex:1, alignItems: 'center',}}>
-                        
-                    <View>
-                        <Text style={styles.headings}>Ryhmän työtunnit:</Text>
-                    </View>
+                    <Text style={styles.headings}>{t('groups-working-hours')}</Text>
+                    <CircularSegments data={groupUsersAndHours} />
+
+                    
+
                     <View style={styles.separator} />
                     {/*------------------------------------*/}
 
-                    
-                    <Text style={styles.headings}>Henkilöt:</Text>
-
-                        <FlatList
-                            data={groupUsers}
-                            keyExtractor={(item) => item.id}
-                            style={styles.scrollviewGroupsUsers}
-                            renderItem={({ item }) => (
-                            <View>
-                                {admin?(
-                                <View style={styles.userViewItem}>
-                                    <Text style={styles.userText}>{item.firstName} {item.lastName}</Text>
-                                    {item.role !== 'admin' && (
-                                    <TouchableOpacity 
-                                        style={styles.removeIcon} 
-                                        onPress={() => removeMember(item.id)}
-                                    >
-                                        <Ionicons name='trash-outline' size={25} />
-                                    </TouchableOpacity>)}
-                                </View>
-                                ):(
-                                <View style={styles.userViewItem}>
-                                    <Text style={styles.userText}>{item.firstName} {item.lastName}</Text>
-                                </View>
-
-                                )}
-
-                                <View style={styles.userSeparator} />
-                            </View> 
-                            )}
-                        />
-
-                    
-                    {admin === true && (
-                        <View style={{flex:1, alignItems: 'center',}}>
-
-                            <Text style={styles.headings}>Asetukset:</Text>
-                            <View style={styles.nameInputHalf}>
-                                <TextInput
-                                    style={styles.nameInput}
-                                    maxLength={25}
-                                    value={newName}
-                                    placeholder="Vaihda ryhmän nimeä..."
-                                    onChangeText={text => setNewName(text)}
-                                />
+                
+                    <Text style={styles.headings}>{t('members')}:</Text>
+                    <FlatList
+                        data={groupUsersAndHours}
+                        keyExtractor={(item) => item.id}
+                        style={styles.scrollviewGroupsUsers}
+                        renderItem={({ item }) => (
+                        <View>
+                            {admin?(
+                            <View style={styles.userViewItem}>
+                                <Text style={styles.userText}>{item.firstName} {item.lastName}</Text>
+                                {item.role !== 'admin' && (
                                 <TouchableOpacity 
-                                    style={styles.clearNameIcon} 
-                                    onPress={() => newGroupName()}
+                                    style={styles.removeIcon} 
+                                    onPress={() => removeMember(item.id)}
                                 >
-                                    <Ionicons name='checkmark-outline' size={30} />
-                                </TouchableOpacity>
-                            </View> 
+                                    <Ionicons name='trash-outline' size={25} />
+                                </TouchableOpacity>)}
+                            </View>
+                            ):(
+                            <View style={styles.userViewItem}>
+                                <Text style={styles.userText}>{item.firstName} {item.lastName}</Text>
+                            </View>
 
-                            <Modal
-                                animationType="fade"
-                                transparent={true}
-                                visible={modalVisible}
-                                onRequestClose={() => {
-                                    setModalVisible(!modalVisible);
-                                }}>
-                                <View style={styles.centeredView}>
-                                    <View style={styles.modalView}>
-                                        <View style={styles.modalTextView}>
-                                            <Text style={styles.modalHeader}>Ryhmän omistajan vaihtaminen:</Text>
-                                            <Text style={styles.modalText}>Valitse yksi ryhmä henkilöistä sen uudeksi omistajaksi</Text>
-                                        </View>
-                                        <FlatList
-                                            data={groupUsers}
-                                            keyExtractor={(item) => item.id}
-                                            style={styles.scrollviewGroupsUsers}
-                                            renderItem={({ item }) => (
-                                            <View>
-                                                <View style={styles.userViewItem}>
-                                                    <Text style={styles.userText}>{item.firstName} {item.lastName}</Text>
-                                                    
-                                                </View>
-                                            <View style={styles.userSeparator} />
-                                            </View> 
-                                            )}
-                                        />
-                                        <TouchableOpacity
-                                            style={styles.modalButton}
-                                            onPress={() => setModalVisible(!modalVisible)}>
-                                            <Text style={{color: '#68548c'}}>Peruuta</Text>
-                                        </TouchableOpacity>
-
-                                    </View>
-                                </View>
-                            </Modal>
-
-                            <TouchableOpacity
-                                style={styles.groupSettingsButton}
-                                onPress={() => setModalVisible(true)}>
-                                <Ionicons name='pencil-outline' size={25} />
-                                <Text style={styles.groupSettingsText}>Muokkaa hallintaoikeuksia</Text>
-                            </TouchableOpacity>
-
-
-                            <TouchableOpacity style={styles.groupDeleteButton} onPress={deleteGroup}>
-                                <Ionicons name='trash-sharp' size={30} color="darkred"/>
-                                <Text style={styles.groupDeleteText }>Poista Ryhmä</Text>
-                            </TouchableOpacity>
-
-                        </View>
-
-                    )}
+                            )}
+                            <View style={styles.userSeparator} />
+                        </View> 
+                        )}
+                    />
                     
                 
                 </View>
+                
+            </View>)}
+
+
 
         </View>
     )

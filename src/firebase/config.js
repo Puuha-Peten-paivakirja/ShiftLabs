@@ -25,6 +25,8 @@ const GROUPS = 'groups'
 const GROUPUSERS = 'group-users'
 const USERGROUPS = 'user-groups'
 const CALENDARENTRIES = 'calendar-entries'
+const HOURS = 'hours'
+const SHIFTS = 'shifts'
 
 export { 
     firestore, 
@@ -54,5 +56,7 @@ export {
     updatePassword,
     verifyBeforeUpdateEmail,
     deleteDoc,
+    HOURS,
     getDocs,
+    SHIFTS,
  }

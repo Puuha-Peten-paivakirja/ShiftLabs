@@ -9,10 +9,12 @@ import { Topbar } from '../components/Topbar.js'
 import styles from '../styles/SingleCalendarEvent'
 import { Button, TextInput } from "react-native-paper";
 import { query, addDoc, collection, firestore, serverTimestamp, auth, USERS, CALENDARENTRIES } from "../firebase/config.js";
+import { useTranslation } from 'react-i18next'
 
 export default function AddCalendarEvent({ route }) {
   //Variables
   const navigation = useNavigation()
+  const { t } = useTranslation()
 
   //For input fields
   const [date, setDate] = useState()
@@ -134,11 +136,11 @@ export default function AddCalendarEvent({ route }) {
 
     return (
       <View style={styles.container}>
-        <Topbar title='Luo kalenteritapahtuma' />
+        <Topbar title={t('create-event')} />
         <View style={styles.pageContent}>
           <View style={styles.textInputContainer}>
             <TextInput 
-              label="Päivämäärä"
+              label={t('date')}
               placeholder="DD.MM.YYYY"
               value={date}
               onChangeText={text => setDate(text)}
@@ -148,7 +150,7 @@ export default function AddCalendarEvent({ route }) {
           </View>
           <View style={styles.textInputContainer}>
             <TextInput 
-              label="Aloitusaika"
+              label={t('start-time')}
               placeholder="hh.mm"
               value={startTime}
               onChangeText={text => setStartTime(text)}
@@ -158,7 +160,7 @@ export default function AddCalendarEvent({ route }) {
           </View>
           <View style={styles.textInputContainer}>
             <TextInput 
-              label="Lopetusaika"
+              label={t('end-time')}
               placeholder="hh.mm"
               value={endTime}
               onChangeText={text => setEndTime(text)}
@@ -168,7 +170,7 @@ export default function AddCalendarEvent({ route }) {
           </View>
           <View style={styles.textInputContainer}>
             <TextInput 
-              label="Kuvaus"
+              label={t('description')}
               style={styles.textInput}
               value={note}
               onChangeText={text => setNote(text)}
@@ -180,7 +182,7 @@ export default function AddCalendarEvent({ route }) {
               style={styles.cancelButton}
               onPress={() => navigation.goBack()}
             >
-              Peruuta
+              {t('cancel')}
             </Button>
 
             <Button 
@@ -188,7 +190,7 @@ export default function AddCalendarEvent({ route }) {
               onPress={saveInformation}
               labelStyle={{color: "white"}}
             >
-              Tallenna
+              {t('save')}
             </Button>
           </View>
           

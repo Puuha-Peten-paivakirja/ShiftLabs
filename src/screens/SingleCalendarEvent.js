@@ -8,9 +8,11 @@ import { Topbar } from '../components/Topbar.js'
 import styles from '../styles/SingleCalendarEvent'
 import { Button, TextInput } from "react-native-paper";
 import { query, addDoc, collection, firestore, serverTimestamp, auth, USERS, CALENDARENTRIES, setDoc, doc, deleteDoc } from "../firebase/config.js";
+import { useTranslation } from 'react-i18next'
 
 export default function SingleCalendarEvent({ route }) {
   //Muuttujia
+  const { t } = useTranslation()
   const navigation = useNavigation()
   const [event, setEvent] = useState(route.params.event)
   //In this case allEvents variable refers to all LOCAL events. All firebase events are not needed on this page.
@@ -169,11 +171,11 @@ export default function SingleCalendarEvent({ route }) {
 
     return (
       <View style={styles.container}>
-        <Topbar title='Muokkaa tapahtumaa' />
+        <Topbar title={t('edit-event')} />
         <View style={styles.pageContent}>
           <View style={styles.textInputContainer}>
             <TextInput 
-              label="Päivämäärä"
+              label={t('date')}
               style={styles.textInput}
               placeholder="DD.MM.YYYY"
               value={date}
@@ -183,7 +185,7 @@ export default function SingleCalendarEvent({ route }) {
           </View>
           <View style={styles.textInputContainer}>
             <TextInput 
-              label="Aloitusaika"
+              label={t('start-time')}
               style={styles.textInput}
               value={startTime}
               onChangeText={text => setStartTime(text)}
@@ -193,7 +195,7 @@ export default function SingleCalendarEvent({ route }) {
           </View>
           <View style={styles.textInputContainer}>
             <TextInput 
-              label="Lopetusaika"
+              label={t('end-time')}
               style={styles.textInput}
               value={endTime}
               onChangeText={text => setEndTime(text)}
@@ -203,7 +205,7 @@ export default function SingleCalendarEvent({ route }) {
           </View>
           <View style={styles.textInputContainer}>
             <TextInput 
-              label="Kuvaus"
+              label={t('description')}
               style={styles.textInput}
               value={note}
               onChangeText={text => setNote(text)}
@@ -215,7 +217,7 @@ export default function SingleCalendarEvent({ route }) {
               style={styles.cancelButton}
               onPress={() => navigation.goBack()}
             >
-              Peruuta
+              {t('cancel')}
             </Button>
 
             <Button 
@@ -231,7 +233,7 @@ export default function SingleCalendarEvent({ route }) {
               onPress={saveInformation}
               labelStyle={{color: "white"}}
             >
-              Tallenna
+              {t('save')}
             </Button>
           </View>
           
