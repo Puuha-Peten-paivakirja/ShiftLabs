@@ -5,6 +5,8 @@ import { CustomButton } from '../components/CustomButton'
 import { useNavigation } from '@react-navigation/native'
 import styles from '../styles/Welcome.js'
 import { useTranslation } from 'react-i18next'
+import CircularSegments from '../components/GroupTimeCircle.js'
+
 
 export default function WelcomeScreen() {
   const navigation = useNavigation()
