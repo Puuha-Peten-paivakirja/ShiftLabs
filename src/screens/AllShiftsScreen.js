@@ -135,7 +135,6 @@ export default function AllShiftsScreen() {
                 await deleteDoc(shiftDocRef);
                 console.log("Shift deleted from Firebase:", destroyShift.id);
             } else {
-                console.error("Shift ID is undefined or user is not authenticated.");
             }
         } catch (error) {
             console.error("Error deleting shift:", error);
