@@ -99,7 +99,13 @@
   "previous-shifts": "Previous shifts",
   "no-recorded-shifts": "No recorded shifts",
   "shift-date": "Date:",
-  "shift-length": "Length:",
+  "shift-duration": "Length:",
   "shift-breaks": "Breaks:",
-  "creating-group": "Saving..."
+  "creating-group": "Saving...",
+  "shift-description": "Description",
+  "shift-return": "← Return",
+  "local-shifts": "My shifts",
+  "shifts": "Shifts",
+  "default-shift-name": "My shifts"
+
 }

@@ -99,7 +99,12 @@
   "previous-shifts": "Aiemmat työvuorot",
   "no-recorded-shifts": "Ei nauhotettuja työvuoroja",
   "shift-date": "Pvm:",
-  "shift-length": "Kesto:",
+  "shift-duration": "Kesto:",
   "shift-breaks": "Tauot:",
-  "creating-group":"Tallennetaan..."
+  "creating-group":"Tallennetaan...",
+  "shift-description":"Kuvaus",
+  "shift-return":"← Takaisin",
+  "local-shifts":"Omat vuorot",
+  "shifts":"Työvuoroa",
+  "default-shift-name":"Omat vuorot"
 }

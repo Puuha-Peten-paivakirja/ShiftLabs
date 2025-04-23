@@ -1,4 +1,4 @@
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect} from "react";
 import { View, Text, FlatList, TouchableOpacity,} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Navbar from "../components/Navbar";
@@ -145,14 +145,14 @@ export default function AllShiftsScreen() {
         <View style={styles.container}>
             <Navbar />
             <View style={styles.container}>
-                <Text style={styles.header}>Aiemmat työvuorot</Text>
+                <Text style={styles.header}> {t('previous-shifts')}</Text>
                 {Object.keys(groupedShifts).length === 0 ? (
-                    <Text style={styles.noDataText}>Ei nauhotettuja työvuoroja</Text>
+                    <Text style={styles.noDataText}>{t('no-recorded-shifts')}Ei nauhotettuja työvuoroja</Text>
                 ) : selectedShiftName ? (
                     // Show entries for the selected shift
                     <View>
                         <TouchableOpacity onPress={() => setSelectedShiftName(null)} style={styles.backButton}>
-                            <Text style={styles.backButtonText}>← Takaisin</Text>
+                            <Text style={styles.backButtonText}>{t('shift-return')} </Text>
                         </TouchableOpacity>
                         <FlatList
                             data={groupedShifts[selectedShiftName].sort(
@@ -164,10 +164,10 @@ export default function AllShiftsScreen() {
                                     <Text style={styles.shiftText}>
                                         {formatTime(item.startTime)} - {formatTime(item.endTime)}
                                     </Text>
-                                    <Text>Pvm: {formatDate(item.date)}</Text>
-                                    <Text>Kesto: {formatDuration(item.duration)}</Text>
-                                    <Text>Tauot: {formatDuration(item.breakDuration)}</Text>
-                                    <Text>Kuvaus: {item.description || "Ei kuvausta"}</Text>
+                                    <Text>{t('shift-date')} {formatDate(item.date)}</Text>
+                                    <Text>{t('shift-duration')} {formatDuration(item.duration)}</Text>
+                                    <Text>{t('shift-breaks')} {formatDuration(item.breakDuration)}</Text>
+                                    <Text>{t('shift-description')}: {item.description || "Ei kuvausta"}</Text>
                                     <TouchableOpacity
                                         onPress={() => deleteShift(item)}
                                         style={styles.deleteShiftButton}
@@ -184,11 +184,11 @@ export default function AllShiftsScreen() {
                         data={Object.keys(groupedShifts)}
                         keyExtractor={(item, index) => index.toString()}
                         renderItem={({ item }) => (
-                            <TouchableOpacity onPress={() => setSelectedShiftName(item)} style={styles.shiftGroup}>
-                                <Text style={styles.shiftGroupName}>{item}</Text>
-                                <Text style={styles.shiftGroupCount}>
-                                    {groupedShifts[item].length} työvuoroa
+                            <TouchableOpacity onPress={() => setSelectedShiftName(item)} style={styles.shiftLabel}>
+                                <Text style={styles.shiftText}>
+                                    {groupedShifts[item].length} {t('shifts')}
                                 </Text>
+                                <Text style={styles.input}>{item}</Text>
                             </TouchableOpacity>
                         )}
                     />

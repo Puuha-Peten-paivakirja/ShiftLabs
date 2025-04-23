@@ -11,6 +11,21 @@ export default StyleSheet.create({
         textAlign: "center",
         marginVertical: 10,
     },
+    shiftLabel: {
+        fontSize: 18,
+        fontWeight: '600',
+        marginRight: 12,
+        marginTop: "5%",
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: "#ccc",
+        borderRadius: 5,
+        padding: 8,
+        flex: 1, // Allow the input to take up available space
+        marginLeft: 10, // Add spacing between the label and input
+        width: "100%", // Set width to 100% of the parent container
+    },
     noDataText: {
         textAlign: "center",
         marginTop: 20,
