@@ -410,12 +410,17 @@ export default function SettingsScreen() {
     }))
   }
 
+  const deleteUserFromUsers = async () => {
+    await deleteDoc(userDocRef)
+  }
+
   const userDeleteAccount = async () => {
     setIsDisabled(true)
 
     try {
       const credential = EmailAuthProvider.credential(user.email, userInfo.currentPassword)
       await reauthenticateWithCredential(user, credential)
+      navigateToWelcomeScreen()
       await Promise.all([
         deleteCalendarEntries(),
         deleteShiftEntries(),
@@ -424,13 +429,10 @@ export default function SettingsScreen() {
         deleteUserFromGroupUsers()
       ])
       await deleteUserGroupsEntries()
+      await deleteUserFromUsers()
       await deleteUser(user)
       setUserInfo({...userInfo, currentPassword: ''})
-      Alert.alert(t('account-deleted'), t('account-deleted-successfully'), [
-        {
-          onPress: () => navigateToWelcomeScreen()
-        }
-      ])
+      Alert.alert(t('account-deleted'), t('account-deleted-successfully'))
     }
     catch (error) {
       if (error.code === 'auth/missing-password') {
