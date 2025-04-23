@@ -40,7 +40,7 @@
   "error-while-changing-name": "Error while changing name",
   "name-changed": "Name changed",
   "name-changed-successfully": "Name changed successfully",
-  "email-change-email": "A verification email has been sent. Plese verify your new email address to complete this change.",
+  "email-change-email": "A verification email has been sent. Plese verify your new email address to complete this change. After completing the change, please sign in with the new email address in order to use it.",
   "error-while-changing-email": "Error while changing email address",
   "confirm": "Confirm",
   "cancel": "Cancel",
@@ -98,6 +98,11 @@
   "sign-in-to-access-groups": "Sign in to access groups!",
   "previous-shifts": "Previous shifts",
   "no-recorded-shifts": "No recorded shifts",
+  "delete-account": "Delete account",
+  "error-while-deleting-account": "Error while deleting account",
+  "account-deleted": "Accound deleted",
+  "account-deleted-successfully": "Deleted account and all the data associated with it.",
+  "user-is-admin": "You are an admin in at least one group. Make another user an admin before deleting your account.",
   "shift-date": "Date",
   "shift-duration": "Duration",
   "shift-breaks": "Breaks",
@@ -124,7 +129,4 @@
   "no-group": "No group",
   "no-selected-group": "No selected group",
   "select-time": "Select time"
-
-
-
 }
