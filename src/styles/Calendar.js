@@ -8,7 +8,7 @@ export default StyleSheet.create({
     backgroundColor: "#FAF5FF",
   },
   calendar: {
-    maxHeight: (Dimensions.get('window').height - 25)
+    maxHeight: (Dimensions.get('window').height - 50)
   },
   eventText: {
     color: '#68548c',
@@ -26,6 +26,50 @@ export default StyleSheet.create({
     shadowColor: "#000",
     shadowOpacity: 0.2,
     shadowOffset: { width: 0, height: 2 },
+  },
+  calendarModeView: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: 'center',
+    flexDirection: 'row',
+    height: '100%',
+    width: '100%',
+  },
+  calendarModeViewVisibleBox: {
+    backgroundColor: "white",
+    width: '60%',
+    height: '50%',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 5,
+    opacity: 1,
+    shadowColor: 'black',
+    elevation: 20,
+  },
+  calendarModalTitle: {
+    color: '#68548c',
+    fontSize: 16
+  },
+  calendarModeAcceptButton: {
+    backgroundColor: '#68548c',
+    margin: 16,
+    position: 'absolute',
+    bottom: 0,
+  },
+  radioButtonContainer: {
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'center',
+    margin: 8,
+  },
+  calendarModalTouchableOpacity:  {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+  },
+  calendarRadioButton: {
+    position: 'absolute',
+    right: 0
   },
   //Styles from library, colors edited
   day: {

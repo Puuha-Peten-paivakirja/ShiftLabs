@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import moment, { locale } from 'moment/min/moment-with-locales';
-import { Text, View, Pressable, TouchableOpacity } from 'react-native';
+import { Text, View, Pressable, TouchableOpacity, Modal, TouchableWithoutFeedback } from 'react-native';
 import WeeklyCalendar from 'react-native-weekly-calendar';
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useNavigation } from "@react-navigation/native";
@@ -9,6 +9,7 @@ import Navbar from "../components/Navbar";
 import styles from '../styles/Calendar'
 import { query, addDoc, collection, firestore, serverTimestamp, auth, USERS, CALENDARENTRIES } from "../firebase/config.js";
 import { onSnapshot, orderBy } from 'firebase/firestore';
+import { Button, RadioButton } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 
 export default function CalendarScreen() {
@@ -18,15 +19,29 @@ export default function CalendarScreen() {
 
   const { t } = useTranslation()
   const navigation = useNavigation()
+  const [allEvents, setAllEvents] = useState([])
   const [localEvents, setLocalEvents] = useState([])
   const [firebaseEvents, setFirebaseEvents] = useState([])
   const [loaded, setLoaded] = useState(false)
+  const [selectedDateFromCalendar, setSelectedDateFromCalendar] = useState(new Date())
+  const [chosenCalendarMode, setChosenCalendarMode] = useState("day")
+  const [chosenCalendarModeBoxVisible, setChosenCalendarModeBoxVisible] = useState(false)
+
 
   //Get all events
   useEffect(() => {
     getAllLocalEvents()
     getFirebaseEvents()
   }, [])
+
+  useEffect(() => {
+    setAllEvents(localEvents.concat(firebaseEvents))
+  }, [loaded])
+
+  //Check calendar date changing
+  useEffect(() => {
+    console.log("Chosen date is: " + selectedDateFromCalendar)
+  }, [selectedDateFromCalendar])
 
   const getAllLocalEvents = async() => {
     try {
@@ -69,13 +84,15 @@ export default function CalendarScreen() {
       }
     }
   }
- 
-  return (
-    <View style={styles.container}>
-      <Navbar />
-      {(firebaseEvents !== undefined && localEvents !== undefined && loaded === true) &&
-        <WeeklyCalendar 
-        selected = {moment()}
+
+  const changeSelectedDate = (date) => {
+    setSelectedDateFromCalendar(new Date(date))
+  }
+
+  const CalendarComponent = () => {
+    return (
+      <WeeklyCalendar 
+        selected = {selectedDateFromCalendar}
         startWeekday = {7}
         titleFormat = {undefined}
         weekdayFormat = 'ddd'
@@ -114,29 +131,157 @@ export default function CalendarScreen() {
         }}
         renderFirstEvent = {undefined}
         renderLastEvent = {undefined}
-        renderDay={(eventViews, weekdayToAdd, i) => (
-          <View key={i.toString()} style={styles.day}>
-            <View style={styles.dayLabel}>
-              <Text style={styles.monthDateText}>{weekdayToAdd.format(t("date-format")).toString()}</Text>
-              <Text style={styles.dayText}>{weekdayToAdd.format('ddd').toString()}</Text>
+        renderDay={(eventViews, weekdayToAdd, i) => {
+          //Triggers every time week is changed
+          if(new Date(weekdayToAdd).getDate() === new Date(selectedDateFromCalendar).getDate()) {
+            return(
+              <View key={i.toString()} style={styles.day}>
+                <View style={styles.dayLabel}>
+                  <Text style={styles.monthDateText}>{weekdayToAdd.format(t("date-format")).toString()}</Text>
+                  <Text style={styles.dayText}>{weekdayToAdd.format('ddd').toString()}</Text>
+                </View>
+                <View style={[styles.allEvents, eventViews.length === 0 ? { width: '100%', backgroundColor: '#f8ecf4' } : {}]}>
+                  {eventViews}
+                </View>
             </View>
-            <View style={[styles.allEvents, eventViews.length === 0 ? { width: '100%', backgroundColor: '#f8ecf4' } : {}]}>
-              {eventViews}
+            )
+          }  else if (chosenCalendarMode === 'week') {
+            return(
+              <View key={i.toString()} style={styles.day}>
+                <View style={styles.dayLabel}>
+                  <Text style={styles.monthDateText}>{weekdayToAdd.format(t("date-format")).toString()}</Text>
+                  <Text style={styles.dayText}>{weekdayToAdd.format('ddd').toString()}</Text>
+                </View>
+                <View style={[styles.allEvents, eventViews.length === 0 ? { width: '100%', backgroundColor: '#f8ecf4' } : {}]}>
+                  {eventViews}
+                </View>
             </View>
-          </View>
-        )}
-        renderFirstDay = {undefined}
+            )
+          }
+        }}
+        renderFirstDay = {(events, weekday, i) => {
+          //If new week is changed, set the selected day to monday
+          if (Math.floor(((new Date(selectedDateFromCalendar) - new Date(weekday)) / 1000 / 3600 / 24)) < 0) {
+            setSelectedDateFromCalendar(new Date(weekday))
+            return(
+              <View key={i.toString()} style={styles.day}>
+                <View style={styles.dayLabel}>
+                  <Text style={styles.monthDateText}>{weekday.format(t("date-format")).toString()}</Text>
+                  <Text style={styles.dayText}>{weekday.format('ddd').toString()}</Text>
+                </View>
+                <View style={[styles.allEvents, events.length === 0 ? { width: '100%', backgroundColor: '#f8ecf4' } : {}]}>
+                  {events}
+                </View>
+              </View>
+            )
+          } else if (Math.floor(((new Date(selectedDateFromCalendar) - new Date(weekday)) / 1000 / 3600 / 24)) > 6) {
+            setSelectedDateFromCalendar(new Date(weekday))
+            return(
+              <View key={i.toString()} style={styles.day}>
+                <View style={styles.dayLabel}>
+                  <Text style={styles.monthDateText}>{weekday.format(t("date-format")).toString()}</Text>
+                  <Text style={styles.dayText}>{weekday.format('ddd').toString()}</Text>
+                </View>
+                <View style={[styles.allEvents, events.length === 0 ? { width: '100%', backgroundColor: '#f8ecf4' } : {}]}>
+                  {events}
+                </View>
+              </View>
+            )
+          } else if (new Date(selectedDateFromCalendar).getDate() === new Date(weekday).getDate()) {
+            return(
+              <View key={i.toString()} style={styles.day}>
+                <View style={styles.dayLabel}>
+                  <Text style={styles.monthDateText}>{weekday.format(t("date-format")).toString()}</Text>
+                  <Text style={styles.dayText}>{weekday.format('ddd').toString()}</Text>
+                </View>
+                <View style={[styles.allEvents, events.length === 0 ? { width: '100%', backgroundColor: '#f8ecf4' } : {}]}>
+                  {events}
+                </View>
+              </View>
+            )
+          } else if (chosenCalendarMode === 'week') {
+            return(
+              <View key={i.toString()} style={styles.day}>
+                <View style={styles.dayLabel}>
+                  <Text style={styles.monthDateText}>{weekday.format(t("date-format")).toString()}</Text>
+                  <Text style={styles.dayText}>{weekday.format('ddd').toString()}</Text>
+                </View>
+                <View style={[styles.allEvents, events.length === 0 ? { width: '100%', backgroundColor: '#f8ecf4' } : {}]}>
+                  {events}
+                </View>
+              </View>
+            )
+          }
+        }}
         renderLastDay = {undefined}
-        onDayPress = {undefined}
+        onDayPress={(weekday, i) => {
+          changeSelectedDate(weekday)
+        }}
         themeColor = '#68548c'
         style = {styles.calendar}
         titleStyle = {{color: '#68548c'}}
         dayLabelStyle = {{color: '#68548c'}}
       />
+    )
+  }
+ 
+  return (
+    <View style={styles.container}>
+      <Navbar />
+      {(firebaseEvents !== undefined && localEvents !== undefined && loaded === true) &&
+        <CalendarComponent />
       }
       <TouchableOpacity style={styles.floatingButton} onPress={() => navigation.navigate('AddCalendarEvent', {allEvents: localEvents})}>
         <Ionicons name="add" size={30} />
       </TouchableOpacity>
+      <TouchableOpacity style={[styles.floatingButton, {bottom: 100}]} onPress={() => setChosenCalendarModeBoxVisible(!chosenCalendarModeBoxVisible)}>
+        <Ionicons name="calendar-outline" size={30} />
+      </TouchableOpacity>
+      <Modal
+        animationType='fade'
+        transparent={true}
+        visible={chosenCalendarModeBoxVisible}
+        onRequestClose={() => setChosenCalendarModeBoxVisible(false)}
+      >
+        <TouchableOpacity 
+          style={styles.calendarModalTouchableOpacity}
+          activeOpacity={1}
+          onPressOut={() => setChosenCalendarModeBoxVisible(false)}
+        >
+          <View style={styles.calendarModeView}>
+            <TouchableWithoutFeedback>
+              <View style={styles.calendarModeViewVisibleBox}>
+                <Text style={styles.calendarModalTitle}>{t("calendar-showing-events-title")}</Text>
+                <View style={styles.radioButtonContainer}>
+                  <Text style={{alignSelf: 'center'}}>{t("calendar-showing-events-day")}</Text>
+                  <RadioButton
+                    style={styles.calendarRadioButton}
+                    value="day"
+                    status={ chosenCalendarMode === 'day' ? 'checked' : 'unchecked' }
+                    onPress={() => setChosenCalendarMode('day')}
+                  />
+                </View>
+                <View style={styles.radioButtonContainer}>
+                  <Text style={{alignSelf: 'center'}}>{t("calendar-showing-events-week")}</Text>
+                  <RadioButton
+                    style={styles.calendarRadioButton}
+                    value="week"
+                    status={ chosenCalendarMode === 'week' ? 'checked' : 'unchecked' }
+                    onPress={() => setChosenCalendarMode('week')}
+                  />
+                </View>
+                <Button 
+                  style={styles.calendarModeAcceptButton}
+                  onPress={() => setChosenCalendarModeBoxVisible(!chosenCalendarModeBoxVisible)}
+                  labelStyle={{color: "white"}}
+                >
+                  {t("calendar-showing-events-close")}
+                </Button>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 }
