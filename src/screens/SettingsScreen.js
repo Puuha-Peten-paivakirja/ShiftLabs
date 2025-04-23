@@ -6,7 +6,7 @@ import { TextInput } from 'react-native-paper'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import { useUser } from '../context/useUser'
-import { USERGROUPS, firestore, USERS, doc, updateDoc, onSnapshot, getDocs, collection, GROUPS, EmailAuthProvider, reauthenticateWithCredential, updatePassword, GROUPUSERS, verifyBeforeUpdateEmail, getDoc, deleteUser, CALENDARENTRIES, deleteDoc, SHIFTS } from '../firebase/config.js'
+import { HOURS, USERGROUPS, firestore, USERS, doc, updateDoc, onSnapshot, getDocs, collection, GROUPS, EmailAuthProvider, reauthenticateWithCredential, updatePassword, GROUPUSERS, verifyBeforeUpdateEmail, getDoc, deleteUser, CALENDARENTRIES, deleteDoc, SHIFTS } from '../firebase/config.js'
 import isStrongPassword from 'validator/lib/isStrongPassword'
 import styles from '../styles/Settings.js'
 import isEmail from 'validator/lib/isEmail'
@@ -355,9 +355,7 @@ export default function SettingsScreen() {
 
     await Promise.all(calendarEntriesIds.map(async (calendarEntriesId) => {
       const calendarEntriesDocRef = doc(firestore, USERS, user.uid, CALENDARENTRIES, calendarEntriesId)
-      const document = await getDoc(calendarEntriesDocRef)
-
-      await deleteDoc(document)
+      await deleteDoc(calendarEntriesDocRef)
     }))
   }
 
@@ -368,18 +366,27 @@ export default function SettingsScreen() {
 
     await Promise.all(shiftsIds.map(async (shiftId) => {
       const shiftsDocRef = doc(firestore, USERS, user.uid, CALENDARENTRIES, shiftId)
-      const document = await getDoc(shiftsDocRef)
-
-      await deleteDoc(document)
+      await deleteDoc(shiftsDocRef)
     }))
   }
 
   const deleteUserGroupsEntries = async () => {
     await Promise.all(joinedGroups.map(async (joinedGroupId) => {
-      const userGroupsDocRef = doc(firestore, USERS, user.uid, CALENDARENTRIES, joinedGroupId)
-      const document = await getDoc(userGroupsDocRef)
+      const userGroupsDocRef = doc(firestore, USERS, user.uid, USERGROUPS, joinedGroupId)
+      await deleteDoc(userGroupsDocRef)
+    }))
+  }
 
-      await deleteDoc(document)
+  const deleteHoursFromGroupUsers = async () => {
+    await Promise.all(joinedGroups.map(async (joinedGroupId) => {
+      const hoursRef = collection(firestore, joinedGroupId, GROUPUSERS, user.uid, HOURS)
+      const allHours = await getDocs(hoursRef)
+      const hoursIds = allHours.docs.map((doc) => doc.id)
+
+      await Promise.all(hoursIds.map(async (hourId) => {
+        const hoursDocRef = doc(firestore, joinedGroupId, GROUPUSERS, user.uid, HOURS, hourId)
+        await deleteDoc(hoursDocRef)
+      }))
     }))
   }
 
