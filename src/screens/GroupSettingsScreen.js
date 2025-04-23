@@ -205,7 +205,7 @@ export default function SpesificGroupScreen({ route }) {
                     // Delete HOURS for each user if it exists
                     if (hoursSnapshot.size > 0) {
                         const deleteHoursPromises = hoursSnapshot.docs.map(hourDoc => {
-                            return hourDoc.ref.delete();
+                            return deleteDoc(hourDoc.ref);
                         });
                         await Promise.all(deleteHoursPromises); // Wait for all HOURS deletes
                     } 
