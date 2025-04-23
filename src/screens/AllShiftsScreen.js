@@ -164,9 +164,9 @@ export default function AllShiftsScreen() {
                                     <Text style={styles.shiftText}>
                                         {formatTime(item.startTime)} - {formatTime(item.endTime)}
                                     </Text>
-                                    <Text>{t('shift-date')} {formatDate(item.date)}</Text>
-                                    <Text>{t('shift-duration')} {formatDuration(item.duration)}</Text>
-                                    <Text>{t('shift-breaks')} {formatDuration(item.breakDuration)}</Text>
+                                    <Text>{t('shift-date')}: {formatDate(item.date)}</Text>
+                                    <Text>{t('shift-duration')}: {formatDuration(item.duration)}</Text>
+                                    <Text>{t('shift-breaks')}: {formatDuration(item.breakDuration)}</Text>
                                     <Text>{t('shift-description')}: {item.description || t('no-description')}</Text>
                                     <TouchableOpacity
                                         onPress={() => deleteShift(item)}
