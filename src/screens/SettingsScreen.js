@@ -374,13 +374,22 @@ export default function SettingsScreen() {
     }))
   }
 
+  const deleteUserGroupsEntries = async () => {
+    await Promise.all(joinedGroups.map(async (joinedGroupId) => {
+      const userGroupsDocRef = doc(firestore, USERS, user.uid, CALENDARENTRIES, joinedGroupId)
+      const document = await getDoc(userGroupsDocRef)
+
+      await deleteDoc(document)
+    }))
+  }
+
   const userDeleteAccount = async () => {
     setIsDisabled(true)
 
     try {
       const credential = EmailAuthProvider.credential(user.email, userInfo.currentPassword)
       await reauthenticateWithCredential(user, credential)
-      await Promise.all([deleteCalendarEntries(), deleteShiftEntries()])
+      await Promise.all([deleteCalendarEntries(), deleteShiftEntries(), deleteUserGroupsEntries()])
       await deleteUser(user)
       setUserInfo({...userInfo, currentPassword: ''})
       Alert.alert(t('account-deleted'), t('account-deleted-successfully'), [
