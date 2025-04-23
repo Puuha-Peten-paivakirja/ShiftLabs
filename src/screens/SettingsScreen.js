@@ -6,7 +6,7 @@ import { TextInput } from 'react-native-paper'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import { useUser } from '../context/useUser'
-import { firestore, USERS, doc, updateDoc, onSnapshot, getDocs, collection, GROUPS, EmailAuthProvider, reauthenticateWithCredential, updatePassword, GROUPUSERS, verifyBeforeUpdateEmail, getDoc, deleteUser, CALENDARENTRIES, deleteDoc, SHIFTS } from '../firebase/config.js'
+import { USERGROUPS, firestore, USERS, doc, updateDoc, onSnapshot, getDocs, collection, GROUPS, EmailAuthProvider, reauthenticateWithCredential, updatePassword, GROUPUSERS, verifyBeforeUpdateEmail, getDoc, deleteUser, CALENDARENTRIES, deleteDoc, SHIFTS } from '../firebase/config.js'
 import isStrongPassword from 'validator/lib/isStrongPassword'
 import styles from '../styles/Settings.js'
 import isEmail from 'validator/lib/isEmail'
@@ -21,11 +21,13 @@ export default function SettingsScreen() {
   const { t, i18n } = useTranslation()
   const navigation = useNavigation()
   const userDocRef = user ? doc(firestore, USERS, user.uid) : null
+  const userGroupsRef = user ? collection(firestore, USERS, user.uid, USERGROUPS) : null
   const [isDisabled, setIsDisabled] = useState(false)
   const [editingName, setEditingName] = useState(false)
   const [editingEmail, setEditingEmail] = useState(false)
   const [deletingAccount, setDeletingAccount] = useState(false)
   const [editingPassword, setEditingPassword] = useState(false)
+  const [joinedGroups, setJoinedGroups] = useState([])
   const [userInfo, setUserInfo] = useState({
     firstName: '',
     lastName: '',
@@ -47,7 +49,7 @@ export default function SettingsScreen() {
   useEffect(() => {
     if(!user) return
     
-    const unsubscribe = onSnapshot(userDocRef, (document) => {
+    const usersInformation = onSnapshot(userDocRef, (document) => {
       setUserInfo({
         firstName: document.data().firstName,
         lastName: document.data().lastName,
@@ -59,10 +61,16 @@ export default function SettingsScreen() {
       })
     })
 
-    const userGroupsRef = 
+    const usersGroups = onSnapshot(userGroupsRef, (querySnapshot) => {
+      const tempGroups = querySnapshot.docs.map((doc) => (
+        doc.data().groupId
+      ))
+      setJoinedGroups(tempGroups)
+    })
 
     return () => {
-      unsubscribe()
+      usersInformation()
+      usersGroups()
     }
   }, [])
 
@@ -215,20 +223,13 @@ export default function SettingsScreen() {
   }
 
   const updateNameInGroupUsersSubCollection = async () => {
-    const groupsRef = collection(firestore, GROUPS)
-    const allGroups = await getDocs(groupsRef)
-    const groupIds = allGroups.docs.map((doc) => doc.id)
+    await Promise.all(joinedGroups.map(async (joinedGroupId) => {
+      const groupUsersDocRef = doc(firestore, GROUPS, joinedGroupId, GROUPUSERS, user.uid)
 
-    await Promise.all(groupIds.map(async (groupId) => {
-      const groupUsersRef = doc(firestore, GROUPS, groupId, GROUPUSERS, user.uid)
-      const document = await getDoc(groupUsersRef)
-
-      if (document.exists()) {
-        await updateDoc(groupUsersRef, {
-          firstName: editInfo.firstName,
-          lastName: editInfo.lastName
-        })
-      }  
+      await updateDoc(groupUsersDocRef, {
+        firstName: editInfo.firstName,
+        lastName: editInfo.lastName
+      })
     }))
   }
 
