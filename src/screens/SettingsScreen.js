@@ -20,7 +20,7 @@ export default function SettingsScreen() {
   const { user } = useUser()
   const { t, i18n } = useTranslation()
   const navigation = useNavigation()
-  const userRef = user ? doc(firestore, USERS, user.uid) : null
+  const userDocRef = user ? doc(firestore, USERS, user.uid) : null
   const [isDisabled, setIsDisabled] = useState(false)
   const [editingName, setEditingName] = useState(false)
   const [editingEmail, setEditingEmail] = useState(false)
@@ -47,7 +47,7 @@ export default function SettingsScreen() {
   useEffect(() => {
     if(!user) return
     
-    const unsubscribe = onSnapshot(userRef, (document) => {
+    const unsubscribe = onSnapshot(userDocRef, (document) => {
       setUserInfo({
         firstName: document.data().firstName,
         lastName: document.data().lastName,
@@ -58,6 +58,9 @@ export default function SettingsScreen() {
         lastName: document.data().lastName
       })
     })
+
+    const userGroupsRef = 
+
     return () => {
       unsubscribe()
     }
@@ -205,7 +208,7 @@ export default function SettingsScreen() {
   }
 
   const updateNameInUsersCollection = async () => {
-    await updateDoc(userRef, {
+    await updateDoc(userDocRef, {
       firstName: editInfo.firstName,
       lastName: editInfo.lastName
     })
