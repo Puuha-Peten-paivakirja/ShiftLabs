@@ -335,7 +335,7 @@ export default function SettingsScreen() {
   }
 
   const navigateToWelcomeScreen = () => {
-    setDeletingAccount(false)
+    setIsDisabled(false)
     navigation.dispatch( // Clear the navigation stack and redirect the user to the welcome page
       CommonActions.reset({
         index: 0,
