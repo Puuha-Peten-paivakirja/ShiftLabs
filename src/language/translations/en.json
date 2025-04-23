@@ -110,7 +110,7 @@
   "no-new-admin": "No user selected",
   "no-new-admin-message": "Select one user to continue",
   "add-users": "Add people to group",
-  "add-users-button": "Add people"
+  "add-users-button": "Add people",
   "delete-account": "Delete account",
   "error-while-deleting-account": "Error while deleting account",
   "account-deleted": "Accound deleted",
