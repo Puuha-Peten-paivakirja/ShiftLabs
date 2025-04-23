@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, Modal, } from "react-native";
+import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import Navbar from "../components/Navbar";
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { useNavigation } from '@react-navigation/native';
@@ -17,6 +17,7 @@ export default function SpesificGroupScreen({ route }) {
     const [ groupUsersAndHours, setGroupUsersAndHours ] = useState([]);
     const [admin, setAdmin] = useState(false);
     const { t } = useTranslation()
+    const [isLoading, setIsLoading] = useState(true)
     
 
 
@@ -76,9 +77,11 @@ export default function SpesificGroupScreen({ route }) {
             if (findCurrentUserStatus) {
                 if (findCurrentUserStatus.role === 'admin') {
                     setAdmin(true);
+                    setIsLoading(false)
                     console.log("User is admin");
                 } else {
                     console.log("User is member");
+                    setIsLoading(false)
                 }
             } else {
                 console.log("User not found in group");
@@ -95,7 +98,7 @@ export default function SpesificGroupScreen({ route }) {
         unsubscribe()
         
         }
- },[])
+ },[groupId, user])
     
     const removeMember = async (id) => {
         try{
@@ -110,6 +113,13 @@ export default function SpesificGroupScreen({ route }) {
     return (
         <View style={styles.container}>
             <Navbar />
+            {isLoading ?(
+                    <View style={{flex:1, alignItems: 'center',justifyContent:'center'}}>
+                      <ActivityIndicator size="large" color="#4B3F72" />
+                    </View>
+            
+                  ):(
+                <View style={{flex: 1}}>
                 <View style={{flexDirection: 'row',justifyContent: 'space-between', width: '100%' }}>
                     <TouchableOpacity  
                         style={styles.backButton}
@@ -128,7 +138,7 @@ export default function SpesificGroupScreen({ route }) {
                 </View>
 
                 <View style={{flex:1, alignItems: 'center',}}>
-                    <Text style={styles.headings}>Ryhmän työtunnit:</Text>
+                    <Text style={styles.headings}>{t('groups-working-hours')}</Text>
                     <CircularSegments data={groupUsersAndHours} />
 
                     
@@ -168,6 +178,10 @@ export default function SpesificGroupScreen({ route }) {
                     
                 
                 </View>
+                
+            </View>)}
+
+
 
         </View>
     )

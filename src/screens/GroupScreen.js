@@ -29,12 +29,12 @@ export default function GroupScreen() {
   const [checkedUsers, setCheckedUsers] = useState([]);
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
 
 
   useEffect(() => {
-    setIsLoading(true)
     // Only proceed if user is logged in
     if (!user) return;
     // Queruy to get groups that user is part of
@@ -44,6 +44,7 @@ export default function GroupScreen() {
         const tempGroups = querySnapshot.docs.map((doc) => ({
           id: doc.data().groupId,
           groupName: doc.data().groupName, 
+          groupDesc: doc.data().groupDesc,
         }))
         // Update the groups that user is joined into a list
         setJoinedGroups(tempGroups)
@@ -61,8 +62,10 @@ export default function GroupScreen() {
     setUsersList(usersList);
     // Update the filtered users list (used for searching)
     setFilteredUsers(usersList);
-    });
+    // Set loading to false to show page
     setIsLoading(false)
+
+    });
 
 
     // Cleanup listener when component is unmounted or user changes
@@ -99,112 +102,119 @@ export default function GroupScreen() {
       }
     });
   };
+
+  // Creates new group to firebase
+  const createGroup = async (group) => {
+    const docRef = await addDoc(collection(firestore, GROUPS), {
+      groupName: group.groupName,
+      description: group.groupDesc,
+      created: serverTimestamp()
+    });
+    console.log('New group saved');
+    return docRef;
+  };
   
+  // Query to find the maching user info to current user
   const getUserName = async () => {
+    // User does not contain users first or last name
+    // Fetches the info maching the current user from User collection
     try {
-      // Query to find the maching user info
       const docRef = doc(firestore, USERS, user.uid);
       const docSnap = await getDoc(docRef);
-
-
       if(docSnap.exists()) { 
         const userData = docSnap.data();
-        console.log("kauttaja haettu onnistuneesti")
+        console.log("User fetched succesfully")
         return { firstName: userData.firstName, lastName: userData.lastName }
       } else {
-          console.log("Käyttäjää ei löytynyt.");
+          console.log("User was not found");
       }
   } catch (error) {
-      console.error("Virhe käyttäjän hakemisessa:", error);
+      console.error("Error finding the user:", error);
   }
+};
+
+// Adds user into the group's "GroupUser" subcollection
+const addUserToGroup = async (groupId, userId, userInfo, role) => {
+  const { firstName, lastName } = userInfo;
+  await setDoc(doc(firestore, GROUPS, groupId, GROUPUSERS, userId), {
+    firstName,
+    lastName,
+    joined: serverTimestamp(),
+    role
+  });
+  console.log(`${role} added to group`);
+};
+
+// Add group info to the user's "UserGroups" subcollection
+const addGroupToUser = async (userId, groupId, group) => {
+  // This is a shortcut reference to the group for quicker lookups
+  // It avoids needing to query the entire Groups/GroupUsers structure
+  await setDoc(doc(firestore, USERS, userId, USERGROUPS, groupId), {
+    groupId,
+    groupName: group.groupName,
+    groupDesc: group.groupDesc,
+    joined: serverTimestamp()
+  });
+  console.log("Group added to user subcollection");
 };
 
 
   const save = async () => {
     // Only proceed if user is logged in
-    if (user !== null) {
-      if(newGroup.groupName !== ''){
+    if (user === null) {
+      console.log("You must log in first");
+      return;
+    }
+  
+    // Groups name can not be empty
+    if (newGroup.groupName === '') {
+      console.log("Group name empty");
+      Alert.alert(t("missing-group-name-alert"), t("missing-group-name-message"));
+      return false;
+    }
+    // Start the saving animation
+    setIsSaving(true);
+
         try{
           // Create a new group document in the "Groups" collection
-          const docRef = await addDoc(collection(firestore, GROUPS),{
-            groupName: newGroup.groupName,
-            description: newGroup.groupDesc,
-            created: serverTimestamp()
-          })
+          const docRef = await createGroup(newGroup);
           // Reset the new group
           setNewGroup({ groupDesc:'', groupName:''})
-          console.log('New group saved')
+
+
           // Fetch full name of the current user using email
           const userName = await getUserName();
-          
           // Add the current user to the group's "GroupUsers" subcollection as an admin
-          await setDoc(doc(firestore, GROUPS, docRef.id, GROUPUSERS, user.uid ), {
-            firstName: userName.firstName,
-            lastName: userName.lastName,
-            joined: serverTimestamp(),
-            role: "admin",
-          })
-          console.log('Admin added to gruop')
-            // Add group info to the user's "UserGroups" subcollection
-            // This is a shortcut reference to the group for quicker lookups
-            // It avoids needing to query the entire Groups/GroupUsers structure
-          await setDoc(doc(firestore, USERS, user.uid, USERGROUPS, docRef.id), {
-            groupId: docRef.id,
-            groupName: newGroup.groupName,
-            groupDesc: newGroup.groupDesc,
-            joined: serverTimestamp(),
-          });
-          console.log("Group added to user subcollection");
+          await addUserToGroup(docRef.id, user.uid, userName, "admin");
+          // Add the group to current user
+          await addGroupToUser(user.uid, docRef.id, newGroup);
 
           // Add all selected users to "GroupUsers" as members
-          
           // Map to get all users into "GroupUsers"
-          const addMembers = checkedUsers.map((member) => {
-              const { firstName, lastName, id} = member;
-              return setDoc(doc(firestore, GROUPS, docRef.id, GROUPUSERS, id), {
-                firstName,
-                lastName,
-                joined: serverTimestamp(),
-                role: "member",
-              })
-            })
-            await Promise.all(addMembers)
-            console.log("All members added!");
+          await Promise.all(checkedUsers.map(member => addUserToGroup(docRef.id, member.id, member, "member")));
+
 
           // Add group info to all selected users
-          const addGroupsToUsers = checkedUsers.map((member) => {
-              const { id } = member;
-              return setDoc(doc(firestore, USERS, id, USERGROUPS, docRef.id),{
-                groupId: docRef.id,
-                groupName: newGroup.groupName,
-                groupDesc: newGroup.groupDesc,
-                joined: serverTimestamp(),
-              })
-          })
-          await Promise.all(addGroupsToUsers)
-          console.log("Group added to all members")
-          setCheckedUsers([''])
+          await Promise.all(checkedUsers.map(member => addGroupToUser(member.id, docRef.id, newGroup)));
 
-
+          // Reset the togglet users
+          setCheckedUsers([])
+          console.log("Group and members successfully added!");
+          setIsSaving(false);
+          return true;
 
         }catch (error) {
           console.log("Error saving group or adding user:", error)
+          setIsSaving(false);
+          return false;
         }
-      }
-      else{
-        console.log("Group name empty")
-        Alert.alert(t("missing-group-name-alert"), t("missing-group-name-message"))
-      }
-    }
-    else{
-      console.log("You must log in first")
-    }
   }
-
+  
+// Navigation to groups info
   const navigateToGroup = useCallback((groupId) => {
       console.log("Navigating to specific group:", groupId);
       navigation.navigate('SpesificGroup', { groupId });
-  }, [navigation]);
+  }, [user]);
 
 
   return (
@@ -213,7 +223,7 @@ export default function GroupScreen() {
 
       {isLoading ?(
         <View style={{flex:1, alignItems: 'center',justifyContent:'center'}}>
-          <ActivityIndicator size="large" color="#00ff00" />
+          <ActivityIndicator size="large" color="#4B3F72" />
         </View>
 
       ):(
@@ -227,7 +237,15 @@ export default function GroupScreen() {
           {
               joinedGroups.map((joinedGroup)=>(
                 <View key={joinedGroup.id} style={styles.groupViewItem}>
-                  <Text style={styles.groupText}>{joinedGroup.groupName}</Text>
+                  <Text style={styles.groupNameText}>{joinedGroup.groupName}</Text>
+                  
+                  <Text
+                    style={[styles.groupDescText, { textAlign: 'center' }]}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {joinedGroup.groupDesc || '-'}
+                  </Text>
 
                   <TouchableOpacity 
                     style={styles.groupInfoButton} 
@@ -336,10 +354,25 @@ export default function GroupScreen() {
                         onPress={() => setModalVisible(!modalVisible)}>
                         <Text style={styles.createButtonText}>{t("cancel")}</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.createGroupButton} onPress={() => {save(); setModalVisible(!modalVisible)}}>
+
+                    <TouchableOpacity 
+                      style={styles.createGroupButton} 
+                      disabled={isSaving}
+                      onPress={async () => {
+                        const wasSaved = await save();
+                        if (wasSaved) {
+                          setModalVisible(false);
+                        }
+                      }}>
                       <Text style={styles.createButtonText}>{t("create")}</Text>
                     </TouchableOpacity>
                   </View>
+                  {isSaving && (
+                    <View style={styles.loadingOverlay}>
+                      <ActivityIndicator size="large" color="#fff" />
+                      <Text style={{ color: "#fff", marginTop: 10 }}>{t("creating-group")}</Text>
+                    </View>
+                  )}
                 </View>
               </View>
           </Modal>

@@ -100,5 +100,6 @@
   "no-recorded-shifts": "No recorded shifts",
   "shift-date": "Date:",
   "shift-length": "Length:",
-  "shift-breaks": "Breaks:"
+  "shift-breaks": "Breaks:",
+  "creating-group": "Saving..."
 }

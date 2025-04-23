@@ -96,6 +96,17 @@ export default StyleSheet.create({
       elevation: 20,
       backgroundColor: '#e6e0e9', 
     },
+    loadingOverlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0,0,0,0.4)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 10,
+    },
 
     
     
@@ -125,11 +136,20 @@ export default StyleSheet.create({
       fontWeight: 'bold',
       marginBottom: 10,
     },
-    groupText: {
+    groupNameText: {
       fontSize: 18,
       textAlign: "left",
-      flex: 1,
+      flex: 0,
+      marginRight: 15,
     },
+    groupDescText: {
+      fontSize: 15,
+      textAlign: "left",
+      color: 'grey',
+      flex: 1,
+      marginRight: 5,
+    },
+
     createButtonText:{
       fontSize: 20,
       color: '#68548c',

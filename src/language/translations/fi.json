@@ -100,5 +100,6 @@
   "no-recorded-shifts": "Ei nauhotettuja työvuoroja",
   "shift-date": "Pvm:",
   "shift-length": "Kesto:",
-  "shift-breaks": "Tauot:"
+  "shift-breaks": "Tauot:",
+  "creating-group":"Tallennetaan..."
 }
