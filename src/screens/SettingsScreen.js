@@ -365,7 +365,7 @@ export default function SettingsScreen() {
     const shiftsIds = allShifts.docs.map((doc) => doc.id)
 
     await Promise.all(shiftsIds.map(async (shiftId) => {
-      const shiftsDocRef = doc(firestore, USERS, user.uid, CALENDARENTRIES, shiftId)
+      const shiftsDocRef = doc(firestore, USERS, user.uid, SHIFTS, shiftId)
       await deleteDoc(shiftsDocRef)
     }))
   }
@@ -379,14 +379,34 @@ export default function SettingsScreen() {
 
   const deleteHoursFromGroupUsers = async () => {
     await Promise.all(joinedGroups.map(async (joinedGroupId) => {
-      const hoursRef = collection(firestore, joinedGroupId, GROUPUSERS, user.uid, HOURS)
+      const hoursRef = collection(firestore, GROUPS, joinedGroupId, GROUPUSERS, user.uid, HOURS)
       const allHours = await getDocs(hoursRef)
       const hoursIds = allHours.docs.map((doc) => doc.id)
 
       await Promise.all(hoursIds.map(async (hourId) => {
-        const hoursDocRef = doc(firestore, joinedGroupId, GROUPUSERS, user.uid, HOURS, hourId)
+        const hoursDocRef = doc(firestore, GROUPS, joinedGroupId, GROUPUSERS, user.uid, HOURS, hourId)
         await deleteDoc(hoursDocRef)
       }))
+    }))
+  }
+
+  const deleteShiftsFromGroupUsers = async () => {
+    await Promise.all(joinedGroups.map(async (joinedGroupId) => {
+      const shiftsRef = collection(firestore, GROUPS, joinedGroupId, GROUPUSERS, user.uid, SHIFTS)
+      const allShifts = await getDocs(shiftsRef)
+      const shiftsIds = allShifts.docs.map((doc) => doc.id)
+
+      await Promise.all(shiftsIds.map(async (shiftId) => {
+        const shiftsDocRef = doc(firestore, GROUPS, joinedGroupId, GROUPUSERS, user.uid, SHIFTS, shiftId)
+        await deleteDoc(shiftsDocRef)
+      }))
+    }))
+  }
+
+  const deleteUserFromGroupUsers = async () => {
+    await Promise.all(joinedGroups.map(async (joinedGroupId) => {
+      const groupUsersDocRef = doc(firestore, GROUPS, joinedGroupId, GROUPUSERS, user.uid)
+      await deleteDoc(groupUsersDocRef)
     }))
   }
 
@@ -396,7 +416,14 @@ export default function SettingsScreen() {
     try {
       const credential = EmailAuthProvider.credential(user.email, userInfo.currentPassword)
       await reauthenticateWithCredential(user, credential)
-      await Promise.all([deleteCalendarEntries(), deleteShiftEntries(), deleteUserGroupsEntries()])
+      await Promise.all([
+        deleteCalendarEntries(),
+        deleteShiftEntries(),
+        deleteUserGroupsEntries(),
+        deleteHoursFromGroupUsers(),
+        deleteShiftsFromGroupUsers(),
+        deleteUserFromGroupUsers()
+      ])
       await deleteUser(user)
       setUserInfo({...userInfo, currentPassword: ''})
       Alert.alert(t('account-deleted'), t('account-deleted-successfully'), [
