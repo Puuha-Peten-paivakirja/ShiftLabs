@@ -4,21 +4,17 @@ import { StyleSheet } from "react-native";
 export default StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
     backgroundColor: "#FAF5FF",
   },
   profileContainer: {
-    marginTop: 40,
-    alignItems: "center",
+    flex: 1,
+    alignItems: 'center',
   },
   progressCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 8,
-    borderColor: "#4B3F72",
-    justifyContent: "center",
-    alignItems: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 20,
+    
   },
   profileImage: {
     width: 80,

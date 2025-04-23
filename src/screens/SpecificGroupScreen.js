@@ -21,7 +21,6 @@ export default function SpecificGroupScreen({ route }) {
     
 
 
-
  useEffect(() => {
     if (!user) return;
     const q = query(collection(firestore,GROUPS,groupId, GROUPUSERS))
@@ -120,58 +119,58 @@ export default function SpecificGroupScreen({ route }) {
             
                   ):(
                 <View style={{flex: 1}}>
-                <View style={{flexDirection: 'row',justifyContent: 'space-between', width: '100%' }}>
-                    <TouchableOpacity  
-                        style={styles.backButton}
-                        onPress={() => {navigation.navigate('Group')}}>
-                        <Ionicons name='arrow-back-outline' size={25} />
-                        <Text style={{fontSize:15, fontWeight: 'bold'}} >{t('return')}</Text>
-                    </TouchableOpacity>
+                    <View style={{flexDirection: 'row',justifyContent: 'space-between', width: '100%' }}>
+                        <TouchableOpacity  
+                            style={styles.backButton}
+                            onPress={() => {navigation.navigate('Group')}}>
+                            <Ionicons name='arrow-back-outline' size={25} />
+                            <Text style={{fontSize:15, fontWeight: 'bold'}} >{t('return')}</Text>
+                        </TouchableOpacity>
 
-                    {admin === true &&(
-                    <TouchableOpacity  
-                        style={styles.settingsButton}
-                        onPress={() => {navigation.navigate('GroupSettingsScreen', {groupUsersAndHours, groupId})}}>
-                        <Ionicons name='settings-outline' size={30} />
-                    </TouchableOpacity>
-                    )}
-                </View>
+                        {admin === true &&(
+                        <TouchableOpacity  
+                            style={styles.settingsButton}
+                            onPress={() => {navigation.navigate('GroupSettingsScreen', {groupUsersAndHours, groupId})}}>
+                            <Ionicons name='settings-outline' size={30} />
+                        </TouchableOpacity>
+                        )}
+                    </View>
 
-                <View style={{flex:1, alignItems: 'center',}}>
-                    <Text style={styles.headings}>{t('groups-working-hours')}</Text>
-                    <CircularSegments data={groupUsersAndHours} />
+                    <View style={{flex:1, alignItems: 'center',}}>
+                        <Text style={styles.headings}>{t('groups-working-hours')}</Text>
+                        <CircularSegments data={groupUsersAndHours} />
+
+                        
+
+                        <View style={styles.separator} />
+                        {/*------------------------------------*/}
 
                     
+                        <Text style={styles.headings}>{t('members')}:</Text>
+                        <FlatList
+                            data={groupUsersAndHours}
+                            keyExtractor={(item) => item.id}
+                            style={styles.scrollviewGroupsUsers}
+                            renderItem={({ item }) => (
+                            <View>
+                                {admin?(
+                                <View style={styles.userViewItem}>
+                                    <Text style={styles.userText}>{item.firstName} {item.lastName}</Text>
+                                    {item.role !== 'admin' && (
+                                    <TouchableOpacity 
+                                        style={styles.removeIcon} 
+                                        onPress={() => removeMember(item.id)}
+                                    >
+                                        <Ionicons name='trash-outline' size={25} />
+                                    </TouchableOpacity>)}
+                                </View>
+                                ):(
+                                <View style={styles.userViewItem}>
+                                    <Text style={styles.userText}>{item.firstName} {item.lastName}</Text>
+                                </View>
 
-                    <View style={styles.separator} />
-                    {/*------------------------------------*/}
-
-                
-                    <Text style={styles.headings}>{t('members')}:</Text>
-                    <FlatList
-                        data={groupUsersAndHours}
-                        keyExtractor={(item) => item.id}
-                        style={styles.scrollviewGroupsUsers}
-                        renderItem={({ item }) => (
-                        <View>
-                            {admin?(
-                            <View style={styles.userViewItem}>
-                                <Text style={styles.userText}>{item.firstName} {item.lastName}</Text>
-                                {item.role !== 'admin' && (
-                                <TouchableOpacity 
-                                    style={styles.removeIcon} 
-                                    onPress={() => removeMember(item.id)}
-                                >
-                                    <Ionicons name='trash-outline' size={25} />
-                                </TouchableOpacity>)}
-                            </View>
-                            ):(
-                            <View style={styles.userViewItem}>
-                                <Text style={styles.userText}>{item.firstName} {item.lastName}</Text>
-                            </View>
-
-                            )}
-                            <View style={styles.userSeparator} />
+                                )}
+                                <View style={styles.userSeparator} />
                         </View> 
                         )}
                     />

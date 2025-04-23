@@ -52,25 +52,30 @@ const CircularSegments = ({ data }) => {
   return (
     <View style={{ alignItems: 'center', justifyContent: 'center' }}>
       <Svg width="200" height="200" viewBox="-125 -125 250 250">
-        {validData.map((item, index) => {
-          const endAngle = startAngle + (item.hours / totalHours) * 2 * Math.PI;
-          const path = createArc(0, 0, radius, startAngle, endAngle);
 
-          startAngle = endAngle; // Update start angle for the next segment
-
-          const segmentColor = item.color || generateRandomColor(index); // Assign a random color if not provided
-
-          return (
-            <React.Fragment key={index}>
-              <Path
-                d={path}
-                fill={segmentColor}
-                stroke='none'
-              />
-            </React.Fragment>
-          );
-        })}
-        <Path
+          {validData.length === 1 ? (
+            <Path
+              d={`M0,-${radius} A${radius},${radius} 0 1,1 0,${radius} A${radius},${radius} 0 1,1 0,-${radius} Z`}
+              fill={validData[0].color || generateRandomColor(0)}
+              stroke='none'
+            />
+          ) : (
+            validData.map((item, index) => {
+              const endAngle = startAngle + (item.hours / totalHours) * 2 * Math.PI;
+              const path = createArc(0, 0, radius, startAngle, endAngle);
+              startAngle = endAngle;
+              const segmentColor = item.color || generateRandomColor(index);
+              return (
+                <Path
+                  key={index}
+                  d={path}
+                  fill={segmentColor}
+                  stroke='none'
+                />
+              );
+            })
+          )}
+          <Path
           d={`M0,${-innerRadius} A${innerRadius},${innerRadius} 0 1,1 0,${innerRadius} A${innerRadius},${innerRadius} 0 1,1 0,${-innerRadius} Z`} 
           fill="white" // Make it white to create the hollow effect
           stroke='none'
