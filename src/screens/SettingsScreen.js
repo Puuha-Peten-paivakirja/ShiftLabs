@@ -6,7 +6,7 @@ import { TextInput } from 'react-native-paper'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import { useUser } from '../context/useUser'
-import { firestore, USERS, doc, updateDoc, onSnapshot, getDocs, collection, GROUPS, EmailAuthProvider, reauthenticateWithCredential, updatePassword, GROUPUSERS, verifyBeforeUpdateEmail, getDoc } from '../firebase/config.js'
+import { firestore, USERS, doc, updateDoc, onSnapshot, getDocs, collection, GROUPS, EmailAuthProvider, reauthenticateWithCredential, updatePassword, GROUPUSERS, verifyBeforeUpdateEmail, getDoc, deleteUser } from '../firebase/config.js'
 import isStrongPassword from 'validator/lib/isStrongPassword'
 import styles from '../styles/Settings.js'
 import isEmail from 'validator/lib/isEmail'
@@ -14,14 +14,17 @@ import { useTranslation } from 'react-i18next'
 import { Dropdown } from 'react-native-element-dropdown'
 import Entypo from '@expo/vector-icons/Entypo'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { useNavigation, CommonActions } from '@react-navigation/native'
 
 export default function SettingsScreen() {
   const { user } = useUser()
   const { t, i18n } = useTranslation()
+  const navigation = useNavigation()
   const userRef = user ? doc(firestore, USERS, user.uid) : null
   const [isDisabled, setIsDisabled] = useState(false)
   const [editingName, setEditingName] = useState(false)
   const [editingEmail, setEditingEmail] = useState(false)
+  const [deletingAccount, setDeletingAccount] = useState(false)
   const [editingPassword, setEditingPassword] = useState(false)
   const [userInfo, setUserInfo] = useState({
     firstName: '',
@@ -63,19 +66,29 @@ export default function SettingsScreen() {
   const startNameEdit = () => {
     setEditingEmail(false)
     setEditingPassword(false)
+    setDeletingAccount(false)
     setEditingName(true)
   }
 
   const startEmailEdit = () => {
     setEditingName(false)
     setEditingPassword(false)
+    setDeletingAccount(false)
     setEditingEmail(true)
   }
 
   const startPasswordEdit = () => {
     setEditingEmail(false)
     setEditingName(false)
+    setDeletingAccount(false)
     setEditingPassword(true)
+  }
+
+  const startDeletingAccount = () => {
+    setEditingEmail(false)
+    setEditingName(false)
+    setEditingPassword(false)
+    setDeletingAccount(true)
   }
 
   const cancelEdit = () => {
@@ -90,6 +103,7 @@ export default function SettingsScreen() {
     setEditingName(false)
     setEditingEmail(false)
     setEditingPassword(false)
+    setDeletingAccount(false)
   }
 
   const checkPasswordInputs = () => {
@@ -284,12 +298,28 @@ export default function SettingsScreen() {
       ])
     }
     catch (error) {
-      console.log(error)
-      Alert.alert(t('error'), t('error-while-changing-email'), [
-        {
-          onPress: () => setIsDisabled(false)
-        }
-      ])
+      if (error.code === 'auth/missing-password') {
+        Alert.alert(t('error'), t('password-is-missing'), [
+          {
+            onPress: () => setIsDisabled(false)
+          }
+        ])
+      }
+      else if (error.code === 'auth/invalid-credential') {
+        Alert.alert(t('error'), t('current-password-is-invalid'), [
+          {
+            onPress: () => setIsDisabled(false)
+          }
+        ])
+      }
+      else {
+        console.log(error)
+        Alert.alert(t('error'), t('error-while-changing-email'), [
+          {
+            onPress: () => setIsDisabled(false)
+          }
+        ])
+      }
     }
   }
 
@@ -301,6 +331,56 @@ export default function SettingsScreen() {
     } 
     catch (error) {
       console.log(error)
+    }
+  }
+
+  const navigateToWelcomeScreen = () => {
+    setDeletingAccount(false)
+    navigation.dispatch( // Clear the navigation stack and redirect the user to the welcome page
+      CommonActions.reset({
+        index: 0,
+        routes: [{name: 'Welcome' }]
+      })
+    )
+  }
+
+  const userDeleteAccount = async () => {
+    setIsDisabled(true)
+
+    try {
+      const credential = EmailAuthProvider.credential(user.email, userInfo.currentPassword)
+      await reauthenticateWithCredential(user, credential)
+      await deleteUser(user)
+      setUserInfo({...userInfo, currentPassword: ''})
+      Alert.alert(t('account-deleted'), t('account-deleted-successfully'), [
+        {
+          onPress: () => navigateToWelcomeScreen()
+        }
+      ])
+    }
+    catch (error) {
+      if (error.code === 'auth/missing-password') {
+        Alert.alert(t('error'), t('password-is-missing'), [
+          {
+            onPress: () => setIsDisabled(false)
+          }
+        ])
+      }
+      else if (error.code === 'auth/invalid-credential') {
+        Alert.alert(t('error'), t('current-password-is-invalid'), [
+          {
+            onPress: () => setIsDisabled(false)
+          }
+        ])
+      }
+      else {
+        console.log(error)
+        Alert.alert(t('error'), t('error-while-deleting-account'), [
+          {
+            onPress: () => setIsDisabled(false)
+          }
+        ])
+      }
     }
   }
 
@@ -556,6 +636,54 @@ export default function SettingsScreen() {
             )}
           />
         </View>
+        
+        {user && deletingAccount &&
+          <View style={styles.editContainer}>
+            <Text style={styles.textStyle}>{t('delete-account')}:</Text>
+            <View style={styles.editRow}>
+              <TextInput
+                style={styles.input}
+                label={t('password')}
+                value={userInfo.currentPassword}
+                onChangeText={text => setUserInfo({...userInfo, currentPassword: text})}
+                secureTextEntry={true}
+                numberOfLines={1}
+                autoCapitalize='none'
+                autoCorrect={false}
+              />
+              <TouchableOpacity style={styles.clearIcon} onPress={() => setUserInfo({...userInfo, currentPassword: ''})}>
+                <Ionicons name='close-circle' size={20} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.confirmAndCancel}>
+              <TouchableOpacity
+                style={styles.confirmButton}
+                activeOpacity={0.75}
+                onPress={() => userDeleteAccount()}
+                disabled={isDisabled}
+              >
+                <Text style={styles.buttonText}>{t('confirm')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                activeOpacity={0.75}
+                onPress={() => cancelEdit()}
+                disabled={isDisabled}
+              >
+                <Text style={styles.buttonText}>{t('cancel')}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        }
+
+        {user && !deletingAccount &&
+          <View style={styles.notEditingContainer}>
+            <TouchableOpacity style={styles.deleteAccount} onPress={() => startDeletingAccount()}>
+              <Text style={styles.textStyle}>{t('delete-account')}</Text>
+            </TouchableOpacity>
+          </View>
+        }
       </View>
     </View>
   )

@@ -101,5 +101,9 @@
   "shift-date": "Pvm:",
   "shift-length": "Kesto:",
   "shift-breaks": "Tauot:",
-  "creating-group":"Tallennetaan..."
+  "creating-group": "Tallennetaan...",
+  "delete-account": "Poista käyttäjä",
+  "error-while-deleting-account": "Käyttäjän poistamisessa tapahtui virhe",
+  "account-deleted": "Käyttäjä poistettu",
+  "account-deleted-successfully": "Käyttäjä ja siihen liittyvä data poistettu."
 }

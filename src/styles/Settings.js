@@ -121,5 +121,13 @@ export default StyleSheet.create({
   dropdownIconRight: {
     position: 'relative',
     right: 8
-  }
+  },
+  deleteAccount: {
+    width: '35%',
+    height: 40,
+    borderWidth: 0.8,
+    borderRadius: 4,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
 })

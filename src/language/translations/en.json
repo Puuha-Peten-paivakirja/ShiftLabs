@@ -101,5 +101,9 @@
   "shift-date": "Date:",
   "shift-length": "Length:",
   "shift-breaks": "Breaks:",
-  "creating-group": "Saving..."
+  "creating-group": "Saving...",
+  "delete-account": "Delete account",
+  "error-while-deleting-account": "Error while deleting account",
+  "account-deleted": "Accound deleted",
+  "account-deleted-successfully": "Deleted account and all the data associated with it."
 }
