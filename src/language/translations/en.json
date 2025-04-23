@@ -106,6 +106,8 @@
   "shift-return": "← Return",
   "local-shifts": "My shifts",
   "shifts": "Shifts",
-  "default-shift-name": "My shifts"
+  "default-shift-name": "My shifts",
+  "no-description": "No description"
+
 
 }

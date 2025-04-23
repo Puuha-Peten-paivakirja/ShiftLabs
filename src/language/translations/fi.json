@@ -106,5 +106,6 @@
   "shift-return":"← Takaisin",
   "local-shifts":"Omat vuorot",
   "shifts":"Työvuoroa",
-  "default-shift-name":"Omat vuorot"
+  "default-shift-name":"Omat vuorot",
+  "no-description":"Ei kuvausta"
 }

@@ -167,7 +167,7 @@ export default function AllShiftsScreen() {
                                     <Text>{t('shift-date')} {formatDate(item.date)}</Text>
                                     <Text>{t('shift-duration')} {formatDuration(item.duration)}</Text>
                                     <Text>{t('shift-breaks')} {formatDuration(item.breakDuration)}</Text>
-                                    <Text>{t('shift-description')}: {item.description || "Ei kuvausta"}</Text>
+                                    <Text>{t('shift-description')}: {item.description || t('no-description')}</Text>
                                     <TouchableOpacity
                                         onPress={() => deleteShift(item)}
                                         style={styles.deleteShiftButton}
@@ -184,14 +184,16 @@ export default function AllShiftsScreen() {
                         data={Object.keys(groupedShifts)}
                         keyExtractor={(item, index) => index.toString()}
                         renderItem={({ item }) => (
-                            <TouchableOpacity onPress={() => setSelectedShiftName(item)} style={styles.shiftLabel}>
-                                <Text style={styles.shiftText}>
-                                    {groupedShifts[item].length} {t('shifts')}
-                                </Text>
-                                <Text style={styles.input}>{item}</Text>
-                            </TouchableOpacity>
-                        )}
-                    />
+                        <TouchableOpacity onPress={() => setSelectedShiftName(item)} style={styles.shiftLabel}>
+                            <Text style={styles.shiftText}>
+                                {groupedShifts[item].length} {t('shifts')}
+                            </Text>
+                            <Text style={styles.input}>
+                                {item === "Omat työvuorot" ? t('default-shift-name') : item}
+                            </Text>
+                        </TouchableOpacity>
+                    )}
+                />
                 )}
             </View>
         </View>
