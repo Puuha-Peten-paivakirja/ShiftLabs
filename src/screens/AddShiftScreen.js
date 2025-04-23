@@ -64,6 +64,9 @@ const AddShiftScreen = () => {
                         renderItem={({ item }) => (
                             <View style={styles.row}>
                                 {/* Localize the label here */}
+                                console.log("Translation for label:", t(item.label));
+                                console.log("Translation for no-group:", t("no-group"));
+                                console.log("Item value:", item.value);
                                 <Text style={styles.label}>{t(item.label)}</Text>
                                 {item.type === "input" ? (
                                     <TextInput

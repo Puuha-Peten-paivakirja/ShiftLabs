@@ -122,5 +122,6 @@
   "yes": "Kyllä",
   "no": "Ei",
   "no-group": "Ei ryhmää",
-  "no-selected-group": "Ei valittua ryhmää"
+  "no-selected-group": "Ei valittua ryhmää",
+  "select-time" : "Valitse aika"
 }

@@ -247,8 +247,7 @@ const AddShiftManually = () => {
                             />
                         ) : (
                             <View style={{ width: 220, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                                {/* Localize "select-time" if item.value is null */}
-                                <Text style={styles.input}>{item.value || t("select-time")}</Text>
+                                <Text style={styles.input}>{item.value || ""}</Text>
                                 {(item.label === "start-time" || item.label === "end-time") && (
                                     <TouchableOpacity onPress={item.onPress}>
                                         <Ionicons name="create-outline" size={25} style={styles.inputIcon} />

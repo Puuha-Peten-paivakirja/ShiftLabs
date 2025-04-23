@@ -122,7 +122,9 @@
   "yes": "Yes",
   "no": "No",
   "no-group": "No group",
-  "no-selected-group": "No selected group"
+  "no-selected-group": "No selected group",
+  "select-time": "Select time"
+
 
 
 }
