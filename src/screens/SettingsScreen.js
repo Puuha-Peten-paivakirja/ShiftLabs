@@ -41,7 +41,7 @@ export default function SettingsScreen() {
     newPassword: '',
     confirmedNewPassword: ''
   })
-  const languageOptions = [
+  const languageOptions = [ // Language options are English and Finnish. This is needed on line 731 for the dropdown menu.
     { label: t('english'), value: 'en' },
     { label: t('finnish'), value: 'fi' },
   ]
@@ -49,19 +49,19 @@ export default function SettingsScreen() {
   useEffect(() => {
     if(!user) return
     
-    const usersInformation = onSnapshot(userDocRef, (document) => {
+    const usersInformation = onSnapshot(userDocRef, (document) => { // Listener to check if users information changes
       setUserInfo({
         firstName: document.data().firstName,
         lastName: document.data().lastName,
         currentEmail: user.email
       })
       setEditInfo({
-        firstName: document.data().firstName,
+        firstName: document.data().firstName, // Saving first and last names because they will be placeholders on lines 506 and 520. These names will show when user is editing name.
         lastName: document.data().lastName
       })
     })
 
-    const usersGroups = onSnapshot(userGroupsRef, (querySnapshot) => {
+    const usersGroups = onSnapshot(userGroupsRef, (querySnapshot) => { // Listener to get all the groups where user is
       const tempGroups = querySnapshot.docs.map((doc) => (
         doc.data().groupId
       ))
@@ -102,7 +102,7 @@ export default function SettingsScreen() {
     setDeletingAccount(true)
   }
 
-  const cancelEdit = () => {
+  const cancelEdit = () => { // This activates when user presses the cancel button. It resets every field that the user is able to edit.
     setEditInfo({
       firstName: userInfo.firstName,
       lastName: userInfo.lastName,
@@ -148,7 +148,7 @@ export default function SettingsScreen() {
 
     try {
       const credential = EmailAuthProvider.credential(user.email, userInfo.currentPassword)
-      await reauthenticateWithCredential(user, credential)
+      await reauthenticateWithCredential(user, credential) // User must reauthenticate before changing password
       await updatePassword(user, editInfo.newPassword)
       setEditingPassword(false)
       setUserInfo({...userInfo, currentPassword: ''})
@@ -186,7 +186,7 @@ export default function SettingsScreen() {
   }
 
   const checkNameInput = () => {
-    if (editInfo.firstName.length > 35 || editInfo.lastName.length > 35) {
+    if (editInfo.firstName.length > 35 || editInfo.lastName.length > 35) { // First name max length = 35 characters & last name max length = 35 characters
       Alert.alert(t('error'), t('first-and-last-name-length'), [
         {
           onPress: () => setIsDisabled(false)
@@ -194,7 +194,7 @@ export default function SettingsScreen() {
       ])
       return false
     }
-    else if (!editInfo.firstName || editInfo.firstName.trim().length === 0) {
+    else if (!editInfo.firstName || editInfo.firstName.trim().length === 0) { // First name cannot be empty
       Alert.alert(t('error'), t('first-name-is-required'), [
         {
           onPress: () => setIsDisabled(false)
@@ -202,7 +202,7 @@ export default function SettingsScreen() {
       ])
       return false
     }
-    else if (!editInfo.lastName || editInfo.lastName.trim().length === 0) {
+    else if (!editInfo.lastName || editInfo.lastName.trim().length === 0) { // Last name cannot be empty
       Alert.alert(t('error'), t('last-name-is-required'), [
         {
           onPress: () => setIsDisabled(false)
@@ -260,7 +260,7 @@ export default function SettingsScreen() {
   }
 
   const checkEmailInput = () => {
-    if (!editInfo.newEmail || editInfo.newEmail.trim().length === 0) {
+    if (!editInfo.newEmail || editInfo.newEmail.trim().length === 0) { // Email cannot be empty
       Alert.alert(t('error'), t('email-is-required'), [
         {
           onPress: () => setIsDisabled(false)
@@ -268,7 +268,7 @@ export default function SettingsScreen() {
       ])
       return false
     }
-    else if (!isEmail(editInfo.newEmail)) {
+    else if (!isEmail(editInfo.newEmail)) { // Using validator library to validate email
       Alert.alert(t('error'), t('email-is-not-valid'), [
         {
           onPress: () => setIsDisabled(false)
@@ -290,8 +290,8 @@ export default function SettingsScreen() {
 
     try {
       const credential = EmailAuthProvider.credential(user.email, userInfo.currentPassword)
-      await reauthenticateWithCredential(user, credential)
-      await verifyBeforeUpdateEmail(user, editInfo.newEmail)
+      await reauthenticateWithCredential(user, credential) // User must reauthenticate before updating email address
+      await verifyBeforeUpdateEmail(user, editInfo.newEmail) // Send the user a link to their new email to confirm the change
       setEditingEmail(false)
       setUserInfo({...userInfo, currentPassword: ''})
       setEditInfo({...editInfo, newEmail: ''})
@@ -331,7 +331,7 @@ export default function SettingsScreen() {
     i18n.changeLanguage(value)
 
     try {
-      await AsyncStorage.setItem('appLanguage', value)
+      await AsyncStorage.setItem('appLanguage', value) // Current language is save in AsyncStorage
     } 
     catch (error) {
       console.log(error)
@@ -414,7 +414,7 @@ export default function SettingsScreen() {
     await deleteDoc(userDocRef)
   }
 
-  const isUserAdmin = async () => {
+  const isUserAdmin = async () => { // A function to check if user is an admin in any of the groups they are in
     const isAdmin = []
 
     await Promise.all(joinedGroups.map(async (joinedGroupId) => {
@@ -449,7 +449,7 @@ export default function SettingsScreen() {
       }
 
       const credential = EmailAuthProvider.credential(user.email, userInfo.currentPassword)
-      await reauthenticateWithCredential(user, credential)
+      await reauthenticateWithCredential(user, credential) // User must reauthenticate before deleting account
       navigateToWelcomeScreen()
       await Promise.all([
         deleteCalendarEntries(),
@@ -460,7 +460,7 @@ export default function SettingsScreen() {
       ])
       await deleteUserGroupsEntries()
       await deleteUserFromUsers()
-      await deleteUser(user)
+      await deleteUser(user) // User is deleted from Firebase Authentication
       setUserInfo({...userInfo, currentPassword: ''})
       Alert.alert(t('account-deleted'), t('account-deleted-successfully'))
     }
