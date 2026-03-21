@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app'
-import { getFirestore, setDoc, doc, collection, addDoc, serverTimestamp, query, getDoc, where, onSnapshot, updateDoc, deleteDoc } from 'firebase/firestore'
-import { initializeAuth, getReactNativePersistence, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, EmailAuthProvider, reauthenticateWithCredential, updatePassword, verifyBeforeUpdateEmail } from 'firebase/auth'
+import { getFirestore, setDoc, doc, collection, addDoc, serverTimestamp, query, getDoc, where, onSnapshot, updateDoc, deleteDoc, getDocs } from 'firebase/firestore'
+import { initializeAuth, getReactNativePersistence, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, EmailAuthProvider, reauthenticateWithCredential, updatePassword, verifyBeforeUpdateEmail, deleteUser } from 'firebase/auth'
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage'
 
 const firebaseConfig = {
@@ -24,6 +24,9 @@ const USERS = 'users' // This is a collection in Firestore
 const GROUPS = 'groups'
 const GROUPUSERS = 'group-users'
 const USERGROUPS = 'user-groups'
+const CALENDARENTRIES = 'calendar-entries'
+const HOURS = 'hours'
+const SHIFTS = 'shifts'
 
 export { 
     firestore, 
@@ -38,6 +41,7 @@ export {
     addDoc,
     GROUPS,
     GROUPUSERS,
+    CALENDARENTRIES,
     serverTimestamp,
     onAuthStateChanged,
     where,
@@ -52,4 +56,8 @@ export {
     updatePassword,
     verifyBeforeUpdateEmail,
     deleteDoc,
+    HOURS,
+    getDocs,
+    SHIFTS,
+    deleteUser
  }

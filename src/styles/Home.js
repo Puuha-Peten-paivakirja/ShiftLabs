@@ -4,21 +4,17 @@ import { StyleSheet } from "react-native";
 export default StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    backgroundColor: "#FAF5FF",
+    backgroundColor: "#ffffff",
   },
   profileContainer: {
-    marginTop: 40,
-    alignItems: "center",
+    flex: 1,
+    alignItems: 'center',
   },
   progressCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 8,
-    borderColor: "#4B3F72",
-    justifyContent: "center",
-    alignItems: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 20,
+    
   },
   profileImage: {
     width: 80,
@@ -51,15 +47,13 @@ export default StyleSheet.create({
   floatingButton: {
     position: "absolute",
     bottom: 40,
-    right: 20,
+    right: 30,
     backgroundColor: "#E6D6FF",
-    width: 50,
-    height: 50,
+    width: 100,
+    height: 100,
     borderRadius: 25,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowOffset: { width: 0, height: 2 },
+    elevation: 5,
   },
 });

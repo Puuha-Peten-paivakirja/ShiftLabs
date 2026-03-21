@@ -1,10 +1,13 @@
 import React, { useState, useContext, useEffect } from "react";
-import { View, Text, TouchableOpacity, TextInput } from "react-native";
+import { View, Text, TouchableOpacity, TextInput, FlatList } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { ShiftTimerContext } from "../context/ShiftTimerContext";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import styles from "../styles/AddShift";
+import { useTranslation } from "react-i18next"; // Import useTranslation
 
 const AddShiftManually = () => {
+    const { t } = useTranslation(); // Initialize translation function
     const { saveShift, setShiftName, setShiftDescription, shiftName, shiftDescription } = useContext(ShiftTimerContext);
 
     // State for managing the date and time pickers
@@ -22,7 +25,6 @@ const AddShiftManually = () => {
 
     const [isBreakPickerVisible, setIsBreakPickerVisible] = useState(false);
     const [selectedBreakTime, setSelectedBreakTime] = useState(new Date());
-    
 
     // Show and hide handlers for the date and time pickers
     const showStartDatePicker = () => setIsStartDatePickerVisible(true);
@@ -108,9 +110,9 @@ const AddShiftManually = () => {
     // Calculate the total duration whenever calculatedDuration or breakDuration changes
     useEffect(() => {
         const [shiftHours, shiftMinutes] = calculatedDuration.split(" ").map((value) => parseInt(value) || 0);
-    
+
         const totalShiftMinutes = shiftHours * 60 + shiftMinutes;
-    
+
         if (totalShiftMinutes > breakDuration) {
             const remainingMinutes = totalShiftMinutes - breakDuration;
             const totalHours = Math.floor(remainingMinutes / 60);
@@ -122,7 +124,7 @@ const AddShiftManually = () => {
     }, [calculatedDuration, breakDuration]);
 
     const formatDateTime = (date) => {
-        if (!date) return "Valitse aika";
+        if (!date) return null; // Return null for invalid dates
         const options = { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" };
         return date.toLocaleString("fi-FI", options);
     };
@@ -154,7 +156,7 @@ const AddShiftManually = () => {
             breakDuration: formattedBreakDuration, // Save in hh:mm:ss format
         });
 
-            // Reset all fields after saving
+        // Reset all fields after saving
         setShiftName("");
         setShiftDescription("");
         setSelectedStartDate(new Date());
@@ -166,38 +168,20 @@ const AddShiftManually = () => {
         console.log("Shift data reset after saving.");
     };
 
+    const data = [
+        { label: "start-time",placeholder:"time", value: formatDateTime(selectedStartDate), onPress: showStartDatePicker }, // Use plain keys
+        { label: "end-time",placeholder:"endtime", value: formatDateTime(selectedEndDate), onPress: showEndDatePicker }, // Use plain keys
+        { label: "break",placeholder:"break", value: `${Math.floor(breakDuration / 60)}h ${breakDuration % 60}m`, onPress: showBreakPicker }, // Use plain keys
+        { label: "shift-duration", value: totalDuration }, // Use plain keys
+    ];
+
     return (
         <View style={styles.container}>
-            {/* Shift Name */}
-            <TextInput
-                style={styles.input}
-                placeholder="Vuoron nimi"
-                value={shiftName}
-                onChangeText={setShiftName}
-            />
-
-            {/* Shift Description */}
-            <TextInput
-                style={styles.input}
-                placeholder="Kuvaus"
-                value={shiftDescription}
-                onChangeText={setShiftDescription}
-                multiline
-            />
-
-            {/* Start Time Section */}
-            <View style={styles.shiftDataInputRow}>
-                <Text style={styles.shiftDataLabel}>Aloitusaika</Text>
-                <TouchableOpacity style={styles.inputbutton} onPress={showStartDatePicker}>
-                    <Text style={styles.buttonText}>{formatDateTime(selectedStartDate)}</Text>
-                </TouchableOpacity>
-            </View>
-
             {isStartDatePickerVisible && (
                 <DateTimePicker
                     value={selectedStartDate}
                     mode="date"
-                    display="spinner"
+                    display="default"
                     onChange={handleStartDateChange}
                 />
             )}
@@ -206,25 +190,17 @@ const AddShiftManually = () => {
                 <DateTimePicker
                     value={selectedStartDate}
                     mode="time"
-                    display="spinner"
+                    display="default"
                     is24Hour={true}
                     onChange={handleStartTimeChange}
                 />
             )}
 
-            {/* End Time Section */}
-            <View style={styles.shiftDataInputRow}>
-                <Text style={styles.shiftDataLabel}>Lopetusaika</Text>
-                <TouchableOpacity style={styles.inputbutton} onPress={showEndDatePicker}>
-                    <Text style={styles.buttonText}>{formatDateTime(selectedEndDate)}</Text>
-                </TouchableOpacity>
-            </View>
-
             {isEndDatePickerVisible && (
                 <DateTimePicker
                     value={selectedEndDate}
                     mode="date"
-                    display="spinner"
+                    display="default"
                     onChange={handleEndDateChange}
                 />
             )}
@@ -233,62 +209,64 @@ const AddShiftManually = () => {
                 <DateTimePicker
                     value={selectedEndDate}
                     mode="time"
-                    display="spinner"
+                    display="default"
                     is24Hour={true}
                     onChange={handleEndTimeChange}
                 />
             )}
 
-            {/* Calculated Duration */}
-            <View style={styles.shiftDataInputRow}>
-                <Text style={styles.shiftDataLabel}>Kesto</Text>
-                <Text style={styles.calculatedDurationText}>{calculatedDuration}</Text>
-            </View>
-
-            {/* Break Duration Field */}
-            <TouchableOpacity
-                style={styles.button}
-                onPress={showBreakPicker}
-            >
-                <Text style={styles.breakButtonText}>+</Text>
-            </TouchableOpacity>
-            <Text style={styles.breakDurationText}>
-                {Math.floor(breakDuration / 60)}h {breakDuration % 60}m
-            </Text>
-
             {isBreakPickerVisible && (
                 <DateTimePicker
                     value={selectedBreakTime}
                     mode="time"
-                    display="spinner"
+                    display="default"
                     is24Hour={true}
                     onChange={(event, time) => {
-                        if (!time) {
-                            hideBreakPicker();
-                            return;
+                        if (time) {
+                            const breakMinutes = time.getHours() * 60 + time.getMinutes();
+                            setBreakDuration(breakMinutes);
                         }
-                        const breakMinutes = time.getHours() * 60 + time.getMinutes();
-                        setBreakDuration((prev) => prev + breakMinutes); // Add the new break duration
                         hideBreakPicker();
                     }}
                 />
             )}
 
-            {/* Total Duration */}
-            <View style={styles.shiftDataInputRow}>
-                <Text style={styles.shiftDataLabel}>Yhteensä</Text>
-                <Text style={styles.calculatedDurationText}>{totalDuration}</Text>
-            </View>
-
-            {/* Save Button */}
-            <TouchableOpacity
-                style={styles.button}
-                onPress={() => {
-                    handleSave();
-                }}
-            >
-                <Text style={styles.buttonText}>Tallenna</Text>
-            </TouchableOpacity>
+            <FlatList
+                data={data}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item }) => (
+                    <View style={styles.row}>
+                        <Text style={styles.label}>{t(item.label)}</Text>
+                        {item.isInput ? (
+                            <TextInput
+                                style={styles.input}
+                                value={item.value || ""}
+                                onChangeText={item.onChange}
+                                placeholder={item.placeholder || ""}
+                            />
+                        ) : (
+                            <View style={{ width: 220, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                                <Text style={styles.input}>{item.value || ""}</Text>
+                                {(item.placeholder === "time" || item.placeholder === "endtime") && (
+                                    <TouchableOpacity onPress={item.onPress}>
+                                        <Ionicons name="create-outline" size={25} style={styles.inputIcon} />
+                                    </TouchableOpacity>
+                                )}
+                                {item.placeholder === "break" && (
+                                    <TouchableOpacity onPress={item.onPress}>
+                                        <Ionicons name="add-outline" size={25} style={styles.inputIcon} />
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+                        )}
+                    </View>
+                )}
+                ListFooterComponent={
+                    <TouchableOpacity style={styles.button} onPress={handleSave}>
+                        <Text style={styles.buttonText}>{t("save") || "Save"}</Text>
+                    </TouchableOpacity>
+                }
+            />
         </View>
     );
 };
